@@ -33,20 +33,37 @@ public class VertexBuffer {
 		BufferBuilder.BufferPair pair = bufferBuilder.popNext();
 		ByteBuffer buffer = pair.buffer();
 		DrawState drawState = pair.drawState();
+		bind();
+		bindBuffers();
 		buffer.clear();
 		buffer.limit(drawState.vertecies() * drawState.format().getSize());
-		GLStateManager.bindVertexArray(arrayObjectId);
-		GLStateManager.bindBufferObject(GL33.GL_ARRAY_BUFFER, this.vertexBufferId);
 		GLStateManager.bufferData(GL33.GL_ARRAY_BUFFER, buffer, GL33.GL_STATIC_DRAW);
 		for (VertexElement element : drawState.format().getElements()) {
 			GLStateManager.attributePointer(element.index(), element.size(), element.position(), element.format().gltype(), element.normalize(), 0);
 		}
 		buffer.position(buffer.limit());
 		buffer.limit(buffer.limit() + drawState.indecies() * Integer.BYTES);
-		GLStateManager.bindBufferObject(GL33.GL_ARRAY_BUFFER, indexBufferId);
-		GLStateManager.bufferData(GL33.GL_ARRAY_BUFFER, buffer, GL33.GL_STATIC_DRAW);
+		GLStateManager.bufferData(GL33.GL_ELEMENT_ARRAY_BUFFER, buffer, GL33.GL_STATIC_DRAW);
+		unbindBuffers();
+		unbind();
+	}
+	
+	public void bind() {
+		GLStateManager.bindVertexArray(arrayObjectId);
+	}
+	
+	public void unbind() {
+		GLStateManager.bindVertexArray(0);
+	}
+	
+	public void bindBuffers() {
+		GLStateManager.bindBufferObject(GL33.GL_ARRAY_BUFFER, vertexBufferId);
+		GLStateManager.bindBufferObject(GL33.GL_ELEMENT_ARRAY_BUFFER, indexBufferId);
+	}
+	
+	public void unbindBuffers() {
 		GLStateManager.bindBufferObject(GL33.GL_ARRAY_BUFFER, 0);
-		GLStateManager.bindVertexArray(0);	
+		GLStateManager.bindBufferObject(GL33.GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 	
 }

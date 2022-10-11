@@ -1,8 +1,13 @@
 package de.m_marvin.renderengine;
 
+import java.io.File;
+import java.io.IOException;
+
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.VertexBuffer;
 import de.m_marvin.renderengine.buffers.BufferBuilder.BufferPair;
+import de.m_marvin.renderengine.shaders.ShaderInstance;
+import de.m_marvin.renderengine.shaders.ShaderLoader;
 import de.m_marvin.renderengine.vertecies.RenderPrimitive;
 import de.m_marvin.renderengine.vertecies.VertexFormat;
 import de.m_marvin.renderengine.vertecies.VertexFormat.Format;
@@ -10,10 +15,17 @@ import de.m_marvin.renderengine.vertecies.VertexFormat.Format;
 public class RenderEngine {
 	
 	public static void main(String... args) {
-		new RenderEngine().start();		
+		try {
+			new RenderEngine().start();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 	}
 	
-	public void start() {
+	public void start() throws IOException {
+		
+		// TODO GL-Context
 		
 		VertexFormat format = new VertexFormat().appand("vertex", Format.FLOAT, 3, false).appand("normal", Format.FLOAT, 3, true).appand("color", Format.FLOAT, 4, true).appand("uv", Format.FLOAT, 2, true);
 		
@@ -43,6 +55,9 @@ public class RenderEngine {
 		
 		VertexBuffer vertexBuffer = new VertexBuffer();
 		vertexBuffer.upload(buffer);
+		
+		File shaderFile = new File(this.getClass().getClassLoader().getResource("").getPath(), "shaders/testShader.json");
+		ShaderInstance shader = ShaderLoader.load(shaderFile, format);
 		
 		vertexBuffer.discard();
 		

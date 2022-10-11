@@ -1,0 +1,11 @@
+{
+	"VertexShaderFile": "testShader.vsh",
+	"FragmentShaderFile": "testShader.fsh",
+	"Uniforms": [
+		{ "Name": "ModelViewMat", "Type": "matrix4x4", "Value": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] },
+		{ "Name": "ProjMat", "Type": "matrix4x4", "Value": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] }
+	],
+	"Samplers": [
+		
+	]
+}
