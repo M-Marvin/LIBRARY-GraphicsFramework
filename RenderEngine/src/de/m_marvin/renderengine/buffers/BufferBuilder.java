@@ -82,7 +82,7 @@ public class BufferBuilder implements IVertexConsumer {
 		if (!this.building) throw new IllegalStateException("Buffer not building!");
 		this.currentElementIndex++;
 		if (this.currentElementIndex == this.format.getElementCount()) throw new IllegalStateException("The current VertexFormat does not have more than " + this.format.getElementCount() + " elements!");
-		this.currentElement = this.format.getElementWithIndex(currentElementIndex);
+		this.currentElement = this.format.getElements().get(currentElementIndex);
 	}
 	
 	public VertexElement getCurrentElement() {

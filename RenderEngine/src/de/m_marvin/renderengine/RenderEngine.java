@@ -1,6 +1,7 @@
 package de.m_marvin.renderengine;
 
 import de.m_marvin.renderengine.buffers.BufferBuilder;
+import de.m_marvin.renderengine.buffers.VertexBuffer;
 import de.m_marvin.renderengine.buffers.BufferBuilder.BufferPair;
 import de.m_marvin.renderengine.vertecies.RenderPrimitive;
 import de.m_marvin.renderengine.vertecies.VertexFormat;
@@ -14,7 +15,7 @@ public class RenderEngine {
 	
 	public void start() {
 		
-		VertexFormat format = new VertexFormat().appand("vertex", Format.FLOAT, 3).appand("normal", Format.FLOAT, 3).appand("color", Format.FLOAT, 4).appand("uv", Format.FLOAT, 2);
+		VertexFormat format = new VertexFormat().appand("vertex", Format.FLOAT, 3, false).appand("normal", Format.FLOAT, 3, true).appand("color", Format.FLOAT, 4, true).appand("uv", Format.FLOAT, 2, true);
 		
 		BufferBuilder buffer = new BufferBuilder(3200);
 		
@@ -40,9 +41,10 @@ public class RenderEngine {
 		
 		buffer.end();
 		
-		BufferPair pair1 = buffer.popNext();
-		BufferPair pair2 = buffer.popNext();
+		VertexBuffer vertexBuffer = new VertexBuffer();
+		vertexBuffer.upload(buffer);
 		
+		vertexBuffer.discard();
 		
 	}
 	
