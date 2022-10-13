@@ -5,9 +5,11 @@ import com.google.common.collect.Queues;
 import java.nio.ByteBuffer;
 import java.util.Queue;
 
+import org.lwjgl.system.MemoryUtil;
+
+import de.m_marvin.renderengine.vertecies.NumberFormat;
 import de.m_marvin.renderengine.vertecies.RenderPrimitive;
 import de.m_marvin.renderengine.vertecies.VertexFormat;
-import de.m_marvin.renderengine.vertecies.VertexFormat.Format;
 import de.m_marvin.renderengine.vertecies.VertexFormat.VertexElement;
 
 public class BufferBuilder implements IVertexConsumer {
@@ -28,7 +30,7 @@ public class BufferBuilder implements IVertexConsumer {
 	public static record BufferPair(ByteBuffer buffer, DrawState drawState) {}
 	
 	public BufferBuilder(int bufferSize) {
-		this.buffer = ByteBuffer.allocate(bufferSize);
+		this.buffer = MemoryUtil.memAlloc(bufferSize);
 		this.drawStates = Queues.newArrayDeque();
 	}
 	
@@ -36,7 +38,7 @@ public class BufferBuilder implements IVertexConsumer {
 		if (this.drawStates.isEmpty()) throw new IllegalStateException("Nothing has ben drawn to the buffer!");
 		DrawState drawState = this.drawStates.poll();
 		this.buffer.position(uploadedBytes);
-		this.uploadedBytes += drawState.format().getSize();
+		this.uploadedBytes += drawState.format().getSize() * drawState.vertecies + drawState.indecies * Integer.BYTES;
 		this.buffer.limit(uploadedBytes);
 		ByteBuffer drawBuffer = this.buffer.slice();
 		this.buffer.clear();
@@ -50,6 +52,10 @@ public class BufferBuilder implements IVertexConsumer {
 		this.indexCount = 0;
 		this.building = false;
 		this.currentElementIndex = -1;
+	}
+
+	public void freeMemory() {
+		MemoryUtil.memFree(buffer);
 	}
 	
 	public void begin(RenderPrimitive type, VertexFormat format) {
@@ -117,7 +123,7 @@ public class BufferBuilder implements IVertexConsumer {
 	@Override
 	public IVertexConsumer vertex(float x, float y, float z) {
 		nextElement();
-		if (getCurrentElement().format() != Format.FLOAT) throw new IllegalStateException("VertexFormat requires diffrent number format!");
+		if (getCurrentElement().format() != NumberFormat.FLOAT) throw new IllegalStateException("VertexFormat requires diffrent number format!");
 		putFloat(x);
 		putFloat(y);
 		putFloat(z);
@@ -127,7 +133,7 @@ public class BufferBuilder implements IVertexConsumer {
 	@Override
 	public IVertexConsumer normal(float x, float y, float z) {
 		nextElement();
-		if (getCurrentElement().format() != Format.FLOAT) throw new IllegalStateException("VertexFormat requires diffrent number format!");
+		if (getCurrentElement().format() != NumberFormat.FLOAT) throw new IllegalStateException("VertexFormat requires diffrent number format!");
 		putFloat(x);
 		putFloat(y);
 		putFloat(z);
@@ -137,7 +143,7 @@ public class BufferBuilder implements IVertexConsumer {
 	@Override
 	public IVertexConsumer color(float r, float g, float b, float a) {
 		nextElement();
-		if (getCurrentElement().format() != Format.FLOAT) throw new IllegalStateException("VertexFormat requires diffrent number format!");
+		if (getCurrentElement().format() != NumberFormat.FLOAT) throw new IllegalStateException("VertexFormat requires diffrent number format!");
 		putFloat(r);
 		putFloat(g);
 		putFloat(b);
@@ -148,7 +154,7 @@ public class BufferBuilder implements IVertexConsumer {
 	@Override
 	public IVertexConsumer uv(float u, float v) {
 		nextElement();
-		if (getCurrentElement().format() != Format.FLOAT) throw new IllegalStateException("VertexFormat requires diffrent number format!");
+		if (getCurrentElement().format() != NumberFormat.FLOAT) throw new IllegalStateException("VertexFormat requires diffrent number format!");
 		putFloat(u);
 		putFloat(v);
 		return this;

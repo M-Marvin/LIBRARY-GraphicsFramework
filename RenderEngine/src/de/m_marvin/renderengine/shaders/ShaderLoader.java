@@ -29,13 +29,13 @@ public class ShaderLoader {
 		String line;
 		BufferedReader vertexShaderInputStream = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sourceFolder, vertexShaderFile))));
 		StringBuilder stringBuilder = new StringBuilder();
-		while ((line = vertexShaderInputStream.readLine()) != null) stringBuilder.append(line);
+		while ((line = vertexShaderInputStream.readLine()) != null) stringBuilder.append(line + "\n");
 		String vertexShaderSource = stringBuilder.toString();
 		vertexShaderInputStream.close();
 		
 		BufferedReader fragmentShaderInputStream = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sourceFolder, fragmentShaderFile))));
 		stringBuilder = new StringBuilder();
-		while ((line = fragmentShaderInputStream.readLine()) != null) stringBuilder.append(line);
+		while ((line = fragmentShaderInputStream.readLine()) != null) stringBuilder.append(line + "\n");
 		String fragmentShaderSource = stringBuilder.toString();
 		fragmentShaderInputStream.close();
 		
@@ -46,7 +46,7 @@ public class ShaderLoader {
 			JsonObject uniformJson = uniformArray.get(i).getAsJsonObject();
 			String uniformName = uniformJson.get("Name").getAsString();
 			UniformType type = UniformType.byName(uniformJson.get("Type").getAsString());
-			Object defaultValue = gson.fromJson(uniformJson.get("Values").getAsJsonArray(), type.getValueType());
+			Object defaultValue = gson.fromJson(uniformJson.get("Value").getAsJsonArray(), type.getValueType());
 			shaderInstance.createUniform(uniformName, type, defaultValue);
 		}
 

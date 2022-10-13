@@ -3,9 +3,11 @@ package de.m_marvin.renderengine.buffers;
 import java.nio.ByteBuffer;
 
 import org.lwjgl.opengl.GL33;
+import org.lwjgl.system.MemoryUtil;
 
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.buffers.BufferBuilder.DrawState;
+import de.m_marvin.renderengine.vertecies.NumberFormat;
 import de.m_marvin.renderengine.vertecies.VertexFormat.VertexElement;
 
 public class VertexBuffer {
@@ -34,7 +36,6 @@ public class VertexBuffer {
 		ByteBuffer buffer = pair.buffer();
 		DrawState drawState = pair.drawState();
 		bind();
-		bindBuffers();
 		buffer.clear();
 		buffer.limit(drawState.vertecies() * drawState.format().getSize());
 		GLStateManager.bufferData(GL33.GL_ARRAY_BUFFER, buffer, GL33.GL_STATIC_DRAW);
@@ -44,15 +45,16 @@ public class VertexBuffer {
 		buffer.position(buffer.limit());
 		buffer.limit(buffer.limit() + drawState.indecies() * Integer.BYTES);
 		GLStateManager.bufferData(GL33.GL_ELEMENT_ARRAY_BUFFER, buffer, GL33.GL_STATIC_DRAW);
-		unbindBuffers();
 		unbind();
 	}
 	
 	public void bind() {
 		GLStateManager.bindVertexArray(arrayObjectId);
+		bindBuffers();
 	}
 	
 	public void unbind() {
+		unbindBuffers();
 		GLStateManager.bindVertexArray(0);
 	}
 	
@@ -64,6 +66,10 @@ public class VertexBuffer {
 	public void unbindBuffers() {
 		GLStateManager.bindBufferObject(GL33.GL_ARRAY_BUFFER, 0);
 		GLStateManager.bindBufferObject(GL33.GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
+
+	public int indecieFormat() {
+		return NumberFormat.UINT.gltype();
 	}
 	
 }

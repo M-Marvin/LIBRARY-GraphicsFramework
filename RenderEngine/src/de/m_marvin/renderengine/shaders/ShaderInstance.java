@@ -1,6 +1,7 @@
 package de.m_marvin.renderengine.shaders;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.lwjgl.opengl.GL33;
@@ -13,7 +14,7 @@ public class ShaderInstance {
 	protected int vertexShader;
 	protected int fragmentShader;
 	protected int program;
-	protected Map<String, Uniform<?>> uniforms;
+	protected Map<String, Uniform<?>> uniforms = new HashMap<>();
 	
 	public class Uniform<T> {
 		
@@ -68,13 +69,13 @@ public class ShaderInstance {
 		GLStateManager.compileShader(fragmentShader);
 		if (!GLStateManager.checkShaderCompile(fragmentShader)) {
 			String errorLog = GLStateManager.shaderInfoLog(fragmentShader);
-			throw new IOException("Failed to compile the provoided fragment shader code: + " + errorLog);
+			throw new IOException("Failed to compile the provoided fragment shader code:\n" + errorLog);
 		}
 		
 		GLStateManager.compileShader(vertexShader);
 		if (!GLStateManager.checkShaderCompile(vertexShader)) {
 			String errorLog = GLStateManager.shaderInfoLog(vertexShader);
-			throw new IOException("Failed to compile the provoided vertex shader code: + " + errorLog);
+			throw new IOException("Failed to compile the provoided vertex shader code:\n" + errorLog);
 		}
 		
 		GLStateManager.createProgram((id) -> this.program = id);
@@ -86,6 +87,14 @@ public class ShaderInstance {
 			throw new IOException("Failed to link shader program: " + errorLog);
 		}
 		
+	}
+	
+	public void useShader() {
+		GLStateManager.bindShader(this.program);
+	}
+
+	public void unbindShader() {
+		GLStateManager.bindShader(0);
 	}
 	
 	public void setAttributeIndex(int index, String attribute) {

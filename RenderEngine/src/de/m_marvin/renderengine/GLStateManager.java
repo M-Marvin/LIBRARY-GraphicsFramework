@@ -116,5 +116,13 @@ public class GLStateManager {
 	public static void setUniformFloatN(int location, float... arr) {
 		GL33.glUniform1fv(location, arr);
 	}
+
+	public static void bindShader(int program) {
+		GL33.glUseProgram(program);
+	}
+	
+	public static void drawElements(int mode, int count, int indecieFormat) {
+		GL33.glDrawElements(mode, count, indecieFormat, 0);
+	}
 	
 }
