@@ -18,6 +18,7 @@ import de.m_marvin.renderengine.shaders.ShaderInstance;
 import de.m_marvin.renderengine.shaders.ShaderInstance.Uniform;
 import de.m_marvin.renderengine.shaders.ShaderLoader;
 import de.m_marvin.renderengine.vertecies.NumberFormat;
+import de.m_marvin.renderengine.vertecies.PoseStack;
 import de.m_marvin.renderengine.vertecies.RenderPrimitive;
 import de.m_marvin.renderengine.vertecies.VertexFormat;
 
@@ -97,7 +98,11 @@ public class RenderEngine {
 //				
 //		buffer.end();
 		
-
+		
+		PoseStack poseStack = new PoseStack();
+		
+		poseStack.push();
+		
 		buffer.begin(RenderPrimitive.TRIANGLES, format);
 		
 		buffer.vertex(-1, -1, 0).normal(0, 0, 1).color(1, 0, 0, 1).uv(0, 0).endVertex();
@@ -109,6 +114,8 @@ public class RenderEngine {
 		buffer.index(3).index(2).index(1).index(0);
 		
 		buffer.end();
+		
+		poseStack.pop();
 		
 		VertexBuffer vertexBuffer = new VertexBuffer();
 		vertexBuffer.upload(buffer);
