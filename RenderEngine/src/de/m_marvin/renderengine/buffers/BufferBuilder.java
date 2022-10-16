@@ -7,7 +7,7 @@ import java.util.Queue;
 
 import org.lwjgl.system.MemoryUtil;
 
-import de.m_marvin.renderengine.vertecies.NumberFormat;
+import de.m_marvin.renderengine.utility.NumberFormat;
 import de.m_marvin.renderengine.vertecies.RenderPrimitive;
 import de.m_marvin.renderengine.vertecies.VertexFormat;
 import de.m_marvin.renderengine.vertecies.VertexFormat.VertexElement;

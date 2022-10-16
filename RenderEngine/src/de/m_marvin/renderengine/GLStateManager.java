@@ -95,9 +95,17 @@ public class GLStateManager {
 		GL33.glBindAttribLocation(program, index, name);
 	}
 	
-//	public static void setUniformMatrix2x2(int location, ) {
-//		GL33.glUniformMatrix2fv(location, false, null);
-//	}
+	public static int getAttributeLocation(int programm, String name) {
+		return GL33.glGetAttribLocation(programm, name);
+	}
+	
+	public static void enableAttributeArray(int index) {
+		GL33.glEnableVertexAttribArray(index);
+	}
+
+	public static void disableAttributeArray(int index) {
+		GL33.glDisableVertexAttribArray(index);
+	}
 	
 	public static int getUniformLocation(int program, String name) {
 		return GL33.glGetUniformLocation(program, name);
@@ -117,6 +125,14 @@ public class GLStateManager {
 		GL33.glUniform1fv(location, arr);
 	}
 
+	public static void setUniformMatrix3(int location, boolean transpose, float[] value) {
+		GL33.glUniformMatrix3fv(location, transpose, value);
+	}
+
+	public static void setUniformMatrix4(int location, boolean transpose, float[] value) {
+		GL33.glUniformMatrix4fv(location, transpose, value);
+	}
+	
 	public static void bindShader(int program) {
 		GL33.glUseProgram(program);
 	}
@@ -124,5 +140,5 @@ public class GLStateManager {
 	public static void drawElements(int mode, int count, int indecieFormat) {
 		GL33.glDrawElements(mode, count, indecieFormat, 0);
 	}
-	
+
 }

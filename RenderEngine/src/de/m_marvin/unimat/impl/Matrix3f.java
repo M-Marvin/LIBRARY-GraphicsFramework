@@ -3,9 +3,11 @@ package de.m_marvin.unimat.impl;
 import de.m_marvin.unimat.api.IMatrix3f;
 import de.m_marvin.unimat.api.IMatrixMath;
 import de.m_marvin.unimat.api.IQuaternion;
+import de.m_marvin.univec.api.IVector3;
+import de.m_marvin.univec.impl.Vec3f;
 
-public class Matrix3f implements IMatrix3f<Matrix3f>, IMatrixMath<Matrix3f> {
-
+public class Matrix3f implements IMatrix3f<Matrix3f>, IMatrixMath<Matrix3f, IVector3<Float>> {
+	
 	protected float m00;
 	protected float m01;
 	protected float m02;
@@ -335,6 +337,41 @@ public class Matrix3f implements IMatrix3f<Matrix3f>, IMatrixMath<Matrix3f> {
 				+ this.m00 + " " + this.m01 + " " + this.m02
 				+ this.m10 + " " + this.m11 + " " + this.m12
 				+ this.m20 + " " + this.m21 + " " + this.m22;
+	}
+	
+	@Override
+	public IVector3<Float> translate(IVector3<Float> vec) {
+		float f = vec.x();
+		float f1 = vec.y();
+		float f2 = vec.z();
+		return new Vec3f(
+				m00 * f + m01 * f1 + m02 * f2,
+				m10 * f + m11 * f1 + m12 * f2,
+				m20 * f + m21 * f1 + m22 * f2
+			);
+	}
+
+	@Override
+	public float[] toFloatArr() {
+		return new float[] {
+				m00, m01, m02,
+				m10, m11, m12,
+				m20, m21, m22
+		};
+	}
+
+	@Override
+	public void loadFloatArr(float[] arr) {
+		if (arr.length != 9) throw new IllegalArgumentException("Matrix float arr has to be of length 9!");
+		this.m00 = arr[0];
+		this.m01 = arr[1];
+		this.m02 = arr[2];
+		this.m10 = arr[3];
+		this.m11 = arr[4];
+		this.m12 = arr[5];
+		this.m20 = arr[6];
+		this.m21 = arr[7];
+		this.m22 = arr[8];
 	}
 
 }

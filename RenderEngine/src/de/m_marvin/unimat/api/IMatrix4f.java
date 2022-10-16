@@ -1,12 +1,7 @@
 package de.m_marvin.unimat.api;
 
-public interface IMatrix4f<M extends IMatrix4f<?>> extends IMatrix {
+public interface IMatrix4f<M extends IMatrix4f<?>> extends IMatrix<M> {
 
-	public M copy();
-	
-	public float getField(int x, int y);
-	public void setField(int x, int y, int f);
-	
 	public float m00();
 	public float m01();
 	public float m02();
@@ -23,5 +18,5 @@ public interface IMatrix4f<M extends IMatrix4f<?>> extends IMatrix {
 	public float m31();
 	public float m32();
 	public float m33();
-	
+
 }

@@ -39,7 +39,7 @@ public class ShaderLoader {
 		String fragmentShaderSource = stringBuilder.toString();
 		fragmentShaderInputStream.close();
 		
-		ShaderInstance shaderInstance = new ShaderInstance(vertexShaderSource, fragmentShaderSource);
+		ShaderInstance shaderInstance = new ShaderInstance(vertexShaderSource, fragmentShaderSource, vertexFormat);
 		
 		JsonArray uniformArray = json.get("Uniforms").getAsJsonArray();
 		for (int i = 0; i < uniformArray.size(); i++) {
@@ -49,8 +49,6 @@ public class ShaderLoader {
 			Object defaultValue = gson.fromJson(uniformJson.get("Value").getAsJsonArray(), type.getValueType());
 			shaderInstance.createUniform(uniformName, type, defaultValue);
 		}
-
-		shaderInstance.setupAttributeNames(vertexFormat);
 		
 		inputStream.close();
 		

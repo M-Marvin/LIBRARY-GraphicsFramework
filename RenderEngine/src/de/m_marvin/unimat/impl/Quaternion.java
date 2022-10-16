@@ -18,22 +18,36 @@ public class Quaternion implements IQuaternion<Quaternion> {
 		this.r = r;
 	}
 
-	public Quaternion(IVector3<?> axisVec, float deg) {
-		float f = (float) Math.sin(deg / 2.0F);
+	public Quaternion(IVector3<?> axisVec, float rad) {
+		float f = (float) Math.sin(rad / 2.0F);
 		this.i = (float) axisVec.x() * f;
 		this.j = (float) axisVec.y() * f;
 		this.k = (float) axisVec.z() * f;
-		this.r = (float) Math.cos(deg / 2.0F);
+		this.r = (float) Math.cos(rad / 2.0F);
 	}
 
-	public static Quaternion fromXYZDegrees(IVector3<?> vec) {
+	public static Quaternion fromXYZDegrees(IVector3<?> eulerVec) {
+		return fromXYZDegrees((float) eulerVec.x(), (float) eulerVec.y(), (float) eulerVec.z());
+	}
+	public static Quaternion fromXYZDegrees(float x, float y, float z) {
 		return fromXYZRadians(
-				(float)Math.toRadians((double)vec.x()), 
-				(float)Math.toRadians((double)vec.y()), 
-				(float)Math.toRadians((double)vec.z())
+				(float)Math.toRadians(x), 
+				(float)Math.toRadians(y), 
+				(float)Math.toRadians(z)
 			);
 	}
 
+	public static Quaternion fromXYZRadians(IVector3<?> eulerVec) {
+		return fromXYZRadians((float) eulerVec.x(), (float) eulerVec.y(), (float) eulerVec.z());
+	}
+	public static Quaternion fromXYZRadians(float x, float y, float z) {
+		Quaternion quaternion = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
+		quaternion.mulI(new Quaternion((float)Math.sin((double)(x / 2.0F)), 0.0F, 0.0F, (float)Math.cos((double)(x / 2.0F))));
+		quaternion.mulI(new Quaternion(0.0F, (float)Math.sin((double)(y / 2.0F)), 0.0F, (float)Math.cos((double)(y / 2.0F))));
+		quaternion.mulI(new Quaternion(0.0F, 0.0F, (float)Math.sin((double)(z / 2.0F)), (float)Math.cos((double)(z / 2.0F))));
+		return quaternion;
+	}
+	
 	public IVector3<Float> toXYZDegrees() {
 		IVector3<Float> vector3f = this.toXYZRadians();
 		return new Vec3f(
@@ -43,14 +57,6 @@ public class Quaternion implements IQuaternion<Quaternion> {
 			);
 	}
 
-	public static Quaternion fromXYZRadians(float x, float y, float z) {
-		Quaternion quaternion = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
-		quaternion.mulI(new Quaternion((float)Math.sin((double)(x / 2.0F)), 0.0F, 0.0F, (float)Math.cos((double)(x / 2.0F))));
-		quaternion.mulI(new Quaternion(0.0F, (float)Math.sin((double)(y / 2.0F)), 0.0F, (float)Math.cos((double)(y / 2.0F))));
-		quaternion.mulI(new Quaternion(0.0F, 0.0F, (float)Math.sin((double)(z / 2.0F)), (float)Math.cos((double)(z / 2.0F))));
-		return quaternion;
-	}
-	
 	public IVector3<Float> toXYZRadians() {
 		float f = this.r() * this.r();
 		float f1 = this.i() * this.i();
@@ -116,6 +122,14 @@ public class Quaternion implements IQuaternion<Quaternion> {
 	@Override
 	public Quaternion copy() {
 		return new Quaternion(i, j, k, r);
+	}
+
+	@Override
+	public Quaternion conjI() {
+		this.i = -this.i;
+		this.j = -this.j;
+		this.k = -this.k;
+		return this;
 	}
 
 }

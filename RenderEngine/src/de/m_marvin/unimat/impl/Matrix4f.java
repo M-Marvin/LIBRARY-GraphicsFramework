@@ -3,8 +3,10 @@ package de.m_marvin.unimat.impl;
 import de.m_marvin.unimat.api.IMatrix4f;
 import de.m_marvin.unimat.api.IMatrixMath;
 import de.m_marvin.unimat.api.IQuaternion;
+import de.m_marvin.univec.api.IVector4;
+import de.m_marvin.univec.impl.Vec4f;
 
-public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f> {
+public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f, IVector4<Float>> {
 
 	protected float m00;
 	protected float m01;
@@ -90,6 +92,33 @@ public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f> {
 		this.m31 = 0;
 		this.m32 = 1;
 		this.m33 = 1;
+	}
+	
+	public static Matrix4f perspective(double fovDegrees, float aspect, float zFar, float zNear) {
+		float f = (float) (1 / Math.tan(Math.toRadians(fovDegrees) / 2)) * aspect;
+		Matrix4f matrix4f = new Matrix4f();
+		matrix4f.m00 = f / aspect;
+		matrix4f.m11 = f;
+		matrix4f.m22 = -((zNear + zFar) / (zFar - zNear));
+		matrix4f.m23 = -1;
+		matrix4f.m32 = -((2.0F * zNear * zFar) / (zFar - zNear));
+		matrix4f.m33 = 0; // TODO
+		return matrix4f;
+	}
+
+	public static Matrix4f orthographic(float left, float right, float bottom, float top, float near, float far) {
+		Matrix4f matrix4f = new Matrix4f();
+		float f = right - left;
+		float f1 = bottom - top;
+		float f2 = far - near;
+		matrix4f.m00 = 2.0F / f;
+		matrix4f.m11 = 2.0F / f1;
+		matrix4f.m22 = -2.0F / f2;
+		matrix4f.m03 = -(right + left) / f;
+		matrix4f.m13 = -(bottom + top) / f1;
+		matrix4f.m23 = -(far + near) / f2;
+		matrix4f.m33 = 1.0F;
+		return matrix4f;
 	}
 
 	public static Matrix4f createScaleMatrix(float p_27633_, float p_27634_, float p_27635_) {
@@ -494,6 +523,51 @@ public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f> {
 				+ this.m10 + " " + this.m11 + " " + this.m12 + " " + this.m13
 				+ this.m20 + " " + this.m21 + " " + this.m22 + " " + this.m23
 				+ this.m30 + " " + this.m31 + " " + this.m32 + " " + this.m33;
+	}
+
+	@Override
+	public IVector4<Float> translate(IVector4<Float> vec) {
+		float f = (float) vec.x();
+		float f1 = (float) vec.y();
+		float f2 = (float) vec.z();
+		float f3 = (float) vec.w();
+		return new Vec4f(
+				m00 * f + m01 * f1 + m02 * f2 + m03 * f3,
+				m10 * f + m11 * f1 + m12 * f2 + m13 * f3,
+				m20 * f + m21 * f1 + m22 * f2 + m23 * f3,
+				m30 * f + m31 * f1 + m32 * f2 + m33 * f3
+			);
+	}
+
+	@Override
+	public float[] toFloatArr() {
+		return new float[] {
+				m00, m01, m02, m03,
+				m10, m11, m12, m13,
+				m20, m21, m22, m23,
+				m30, m31, m32, m33
+		};
+	}
+
+	@Override
+	public void loadFloatArr(float[] arr) {
+		if (arr.length != 16) throw new IllegalArgumentException("Matrix float arr has to be of length 16!");
+		this.m00 = arr[0];
+		this.m01 = arr[1];
+		this.m02 = arr[2];
+		this.m03 = arr[3];
+		this.m10 = arr[4];
+		this.m11 = arr[5];
+		this.m12 = arr[6];
+		this.m13 = arr[7];
+		this.m20 = arr[8];
+		this.m21 = arr[9];
+		this.m22 = arr[10];
+		this.m23 = arr[11];
+		this.m30 = arr[12];
+		this.m31 = arr[13];
+		this.m32 = arr[14];
+		this.m33 = arr[15];
 	}
 
 }

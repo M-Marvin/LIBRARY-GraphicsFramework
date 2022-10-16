@@ -4,14 +4,11 @@ import de.m_marvin.renderengine.GLStateManager;
 
 public enum UniformType {
 	
-	MATRIX_2x2("matrix2x2", float[].class, (location, count, value) -> {
-		// TODO Requires UnifiedVectors lib
-	}),
 	MATRIX_3x3("matrix3x3", float[].class, (location, count, value) -> {
-		// TODO Requires UnifiedVectors lib
+		GLStateManager.setUniformMatrix3(location, false, (float[]) value);
 	}),
 	MATRIX_4x4("matrix4x4", float[].class, (location, count, value) -> {
-		// TODO Requires UnifiedVectors lib
+		GLStateManager.setUniformMatrix4(location, false, (float[]) value);
 	}),
 	INT("int", int[].class, (location, count, value) -> {
 		if (count == 1) {
@@ -56,7 +53,7 @@ public enum UniformType {
 	}
 
 	public static UniformType byName(String name) {
-		for (UniformType type : UniformType.values()) if (type.name().equals(name)) return type;
+		for (UniformType type : UniformType.values()) if (type.getCodeName().equals(name)) return type;
 		return FLOAT;
 	}
 	

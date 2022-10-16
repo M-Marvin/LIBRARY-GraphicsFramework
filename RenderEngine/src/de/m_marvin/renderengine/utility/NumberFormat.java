@@ -1,4 +1,4 @@
-package de.m_marvin.renderengine.vertecies;
+package de.m_marvin.renderengine.utility;
 
 import org.lwjgl.opengl.GL33;
 
