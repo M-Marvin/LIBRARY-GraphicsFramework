@@ -17,6 +17,7 @@ public class Vec3d implements IVector3Math<Double, Vec3d, IVector3<? extends Num
 	public Vec3d(Double x, Double y, Double z) {
 		this.x = x;
 		this.y = y;
+		this.z = z;
 	}
 
 	public Vec3d(IVector3<? extends Number> vec) {
@@ -222,7 +223,7 @@ public class Vec3d implements IVector3Math<Double, Vec3d, IVector3<? extends Num
 
 	@Override
 	public IQuaternion<Quaternion> rotationRadians(Double angle) {
-		return new Quaternion(this, angle.floatValue());
+		return new Quaternion(new Vec3i(this), angle.floatValue());
 	}
 
 	@Override

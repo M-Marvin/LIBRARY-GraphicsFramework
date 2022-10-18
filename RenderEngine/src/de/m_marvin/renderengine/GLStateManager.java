@@ -81,6 +81,16 @@ public class GLStateManager {
 		GL33.glLinkProgram(program);
 	}
 	
+	public static void validateProgram(int program) {
+		GL33.glValidateProgram(program);
+	}
+	
+	public static boolean checkProgramValidation(int program) {
+		int[] intBuffer = new int[1];
+		GL33.glGetProgramiv(program, GL33.GL_VALIDATE_STATUS, intBuffer);
+		return intBuffer[0] == GL33.GL_TRUE;
+	}
+
 	public static boolean checkProgramLink(int program) {
 		int[] intBuffer = new int[1];
 		GL33.glGetProgramiv(program, GL33.GL_LINK_STATUS, intBuffer);

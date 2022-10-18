@@ -7,7 +7,6 @@ import de.m_marvin.unimat.impl.Matrix3f;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.api.IVector3;
-import de.m_marvin.univec.impl.Vec3f;
 
 public class PoseStack {
 	
@@ -65,11 +64,11 @@ public class PoseStack {
 		return 0.6666667F * f + 1.0F / (3.0F * f * f * p_14200_);
 	}
 	
-	public void rotateRadians(float x, float y, float z, float angle) {
-		multiplyTransformation(new Quaternion(new Vec3f(x, y, z), angle));
+	public void rotateRadians(float x, float y, float z) {
+		multiplyTransformation(Quaternion.fromXYZRadians(x, y, z));
 	}
-	public void rotateDegrees(float x, float y, float z, float angle) {
-		multiplyTransformation(new Quaternion(new Vec3f(x, y, z), (float) Math.toRadians(angle)));
+	public void rotateDegrees(float x, float y, float z) {
+		multiplyTransformation(Quaternion.fromXYZDegrees(x, y, z));
 	}
 	
 	public void multiplyTransformation(Quaternion quat) {

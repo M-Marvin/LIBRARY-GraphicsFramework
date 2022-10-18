@@ -2,7 +2,7 @@ package de.m_marvin.unimat.api;
 
 import de.m_marvin.univec.api.IVector;
 
-public interface IMatrixMath<M extends IMatrix, V extends IVector> {
+public interface IMatrixMath<M extends IMatrix<?>, V extends IVector> {
 
 	/* Basic math */
 	

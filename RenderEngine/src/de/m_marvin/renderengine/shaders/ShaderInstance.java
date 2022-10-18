@@ -100,8 +100,11 @@ public class ShaderInstance {
 			throw new IllegalArgumentException("Failed to link shader program: " + errorLog);
 		}
 		
-		GLStateManager.bindAttributeLocation(program, 1, "normal");
-		GLStateManager.linkProgram(program);
+		GLStateManager.validateProgram(program);
+		if (!GLStateManager.checkProgramValidation(program)) {
+			String errorLog = GLStateManager.programInfoLog(program);
+			throw new IllegalArgumentException("Failed to validate shader program: " + errorLog);
+		}
 		
 	}
 	
@@ -116,6 +119,11 @@ public class ShaderInstance {
 
 	public void unbindShader() {
 		GLStateManager.bindShader(0);
+	}
+	
+	public void unbindShaderAndRestore() {
+		unbindShader();
+		this.format.restoreState();
 	}
 	
 	public <T> void createUniform(String name, UniformType type, T defaultValue) {

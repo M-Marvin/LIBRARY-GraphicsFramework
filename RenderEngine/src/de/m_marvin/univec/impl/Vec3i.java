@@ -17,6 +17,7 @@ public class Vec3i implements IVector3Math<Integer, Vec3i, IVector3<? extends Nu
 	public Vec3i(Integer x, Integer y, Integer z) {
 		this.x = x;
 		this.y = y;
+		this.z = z;
 	}
 
 	public Vec3i(IVector3<? extends Number> vec) {

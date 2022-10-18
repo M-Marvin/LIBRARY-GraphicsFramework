@@ -17,6 +17,7 @@ public class Vec3f implements IVector3Math<Float, Vec3f, IVector3<? extends Numb
 	public Vec3f(Float x, Float y, Float z) {
 		this.x = x;
 		this.y = y;
+		this.z = z;
 	}
 
 	public Vec3f(IVector3<? extends Number> vec) {
@@ -222,15 +223,14 @@ public class Vec3f implements IVector3Math<Float, Vec3f, IVector3<? extends Numb
 
 	@Override
 	public IQuaternion<Quaternion> rotationRadians(Float angle) {
-		return new Quaternion(this, angle);
+		// TODO Verify
+		return new Quaternion(new Vec3i(this), angle);
 	}
 
 	@Override
 	public Vec3f transform(Quaternion quaternion) {
-		Quaternion quaternion2 = quaternion.copy().mulI(new Quaternion(x, y, z, 0F));
-		Quaternion quaternion3 = quaternion.copy().conjI();
-		quaternion2.mulI(quaternion3);
-		return new Vec3f(quaternion2.i(), quaternion2.j(), quaternion2.k());
+		Quaternion q = quaternion.mul(new Quaternion(x, y, z, 0.0F)).mul(quaternion.conj());
+		return new Vec3f(q.i(), q.j(), q.k());
 	}
 	
 }

@@ -7,7 +7,6 @@ import org.lwjgl.opengl.GL33;
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.buffers.BufferBuilder.DrawState;
 import de.m_marvin.renderengine.utility.NumberFormat;
-import de.m_marvin.renderengine.vertecies.VertexFormat.VertexElement;
 
 public class VertexBuffer {
 	

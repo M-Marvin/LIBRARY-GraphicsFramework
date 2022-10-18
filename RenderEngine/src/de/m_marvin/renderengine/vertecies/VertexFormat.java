@@ -5,7 +5,6 @@ import java.util.List;
 
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.utility.NumberFormat;
-import de.m_marvin.renderengine.vertecies.VertexFormat.VertexElement;
 
 public class VertexFormat {
 	
@@ -41,6 +40,12 @@ public class VertexFormat {
 		for (VertexElement element : getElements()) {
 			GLStateManager.enableAttributeArray(element.index());
 			GLStateManager.attributePointer(element.index(), element.size(), element.position(), element.format().gltype(), element.normalize(), 0);
+		}
+	}
+	
+	public void restoreState() {
+		for (VertexElement element : getElements()) {
+			GLStateManager.disableAttributeArray(element.index());
 		}
 	}
 	

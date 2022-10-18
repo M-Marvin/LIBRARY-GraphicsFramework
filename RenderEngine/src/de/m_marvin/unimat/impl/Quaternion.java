@@ -3,6 +3,7 @@ package de.m_marvin.unimat.impl;
 import de.m_marvin.unimat.api.IQuaternion;
 import de.m_marvin.univec.api.IVector3;
 import de.m_marvin.univec.impl.Vec3f;
+import de.m_marvin.univec.impl.Vec3i;
 
 public class Quaternion implements IQuaternion<Quaternion> {
 	
@@ -17,15 +18,15 @@ public class Quaternion implements IQuaternion<Quaternion> {
 		this.k = k;
 		this.r = r;
 	}
-
-	public Quaternion(IVector3<?> axisVec, float rad) {
-		float f = (float) Math.sin(rad / 2.0F);
-		this.i = (float) axisVec.x() * f;
-		this.j = (float) axisVec.y() * f;
-		this.k = (float) axisVec.z() * f;
-		this.r = (float) Math.cos(rad / 2.0F);
+	
+	public Quaternion(Vec3i rotationAxis, float radians) {
+		float f = (float) Math.sin(radians / 2F);
+		this.r = (float) Math.cos(radians / 2F);
+		this.i = f * rotationAxis.x();
+		this.j = f * rotationAxis.y();
+		this.k = f * rotationAxis.z();
 	}
-
+	
 	public static Quaternion fromXYZDegrees(IVector3<?> eulerVec) {
 		return fromXYZDegrees((float) eulerVec.x(), (float) eulerVec.y(), (float) eulerVec.z());
 	}
@@ -41,11 +42,19 @@ public class Quaternion implements IQuaternion<Quaternion> {
 		return fromXYZRadians((float) eulerVec.x(), (float) eulerVec.y(), (float) eulerVec.z());
 	}
 	public static Quaternion fromXYZRadians(float x, float y, float z) {
-		Quaternion quaternion = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
-		quaternion.mulI(new Quaternion((float)Math.sin((double)(x / 2.0F)), 0.0F, 0.0F, (float)Math.cos((double)(x / 2.0F))));
-		quaternion.mulI(new Quaternion(0.0F, (float)Math.sin((double)(y / 2.0F)), 0.0F, (float)Math.cos((double)(y / 2.0F))));
-		quaternion.mulI(new Quaternion(0.0F, 0.0F, (float)Math.sin((double)(z / 2.0F)), (float)Math.cos((double)(z / 2.0F))));
-		return quaternion;
+		float cx = (float) Math.cos(x * 0.5F);
+		float sx = (float) Math.sin(x * 0.5F);
+		float cy = (float) Math.cos(y * 0.5F);
+		float sy = (float) Math.sin(y * 0.5F);
+		float cz = (float) Math.cos(z * 0.5F);
+		float sz = (float) Math.sin(z * 0.5F);
+		
+		return new Quaternion(
+				sx * cy * cz + cx * sy * sz,
+				cx * sy * cz + sx * cy * sz,
+				cx * cy * sz + sx * sy * cz,
+				cx * cy * cz + sx * sy * sz
+				);
 	}
 	
 	public IVector3<Float> toXYZDegrees() {
@@ -125,11 +134,8 @@ public class Quaternion implements IQuaternion<Quaternion> {
 	}
 
 	@Override
-	public Quaternion conjI() {
-		this.i = -this.i;
-		this.j = -this.j;
-		this.k = -this.k;
-		return this;
+	public Quaternion conj() {
+		return new Quaternion(-i, -j, -k, r);
 	}
 
 }

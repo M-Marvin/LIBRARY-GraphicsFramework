@@ -1,7 +1,5 @@
 package de.m_marvin.unimat.api;
 
-import de.m_marvin.unimat.impl.Quaternion;
-
 public interface IQuaternion<Q extends IQuaternion<?>> {
 
 	public float i();
@@ -18,7 +16,8 @@ public interface IQuaternion<Q extends IQuaternion<?>> {
 	public Q mul(float f);
 	default public Q mulI(float f) { return this.setI(this.mul(f)); }
 	
-	public Quaternion conjI();
+	public Q conj();
+	default public Q conjI() { return this.setI(this.conj()); }
 	
 	public Q copy();
 
