@@ -83,41 +83,50 @@ public class BufferBuilder implements IVertexConsumer {
 			this.buildingIndecies = false;
 		}
 	}
-	
-	public void nextElement() {
-		if (!this.building) throw new IllegalStateException("Buffer not building!");
-		this.currentElementIndex++;
-		if (this.currentElementIndex == this.format.getElementCount()) throw new IllegalStateException("The current VertexFormat does not have more than " + this.format.getElementCount() + " elements!");
-		this.currentElement = this.format.getElements().get(currentElementIndex);
-	}
-	
+
 	public VertexElement getCurrentElement() {
 		return currentElement;
 	}
 	
-	public void putFloat(float f) {
+	public IVertexConsumer nextElement() {
+		if (!this.building) throw new IllegalStateException("Buffer not building!");
+		this.currentElementIndex++;
+		if (this.currentElementIndex == this.format.getElementCount()) throw new IllegalStateException("The current VertexFormat does not have more than " + this.format.getElementCount() + " elements!");
+		this.currentElement = this.format.getElements().get(currentElementIndex);
+		return this;
+	}
+	
+	public IVertexConsumer putFloat(float f) {
 		this.buffer.putFloat(f);
+		return this;
 	}
-	public void putInt(int i) {
+	public IVertexConsumer putInt(int i) {
 		this.buffer.putInt(i);
+		return this;
 	}
-	public void putShort(short s) {
+	public IVertexConsumer putShort(short s) {
 		this.buffer.putShort(s);
+		return this;
 	}
-	public void putByte(byte b) {
+	public IVertexConsumer putByte(byte b) {
 		this.buffer.put(b);
+		return this;
 	}
-	public void putIntArr(int... intArr) {
+	public IVertexConsumer putIntArr(int... intArr) {
 		for (int i : intArr) this.buffer.putInt(i);
+		return this;
 	}
-	public void putFloatArr(float... floatArr) {
+	public IVertexConsumer putFloatArr(float... floatArr) {
 		for (float f : floatArr) this.buffer.putFloat(f);
+		return this;
 	}
-	public void putShortArr(short... shortArr) {
+	public IVertexConsumer putShortArr(short... shortArr) {
 		for (short s : shortArr) this.buffer.putShort(s);
+		return this;
 	}
-	public void putByteArr(byte... floatArr) {
+	public IVertexConsumer putByteArr(byte... floatArr) {
 		for (byte b : floatArr) this.buffer.put(b);
+		return this;
 	}
 	
 	@Override

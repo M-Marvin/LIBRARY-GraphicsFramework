@@ -8,6 +8,8 @@ import de.m_marvin.univec.impl.Vec4f;
 
 public interface IVertexConsumer {
 	
+	/* Predefined layouts for common vertex attributes */
+	
 	public default IVertexConsumer vertex(PoseStack poseStack, float x, float y, float z) {
 		IVector4<Float> vec = poseStack.last().pose().translate(new Vec4f(x, y, z, 1));
 		return vertex(vec.x(), vec.y(), vec.z());
@@ -20,6 +22,20 @@ public interface IVertexConsumer {
 	public IVertexConsumer normal(float x, float y, float z);
 	public IVertexConsumer color(float r, float g, float b, float a);
 	public IVertexConsumer uv(float u, float v);
+	
+	/* End of predefined layouts */
+	
+	public IVertexConsumer nextElement();
+	
+	public IVertexConsumer putFloat(float f);
+	public IVertexConsumer putInt(int i);
+	public IVertexConsumer putShort(short s);
+	public IVertexConsumer putByte(byte b);
+	public IVertexConsumer putIntArr(int... intArr);
+	public IVertexConsumer putFloatArr(float... floatArr);
+	public IVertexConsumer putShortArr(short... shortArr);
+	public IVertexConsumer putByteArr(byte... floatArr);
+	
 	public IVertexConsumer index(int i);
 	public IVertexConsumer indecies(int... i);
 	public void endVertex();

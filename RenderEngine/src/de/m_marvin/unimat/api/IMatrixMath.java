@@ -19,9 +19,6 @@ public interface IMatrixMath<M extends IMatrix<?>, V extends IVector> {
 	public M mul(M mat);
 	default public M mulI(M mat) { return this.setI((M) this.mul(mat)); }
 
-	public M div(M mat);
-	default public M diM(M mat) { return this.setI((M) this.div(mat)); }
-
 	/* Matrix math */
 	
 	public M identity();

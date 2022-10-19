@@ -219,15 +219,6 @@ public class Matrix3f implements IMatrix3f<Matrix3f>, IMatrixMath<Matrix3f, IVec
 	}
 
 	@Override
-	public Matrix3f div(Matrix3f mat) {
-		return new Matrix3f(
-				m00 / m00, m10 / m01, m20 / m02,
-				m01 / m10, m11 / m11, m21 / m12,
-				m02 / m20, m12 / m21, m22 / m22
-				);
-	}
-
-	@Override
 	public Matrix3f identity() {
 		this.m00 = 1;
 		this.m01 = 0;

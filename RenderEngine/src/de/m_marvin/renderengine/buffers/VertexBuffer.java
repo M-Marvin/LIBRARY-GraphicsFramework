@@ -17,15 +17,15 @@ public class VertexBuffer {
 	protected int vertecies;
 	
 	public VertexBuffer() {
-		GLStateManager.genVertexArray((id) -> this.arrayObjectId = id);
-		GLStateManager.genBufferObject((id) -> this.indexBufferId = id);
-		GLStateManager.genBufferObject((id) -> this.vertexBufferId = id);
+		this.arrayObjectId = GLStateManager.genVertexArray();
+		this.indexBufferId = GLStateManager.genBufferObject();
+		this.vertexBufferId = GLStateManager.genBufferObject();
 	}
 	
 	public void discard() {
 		GLStateManager.deleteVertexArray(this.vertexBufferId);
-		GLStateManager.deleteBufferObject(vertexBufferId);
-		GLStateManager.deleteBufferObject(indexBufferId);
+		GLStateManager.deleteBufferObject(this.vertexBufferId);
+		GLStateManager.deleteBufferObject(this.indexBufferId);
 	}
 	
 	public void upload(BufferBuilder bufferBuilder) {
@@ -36,10 +36,15 @@ public class VertexBuffer {
 		bindBuffers();
 		buffer.clear();
 		buffer.limit(drawState.vertecies() * drawState.format().getSize());
+		
 		GLStateManager.bufferData(GL33.GL_ARRAY_BUFFER, buffer, GL33.GL_STATIC_DRAW);
+		
+		drawState.format().getElements().forEach((element) -> GLStateManager.attributePointer(element.index(), element.count(), element.format().gltype(), element.normalize(), drawState.format().getSize(), element.offset()));
+		//GLStateManager.attributePointer(element.index(), element.size(), element.position(), element.format().gltype(), element.normalize(), 0));
+		
 		buffer.position(buffer.limit());
 		buffer.limit(buffer.limit() + drawState.indecies() * Integer.BYTES);
-		GLStateManager.bufferData(GL33.GL_ELEMENT_ARRAY_BUFFER, buffer, GL33.GL_STATIC_DRAW);
+		//GLStateManager.bufferData(GL33.GL_ELEMENT_ARRAY_BUFFER, buffer, GL33.GL_STATIC_DRAW);
 		unbindBuffers();
 	}
 	

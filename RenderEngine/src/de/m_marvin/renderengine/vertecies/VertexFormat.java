@@ -11,12 +11,11 @@ public class VertexFormat {
 	protected List<VertexElement> elements = new ArrayList<>();
 	protected int size;
 	
-	public record VertexElement(int index, int position, boolean normalize, String name, NumberFormat format, int size) {}
+	public record VertexElement(int index, int offset, boolean normalize, String name, NumberFormat format, int count) {}
 	
 	public VertexFormat appand(String name, NumberFormat format, int count, boolean normalize) {
-		int size = count; // * format.size();
-		elements.add(new VertexElement(elements.size(), this.size, normalize, name, format, size));
-		this.size += size;
+		elements.add(new VertexElement(elements.size(), this.size, normalize, name, format, count));
+		this.size += count * format.size();
 		return this;
 	}
 	
@@ -36,14 +35,13 @@ public class VertexFormat {
 		return this.elements.size();
 	}
 	
-	public void setupAttributes() {
+	public void enableAttributes() {
 		for (VertexElement element : getElements()) {
 			GLStateManager.enableAttributeArray(element.index());
-			GLStateManager.attributePointer(element.index(), element.size(), element.position(), element.format().gltype(), element.normalize(), 0);
 		}
 	}
 	
-	public void restoreState() {
+	public void disableAttributes() {
 		for (VertexElement element : getElements()) {
 			GLStateManager.disableAttributeArray(element.index());
 		}

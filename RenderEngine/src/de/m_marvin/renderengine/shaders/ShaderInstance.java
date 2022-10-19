@@ -23,11 +23,12 @@ public class ShaderInstance {
 		
 		protected int location;
 		protected UniformType type;
+		protected T defaultValue;
 		
 		public Uniform(int location, UniformType type, T defaultValue) {
 			this.location = location;
 			this.type = type;
-			set(defaultValue);
+			this.defaultValue = defaultValue;
 		}
 		
 		public void set(T value) {
@@ -64,13 +65,17 @@ public class ShaderInstance {
 			this.type.set(location, 1, value.toFloatArr());
 		}
 		
+		public void setDefault() {
+			set(this.defaultValue);
+		}
+		
 	}
 	
 	public ShaderInstance(String vertexProgram, String fragmentProgram, VertexFormat arrayFormat) throws IOException {
 		
-		GLStateManager.createShader(GL33.GL_VERTEX_SHADER, (id) -> this.vertexShader = id);
-		GLStateManager.createShader(GL33.GL_FRAGMENT_SHADER, (id) -> this.fragmentShader = id);
-		GLStateManager.createProgram((id) -> this.program = id);
+		this.vertexShader = GLStateManager.createShader(GL33.GL_VERTEX_SHADER);
+		this.fragmentShader = GLStateManager.createShader(GL33.GL_FRAGMENT_SHADER);
+		this.program =  GLStateManager.createProgram();
 		
 		GLStateManager.shaderSource(vertexShader, vertexProgram);
 		GLStateManager.shaderSource(fragmentShader, fragmentProgram);
@@ -87,12 +92,11 @@ public class ShaderInstance {
 			throw new IllegalArgumentException("Failed to compile the provoided vertex shader code:\n" + errorLog);
 		}
 		
-		GLStateManager.createProgram((id) -> this.program = id);
 		GLStateManager.attachShader(program, vertexShader);
 		GLStateManager.attachShader(program, fragmentShader);
 		
 		this.format = arrayFormat;
-		this.format.getElements().forEach((element) -> GLStateManager.bindAttributeLocation(program, element.index(), element.name()));
+		this.format.getElements().forEach((element) -> GLStateManager.bindVertexAttributeLocation(program, element.index(), element.name()));
 		
 		GLStateManager.linkProgram(program);
 		if (!GLStateManager.checkProgramLink(program)) {
@@ -109,21 +113,22 @@ public class ShaderInstance {
 	}
 	
 	public void useShader() {
-		GLStateManager.bindShader(this.program);
+		GLStateManager.useShader(this.program);
+		this.uniforms.values().forEach(Uniform::setDefault);
 	}
 	
 	public void useShaderAndFormat() {
 		useShader();
-		this.format.setupAttributes();
+		this.format.enableAttributes();
 	}
 
 	public void unbindShader() {
-		GLStateManager.bindShader(0);
+		GLStateManager.useShader(0);
 	}
 	
 	public void unbindShaderAndRestore() {
 		unbindShader();
-		this.format.restoreState();
+		this.format.disableAttributes();
 	}
 	
 	public <T> void createUniform(String name, UniformType type, T defaultValue) {

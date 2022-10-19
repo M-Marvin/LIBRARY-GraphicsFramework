@@ -4,6 +4,7 @@ uniform mat4 ModelViewMat;
 uniform mat4 ProjMat;
 
 in vec3 position;
+in int test;
 in vec4 color;
 in vec3 normal;
 in vec2 uv;
@@ -14,10 +15,9 @@ out vec2 vertexUV;
 
 void main() {
 	
-	gl_Position = ModelViewMat * ProjMat * vec4(position, 1.0);
+	gl_Position = ProjMat * ModelViewMat * vec4(vec3(0, 0, 0) + position, 1.0);
 	
 	vertexColor = color;
-	vertexNormal = normal;
-	vertexUV = uv;
+	
 	
 }

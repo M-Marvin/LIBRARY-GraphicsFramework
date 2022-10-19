@@ -1,7 +1,6 @@
 package de.m_marvin.renderengine;
 
 import java.nio.ByteBuffer;
-import java.util.function.IntConsumer;
 
 import org.lwjgl.opengl.GL33;
 
@@ -15,12 +14,12 @@ public class GLStateManager {
 		if (!isOnRenderThread()) throw new IllegalStateException("GL operations have to be performed on the render thread!");
 	}
 	
-	public static void genVertexArray(IntConsumer idConsumer) {
-		idConsumer.accept(GL33.glGenVertexArrays());
+	public static int genVertexArray() {
+		return GL33.glGenVertexArrays();
 	}
 	
-	public static void genBufferObject(IntConsumer idConsumer) {
-		idConsumer.accept(GL33.glGenBuffers());
+	public static int genBufferObject() {
+		return GL33.glGenBuffers();
 	}
 
 	public static void deleteVertexArray(int vertexArrayId) {
@@ -43,12 +42,12 @@ public class GLStateManager {
 		GL33.glBindVertexArray(arrayObjectId);
 	}
 	
-	public static void attributePointer(int attributeId, int size, int position, int format, boolean normalize, long bufferOffset) {
-		GL33.glVertexAttribPointer(attributeId, size, format, normalize, position, bufferOffset);
+	public static void attributePointer(int attributeId, int size, int format, boolean normalize, int stride, long bufferOffset) {
+		GL33.glVertexAttribPointer(attributeId, size, format, normalize, stride, bufferOffset);
 	}
 	
-	public static void createShader(int type, IntConsumer idConsumer) {
-		idConsumer.accept(GL33.glCreateShader(type));
+	public static int createShader(int type) {
+		return GL33.glCreateShader(type);
 	}
 	
 	public static void shaderSource(int shader, String shaderCode) {
@@ -69,8 +68,8 @@ public class GLStateManager {
 		return GL33.glGetShaderInfoLog(shader);
 	}
 	
-	public static void createProgram(IntConsumer idConsumer) {
-		idConsumer.accept(GL33.glCreateProgram());
+	public static int createProgram() {
+	 return GL33.glCreateProgram();
 	}
 	
 	public static void attachShader(int program, int shader) {
@@ -101,12 +100,20 @@ public class GLStateManager {
 		return GL33.glGetProgramInfoLog(program);
 	}
 	
-	public static void bindAttributeLocation(int program, int index, String name) {
+	public static void bindVertexAttributeLocation(int program, int index, String name) {
 		GL33.glBindAttribLocation(program, index, name);
 	}
 	
-	public static int getAttributeLocation(int programm, String name) {
+	public static int getVertexAttributeLocation(int programm, String name) {
 		return GL33.glGetAttribLocation(programm, name);
+	}
+	
+	public static void enableClientState(int state) {
+		GL33.glEnableClientState(state);
+	}
+
+	public static void disableClientState(int state) {
+		GL33.glDisableClientState(state);
 	}
 	
 	public static void enableAttributeArray(int index) {
@@ -143,7 +150,7 @@ public class GLStateManager {
 		GL33.glUniformMatrix4fv(location, transpose, value);
 	}
 	
-	public static void bindShader(int program) {
+	public static void useShader(int program) {
 		GL33.glUseProgram(program);
 	}
 	

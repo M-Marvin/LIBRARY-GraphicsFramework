@@ -100,7 +100,7 @@ public class RenderEngineTest {
 		input.registerBinding("movement.rotateup").addBinding(KeySource.getKey(GLFW.GLFW_KEY_UP));
 		input.registerBinding("movement.rotatedown").addBinding(KeySource.getKey(GLFW.GLFW_KEY_DOWN));
 		
-		VertexFormat format = new VertexFormat().appand("position", NumberFormat.FLOAT, 3, false); //.appand("normal", NumberFormat.FLOAT, 3, true).appand("color", NumberFormat.FLOAT, 4, false).appand("uv", NumberFormat.FLOAT, 2, false);
+		VertexFormat format = new VertexFormat().appand("position", NumberFormat.FLOAT, 3, false).appand("normal", NumberFormat.FLOAT, 3, true).appand("color", NumberFormat.FLOAT, 4, false).appand("uv", NumberFormat.FLOAT, 2, false);
 		
 		BufferBuilder buffer = new BufferBuilder(3200);
 		
@@ -117,14 +117,19 @@ public class RenderEngineTest {
 		PoseStack poseStack = new PoseStack();
 		
 		poseStack.push();
-		poseStack.translate(0, 0, -100);
+		//poseStack.translate(0, 0, -100);
 		
 		buffer.begin(RenderPrimitive.TRIANGLES, format);
 		
-		buffer.vertex(poseStack, -100, -100, 0).endVertex(); //.normal(poseStack, 0, 0, 1).color(1, 0, 0, 1).uv(0, 0).endVertex();
-		buffer.vertex(poseStack, 100, -100, -200).endVertex(); //.normal(poseStack, 0, 0, 1).color(0, 1, 0, 1).uv(1, 0).endVertex();
-		buffer.vertex(poseStack, -100, 100, 0).endVertex(); //.normal(poseStack, 0, 0, 1).color(0, 0, 1, 1).uv(0, 1).endVertex();
-		buffer.vertex(poseStack, 100, 100, 200).endVertex(); //.normal(poseStack, 0, 0, 1).color(1, 1, 1, 1).uv(1, 1).endVertex();
+		buffer.vertex( -1, -1, 0).normal(poseStack, 0, 0, 1).color(1, 0, 0, 1).uv(0, 0).endVertex();
+		buffer.vertex( 1, -1, 0).normal(poseStack, 0, 0, 1).color(0, 1, 0, 1).uv(1, 0).endVertex();
+		buffer.vertex( 0, 1, 0).normal(poseStack, 0, 0, 1).color(0, 0, 1, 1).uv(0, 1).endVertex();
+		
+		
+//		buffer.vertex( -1, -1, 0).nextElement().putByte((byte) 1).endVertex(); //.normal(poseStack, 0, 0, 1).color(1, 0, 0, 1).uv(0, 0).endVertex();
+//		buffer.vertex( 1, -1, 0).nextElement().putByte((byte) 2).endVertex(); //.normal(poseStack, 0, 0, 1).color(0, 1, 0, 1).uv(1, 0).endVertex();
+//		buffer.vertex( 0, 1, 0).nextElement().putByte((byte) 3).endVertex(); //.normal(poseStack, 0, 0, 1).color(0, 0, 1, 1).uv(0, 1).endVertex();
+		//buffer.vertex( 1, 1, 0).endVertex(); //.normal(poseStack, 0, 0, 1).color(1, 1, 1, 1).uv(1, 1).endVertex();
 		
 //		buffer.index(0).index(1).index(2).index(3);
 //		buffer.index(3).index(2).index(1).index(0);
@@ -141,7 +146,7 @@ public class RenderEngineTest {
 		
 		vertexBuffer.discard();
 		
-		Matrix4f projectionMatrix = Matrix4f.perspective(60, 1000 / 600, 1000, 0.1F); //Matrix4f.orthographic(-100, 100, 100, -100, 0F, 100F);
+		Matrix4f projectionMatrix = new Matrix4f(); // Matrix4f.perspective(60, 1000 / 600, 1000, 0.1F); //Matrix4f.orthographic(-100, 100, 100, -100, 0F, 100F);
 		
 		while (!window.shouldClose()) {
 			
@@ -167,18 +172,23 @@ public class RenderEngineTest {
 			Matrix4f viewMatrix = camera.getViewMatrix();
 			
 			vertexBuffer.bind();
+			//format.setupAttributes();
 			shader.useShaderAndFormat();
+			System.out.println( camera);
 			shader.getUniform("ModelViewMat").setMatrix4f(viewMatrix);
 			shader.getUniform("ProjMat").setMatrix4f(projectionMatrix);
 			
-			//GL33.glDrawArrays(GL33.GL_TRIANGLES, 0, 3);
-			GLStateManager.drawElements(RenderPrimitive.TRIANGLES.getGlType(), 8, vertexBuffer.indecieFormat());
+			//GL33.glDrawElements(GL33.GL_TRIANGLES, 3, GL33.GL_UNSIGNED_INT, 0);
+			
+			GL33.glDrawArrays(GL33.GL_TRIANGLES, 0, 3);
+			//GLStateManager.drawElements(RenderPrimitive.TRIANGLES.getGlType(), 8, vertexBuffer.indecieFormat());
+			format.disableAttributes();
 			vertexBuffer.unbind();
 			
 			window.swapFrames();
 			window.pollEvents();
 			
-			System.out.println(camera + " " + motion);
+			//System.out.println(camera + " " + motion);
 		}
 
 		buffer.freeMemory();

@@ -339,21 +339,23 @@ public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f, IVec
 	@Override
 	public Matrix4f mul(Matrix4f mat) {
 		return new Matrix4f(
-				m00 * mat.m00(), m10 * mat.m01(), m20 * mat.m02(), m30 * mat.m03(), 
-				m01 * mat.m10(), m11 * mat.m11(), m21 * mat.m21(), m31 * mat.m13(), 
-				m02 * mat.m20(), m12 * mat.m21(), m22 * mat.m22(), m32 * mat.m23(), 
-				m03 * mat.m30(), m13 * mat.m31(), m23 * mat.m32(), m33 * mat.m33()
-				);
-	}
-
-	@Override
-	public Matrix4f div(Matrix4f mat) {
-		return new Matrix4f(
-				m00 / mat.m00(), m10 / mat.m01(), m20 / mat.m02(), m30 / mat.m03(), 
-				m01 / mat.m10(), m11 / mat.m11(), m21 / mat.m21(), m31 / mat.m13(), 
-				m02 / mat.m20(), m12 / mat.m21(), m22 / mat.m22(), m32 / mat.m23(), 
-				m03 / mat.m30(), m13 / mat.m31(), m23 / mat.m32(), m33 / mat.m33()
-				);
+			this.m00 * mat.m00 + this.m01 * mat.m10 + this.m02 * mat.m20 + this.m03 * mat.m30,
+			this.m00 * mat.m01 + this.m01 * mat.m11 + this.m02 * mat.m21 + this.m03 * mat.m31,
+			this.m00 * mat.m02 + this.m01 * mat.m12 + this.m02 * mat.m22 + this.m03 * mat.m32,
+			this.m00 * mat.m03 + this.m01 * mat.m13 + this.m02 * mat.m23 + this.m03 * mat.m33,
+			this.m10 * mat.m00 + this.m11 * mat.m10 + this.m12 * mat.m20 + this.m13 * mat.m30,
+			this.m10 * mat.m01 + this.m11 * mat.m11 + this.m12 * mat.m21 + this.m13 * mat.m31,
+			this.m10 * mat.m02 + this.m11 * mat.m12 + this.m12 * mat.m22 + this.m13 * mat.m32,
+			this.m10 * mat.m03 + this.m11 * mat.m13 + this.m12 * mat.m23 + this.m13 * mat.m33,
+			this.m20 * mat.m00 + this.m21 * mat.m10 + this.m22 * mat.m20 + this.m23 * mat.m30,
+			this.m20 * mat.m01 + this.m21 * mat.m11 + this.m22 * mat.m21 + this.m23 * mat.m31,
+			this.m20 * mat.m02 + this.m21 * mat.m12 + this.m22 * mat.m22 + this.m23 * mat.m32,
+			this.m20 * mat.m03 + this.m21 * mat.m13 + this.m22 * mat.m23 + this.m23 * mat.m33,
+			this.m30 * mat.m00 + this.m31 * mat.m10 + this.m32 * mat.m20 + this.m33 * mat.m30,
+			this.m30 * mat.m01 + this.m31 * mat.m11 + this.m32 * mat.m21 + this.m33 * mat.m31,
+			this.m30 * mat.m02 + this.m31 * mat.m12 + this.m32 * mat.m22 + this.m33 * mat.m32,
+			this.m30 * mat.m03 + this.m31 * mat.m13 + this.m32 * mat.m23 + this.m33 * mat.m33
+		);
 	}
 
 	@Override
