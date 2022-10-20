@@ -74,7 +74,7 @@ public class BufferBuilder implements IVertexConsumer {
 	public void end() {
 		if (this.building) {
 			if (!this.buildingIndecies) {
-				this.type.buildDefaultIndecies(this.vertexCount, this::putInt);
+				this.type.buildDefaultIndecies(this.vertexCount, this::index);
 			}
 			this.drawStates.add(new DrawState(this.vertexCount, this.indexCount, this.format, this.type));
 			this.vertexCount = 0;

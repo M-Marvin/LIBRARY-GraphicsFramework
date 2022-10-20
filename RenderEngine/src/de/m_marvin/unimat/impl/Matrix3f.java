@@ -60,15 +60,7 @@ public class Matrix3f implements IMatrix3f<Matrix3f>, IMatrixMath<Matrix3f, IVec
 	}
 
 	public Matrix3f() {
-		this.m00 = 0;
-		this.m01 = 0;
-		this.m02 = 0;
-		this.m10 = 0;
-		this.m11 = 0;
-		this.m12 = 0;
-		this.m20 = 0;
-		this.m21 = 0;
-		this.m22 = 0;
+		identity();
 	}
 
 	public static Matrix3f createScaleMatrix(float p_8175_, float p_8176_, float p_8177_) {
@@ -345,9 +337,9 @@ public class Matrix3f implements IMatrix3f<Matrix3f>, IMatrixMath<Matrix3f, IVec
 	@Override
 	public float[] toFloatArr() {
 		return new float[] {
-				m00, m01, m02,
-				m10, m11, m12,
-				m20, m21, m22
+				m00, m11, m20,
+				m01, m11, m21,
+				m02, m12, m22
 		};
 	}
 

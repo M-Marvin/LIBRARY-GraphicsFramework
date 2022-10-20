@@ -1,9 +1,5 @@
 package de.m_marvin.renderengine.shaders;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import de.m_marvin.renderengine.GLStateManager;
 
 public enum UniformType {

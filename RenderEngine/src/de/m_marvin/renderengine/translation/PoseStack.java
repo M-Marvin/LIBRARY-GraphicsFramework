@@ -36,12 +36,12 @@ public class PoseStack {
 		translate((float) vec.x(), (float) vec.y(), (float) vec.z());
 	}
 	public void translate(float x, float y, float z) {
-		this.last().pose.mul(Matrix4f.createTranslateMatrix(x, y, z));
+		this.last().pose.mulI(Matrix4f.translateMatrix(x, y, z));
 	}
 	
 	public void scale(float sx, float sy, float sz) {
 		PoseStack.Pose posestack$pose = last();
-		posestack$pose.pose.mulI(Matrix4f.createScaleMatrix(sx, sy, sz));
+		posestack$pose.pose.mulI(Matrix4f.scaleMatrix(sx, sy, sz));
 		if (sx == sy && sy == sz) {
 			if (sx > 0.0F) {
 				return;
@@ -53,7 +53,7 @@ public class PoseStack {
 		float f1 = 1.0F / sy;
 		float f2 = 1.0F / sz;
 		float f3 = fastInvCubeRoot(f * f1 * f2);
-		posestack$pose.normal.mul(Matrix3f.createScaleMatrix(f3 * f, f3 * f1, f3 * f2));
+		posestack$pose.normal.mulI(Matrix3f.createScaleMatrix(f3 * f, f3 * f1, f3 * f2));
 	}
 	
 	private static float fastInvCubeRoot(float p_14200_) {
@@ -73,8 +73,8 @@ public class PoseStack {
 	
 	public void multiplyTransformation(Quaternion quat) {
 		Pose pose = last();
-		pose.normal().mul(quat);
-		pose.pose().mul(quat);
+		pose.normal().mulI(quat);
+		pose.pose().mulI(quat);
 	}
 	
 	public boolean cleared() {

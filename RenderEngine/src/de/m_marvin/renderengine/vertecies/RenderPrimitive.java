@@ -10,7 +10,7 @@ public enum RenderPrimitive {
 	TRIANGLES(GL33.GL_TRIANGLES, (vertecies, indexconsumer) -> {
 		for (int i = 0; i < vertecies; i++) indexconsumer.accept(i);
 	}),
-	TRIANGLES_STRIP(GL33.GL_TRIANGLE_STRIP_ADJACENCY, (vertecies, indexconsumer) -> {
+	TRIANGLES_STRIP(GL33.GL_TRIANGLE_STRIP, (vertecies, indexconsumer) -> {
 		for (int i = 0; i < vertecies; i++) indexconsumer.accept(i);
 	}),
 	TRIANGLES_FAN(GL33.GL_TRIANGLE_FAN, (vertecies, indexconsumer) -> {

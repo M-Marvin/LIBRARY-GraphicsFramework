@@ -15,7 +15,7 @@ out vec2 vertexUV;
 
 void main() {
 	
-	gl_Position = ProjMat * ModelViewMat * vec4(vec3(0, 0, 0) + position, 1.0);
+	gl_Position = ModelViewMat * vec4(position, 1.0);
 	
 	vertexColor = color;
 	

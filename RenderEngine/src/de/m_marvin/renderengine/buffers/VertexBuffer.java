@@ -7,6 +7,7 @@ import org.lwjgl.opengl.GL33;
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.buffers.BufferBuilder.DrawState;
 import de.m_marvin.renderengine.utility.NumberFormat;
+import de.m_marvin.renderengine.vertecies.RenderPrimitive;
 
 public class VertexBuffer {
 	
@@ -23,9 +24,12 @@ public class VertexBuffer {
 	}
 	
 	public void discard() {
-		GLStateManager.deleteVertexArray(this.vertexBufferId);
+		GLStateManager.deleteVertexArray(this.arrayObjectId);
 		GLStateManager.deleteBufferObject(this.vertexBufferId);
 		GLStateManager.deleteBufferObject(this.indexBufferId);
+		this.arrayObjectId = 0;
+		this.vertexBufferId = 0;
+		this.indexBufferId = 0;
 	}
 	
 	public void upload(BufferBuilder bufferBuilder) {
@@ -36,16 +40,14 @@ public class VertexBuffer {
 		bindBuffers();
 		buffer.clear();
 		buffer.limit(drawState.vertecies() * drawState.format().getSize());
-		
 		GLStateManager.bufferData(GL33.GL_ARRAY_BUFFER, buffer, GL33.GL_STATIC_DRAW);
-		
 		drawState.format().getElements().forEach((element) -> GLStateManager.attributePointer(element.index(), element.count(), element.format().gltype(), element.normalize(), drawState.format().getSize(), element.offset()));
-		//GLStateManager.attributePointer(element.index(), element.size(), element.position(), element.format().gltype(), element.normalize(), 0));
-		
 		buffer.position(buffer.limit());
 		buffer.limit(buffer.limit() + drawState.indecies() * Integer.BYTES);
-		//GLStateManager.bufferData(GL33.GL_ELEMENT_ARRAY_BUFFER, buffer, GL33.GL_STATIC_DRAW);
+		GLStateManager.bufferData(GL33.GL_ELEMENT_ARRAY_BUFFER, buffer, GL33.GL_STATIC_DRAW);
 		unbindBuffers();
+		this.indecies = drawState.indecies();
+		this.vertecies = drawState.vertecies();
 	}
 	
 	public void bind() {
@@ -70,6 +72,10 @@ public class VertexBuffer {
 
 	public int indecieFormat() {
 		return NumberFormat.UINT.gltype();
+	}
+	
+	public void drawAll(RenderPrimitive mode) {
+		GLStateManager.drawElements(mode.getGlType(), indecies, indecieFormat());
 	}
 	
 }

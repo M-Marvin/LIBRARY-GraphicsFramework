@@ -76,22 +76,7 @@ public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f, IVec
 	}
 
 	public Matrix4f() {
-		this.m00 = 1;
-		this.m01 = 0;
-		this.m02 = 0;
-		this.m03 = 0;
-		this.m10 = 0;
-		this.m11 = 1;
-		this.m12 = 0;
-		this.m13 = 0;
-		this.m20 = 0;
-		this.m21 = 0;
-		this.m22 = 1;
-		this.m23 = 1;
-		this.m30 = 0;
-		this.m31 = 0;
-		this.m32 = 1;
-		this.m33 = 1;
+		identity();
 	}
 	
 	public static Matrix4f perspective(double fovDegrees, float aspect, float zFar, float zNear) {
@@ -121,27 +106,84 @@ public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f, IVec
 		return matrix4f;
 	}
 
-	public static Matrix4f createScaleMatrix(float p_27633_, float p_27634_, float p_27635_) {
-		Matrix4f matrix4f = new Matrix4f();
-		matrix4f.m00 = p_27633_;
-		matrix4f.m11 = p_27634_;
-		matrix4f.m22 = p_27635_;
-		matrix4f.m33 = 1.0F;
-		return matrix4f;
+	public static Matrix4f scaleMatrix(float sx, float sy, float sz) {
+		return new Matrix4f(
+				sx, 0, 0, 0,
+				0, sy, 0, 0,
+				0, 0, sz, 0,
+				0, 0, 0, 1
+				);
+		
+//		Matrix4f matrix4f = new Matrix4f();
+//		matrix4f.m00 = p_27633_;
+//		matrix4f.m11 = p_27634_;
+//		matrix4f.m22 = p_27635_;
+//		matrix4f.m33 = 1.0F;
+//		return matrix4f;
 	}
 
-	public static Matrix4f createTranslateMatrix(float p_27654_, float p_27655_, float p_27656_) {
-		Matrix4f matrix4f = new Matrix4f();
-		matrix4f.m00 = 1.0F;
-		matrix4f.m11 = 1.0F;
-		matrix4f.m22 = 1.0F;
-		matrix4f.m33 = 1.0F;
-		matrix4f.m03 = p_27654_;
-		matrix4f.m13 = p_27655_;
-		matrix4f.m23 = p_27656_;
-		return matrix4f;
+	public static Matrix4f translateMatrix(float x, float y, float z) {
+		return new Matrix4f(
+				1, 0, 0, x,
+				0, 1, 0, y,
+				0, 0, 1, z,
+				0, 0, 0, 1
+				);
+		
+//		Matrix4f matrix4f = new Matrix4f();
+//		matrix4f.m00 = 1.0F;
+//		matrix4f.m11 = 1.0F;
+//		matrix4f.m22 = 1.0F;
+//		matrix4f.m33 = 1.0F;
+//		matrix4f.m03 = p_27654_;
+//		matrix4f.m13 = p_27655_;
+//		matrix4f.m23 = p_27656_;
+//		
+//		matrix4f.m03 = x;
+//		matrix.m03 = x;
+//		matrix.m03 = x;
+//		
+//		
+//		return matrix4f;
 	}
 
+	public static Matrix4f rotationMatrixX(float radians) {
+		float crad = (float) Math.cos(radians);
+		float srad = (float) Math.sin(radians);
+		return new Matrix4f(
+				1, 0, 0, 0,
+				0, crad, srad, 0,
+				0, -srad, crad, 0,
+				0, 0, 0, 1
+				);
+	}
+
+	public static Matrix4f rotationMatrixY(float radians) {
+		float crad = (float) Math.cos(radians);
+		float srad = (float) Math.sin(radians);
+		return new Matrix4f(
+				crad, 0, -srad, 0,
+				0, 1, 0, 0,
+				srad, 0, crad, 0,
+				0, 0, 0, 1
+				);
+	}
+
+	public static Matrix4f rotationMatrixZ(float radians) {
+		float crad = (float) Math.cos(radians);
+		float srad = (float) Math.sin(radians);
+		return new Matrix4f(
+				crad, -srad, 0, 0,
+				srad, crad, 0, 0,
+				0, 0, 1, 0,
+				0, 0, 0, 1
+				);
+	}
+	
+	public static Matrix4f rotationMatrix(float rx, float ry, float rz) {
+		return rotationMatrixZ(rz).mul(rotationMatrixY(ry)).mul(rotationMatrixX(rx));
+	}
+	
 	@Override
 	public float getField(int x, int y) {
 		switch (x) {
@@ -338,6 +380,10 @@ public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f, IVec
 
 	@Override
 	public Matrix4f mul(Matrix4f mat) {
+//		return new Matrix4f(
+//				mat.m00 + mat.m01 + mat.m02 + mat.m03
+//			);
+		
 		return new Matrix4f(
 			this.m00 * mat.m00 + this.m01 * mat.m10 + this.m02 * mat.m20 + this.m03 * mat.m30,
 			this.m00 * mat.m01 + this.m01 * mat.m11 + this.m02 * mat.m21 + this.m03 * mat.m31,
@@ -520,10 +566,10 @@ public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f, IVec
 	}
 
 	public String toString() {
-		return "Matrix4f:"
-				+ this.m00 + " " + this.m01 + " " + this.m02 + " " + this.m03
-				+ this.m10 + " " + this.m11 + " " + this.m12 + " " + this.m13
-				+ this.m20 + " " + this.m21 + " " + this.m22 + " " + this.m23
+		return "Matrix4f:\n"
+				+ this.m00 + " " + this.m01 + " " + this.m02 + " " + this.m03 + "\n"
+				+ this.m10 + " " + this.m11 + " " + this.m12 + " " + this.m13 + "\n"
+				+ this.m20 + " " + this.m21 + " " + this.m22 + " " + this.m23 + "\n"
 				+ this.m30 + " " + this.m31 + " " + this.m32 + " " + this.m33;
 	}
 
@@ -544,10 +590,10 @@ public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f, IVec
 	@Override
 	public float[] toFloatArr() {
 		return new float[] {
-				m00, m01, m02, m03,
-				m10, m11, m12, m13,
-				m20, m21, m22, m23,
-				m30, m31, m32, m33
+				m00, m10, m20, m30,
+				m01, m11, m21, m31,
+				m02, m12, m22, m32,
+				m03, m13, m23, m33
 		};
 	}
 
