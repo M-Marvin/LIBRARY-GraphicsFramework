@@ -38,7 +38,7 @@ public class Camera {
 	
 	public void upadteViewMatrix() {
 		this.viewMatrix.identity();
-		this.viewMatrix.mulI(Quaternion.fromXYZDegrees(rotation.mul(-1F)));
+		this.viewMatrix.mulI(Quaternion.fromXYZDegrees(rotation).conj());
 		this.viewMatrix.mulI(Matrix4f.translateMatrix(-this.position.x(), -this.position.y(), -this.position.z()));
 	}
 	

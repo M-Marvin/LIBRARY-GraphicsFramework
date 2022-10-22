@@ -1,6 +1,7 @@
 package de.m_marvin.renderengine;
 
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 import org.lwjgl.opengl.GL33;
 
@@ -157,5 +158,29 @@ public class GLStateManager {
 	public static void drawElements(int mode, int count, int indecieFormat) {
 		GL33.glDrawElements(mode, count, indecieFormat, 0);
 	}
-
+	
+	public static void enable(int target) {
+		GL33.glEnable(target);
+	}
+	
+	public static int genTexture() {
+		return GL33.glGenTextures();
+	}
+	
+	public static void bindTexture(int target, int textureId) {
+		GL33.glBindTexture(target, textureId);
+	}
+	
+	public static void textureParameter(int target, int parameter, int value) {
+		GL33.glTexParameteri(target, parameter, value);
+	}
+	
+	public static void loadTexture(int target, int level, int internalformat, int format, int width, int height, int border, int type, IntBuffer pixels) {
+		GL33.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+	}
+	
+	public static void activeTexture(int textureId) {
+		GL33.glActiveTexture(GL33.GL_TEXTURE0 + textureId);
+	}
+	
 }

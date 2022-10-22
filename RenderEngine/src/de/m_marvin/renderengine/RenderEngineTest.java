@@ -1,12 +1,14 @@
 package de.m_marvin.renderengine;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL33;
 import org.lwjgl.opengl.GLCapabilities;
 
 import de.m_marvin.renderengine.buffers.BufferBuilder;
@@ -15,6 +17,8 @@ import de.m_marvin.renderengine.inputbinding.InputBindings;
 import de.m_marvin.renderengine.inputbinding.KeySource;
 import de.m_marvin.renderengine.shaders.ShaderInstance;
 import de.m_marvin.renderengine.shaders.ShaderLoader;
+import de.m_marvin.renderengine.textures.ITextureSampler;
+import de.m_marvin.renderengine.textures.SingleTexture;
 import de.m_marvin.renderengine.translation.Camera;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.renderengine.utility.NumberFormat;
@@ -84,7 +88,7 @@ public class RenderEngineTest {
 		GLFWErrorCallback.createPrint(System.err).set();
 		
 		Window window = new Window(1000, 600, "Test");
-		Camera camera = new Camera();
+		Camera camera = new Camera(new Vec3f(0F, 0F, 10F), new Vec3f(0F, 0F, 0F));
 		InputBindings input = new InputBindings();
 		input.attachToWindow(window.glWindow);
 		
@@ -106,11 +110,12 @@ public class RenderEngineTest {
 		poseStack.push();
 		buffer.begin(RenderPrimitive.TRIANGLES, format);
 		poseStack.translate(0, 0.5F, 0);
-		buffer.vertex(poseStack, -1, -1, 0).normal(poseStack, 0, 0, 1).color(1, 0, 0, 1).uv(0, 0).endVertex();
-		buffer.vertex(poseStack, 1, -1, 0).normal(poseStack, 0, 0, 1).color(0, 1, 0, 1).uv(1, 0).endVertex();
-		buffer.vertex(poseStack, -1, 1, 0).normal(poseStack, 0, 0, 1).color(0, 0, 1, 1).uv(0, 1).endVertex();
-		buffer.vertex(poseStack, 1, 1, 0).normal(poseStack, 0, 0, 1).color(0, 0, 1, 1).uv(0, 1).endVertex();
-		buffer.index(0).index(1).index(2).index(3);
+		poseStack.scale(100, 100, 1);
+		buffer.vertex(-1, -1, 1).normal(1, 0, 1).color(1, 0, 0, 1).uv(0, 0).endVertex();
+		buffer.vertex( 1, -1, 0).normal(0, 1, 1).color(0, 1, 0, 1).uv(1, 0).endVertex();
+		buffer.vertex( -1, 1, 0).normal(1, 1, 1).color(0, 0, 1, 1).uv(0, 1).endVertex();
+		buffer.vertex( 1, 1, -1).normal( 0, 0, 1).color(1, 0, 1, 1).uv(0, 0).endVertex();
+		buffer.index(0).index(1).index(2);//.index(3);
 		buffer.end();
 		poseStack.pop();
 		
@@ -121,22 +126,27 @@ public class RenderEngineTest {
 		File shaderFile = new File(this.getClass().getClassLoader().getResource("").getPath(), "shaders/testShader.json");
 		ShaderInstance shader = ShaderLoader.load(shaderFile, format);
 		
-		Matrix4f projectionMatrix = new Matrix4f(); // Matrix4f.perspective(60, 1000 / 600, 1000, 0.1F); //Matrix4f.orthographic(-100, 100, 100, -100, 0F, 100F);
+		Matrix4f projectionMatrix = Matrix4f.perspective(65, 1000F / 600F, 1, 1000); //Matrix4f.orthographic(-100, 100, 100, -100, -10F, 10F);
+		
+		File textureFile = new File(this.getClass().getClassLoader().getResource("").getPath(), "textures/test.png");
+		ITextureSampler texture = new SingleTexture(); //new FileInputStream(textureFile));
+		
+		GL33.glEnable(GL33.GL_TEXTURE_2D);
 		
 		while (!window.shouldClose()) {
 			
 			Vec3f motion = new Vec3f(0F, 0F, 0F);
 			float motionSensitivity = 0.2F;
-			if (input.isBindingActive("movement.forward")) motion.z = +motionSensitivity;
-			if (input.isBindingActive("movement.backward")) motion.z = -motionSensitivity;
+			if (input.isBindingActive("movement.forward")) motion.z = -motionSensitivity;
+			if (input.isBindingActive("movement.backward")) motion.z = +motionSensitivity;
 			if (input.isBindingActive("movement.leftside")) motion.x = -motionSensitivity;
 			if (input.isBindingActive("movement.rightside")) motion.x = +motionSensitivity;
 			camera.move(motion);
 			
 			Vec3f rotation = new Vec3f(0F, 0F, 0F);
 			float rotationSensitivity = 2F;
-			if (input.isBindingActive("movement.rotateleft")) rotation.y = -rotationSensitivity;
-			if (input.isBindingActive("movement.rotateright")) rotation.y = +rotationSensitivity;
+			if (input.isBindingActive("movement.rotateleft")) rotation.y = +rotationSensitivity;
+			if (input.isBindingActive("movement.rotateright")) rotation.y = -rotationSensitivity;
 //			if (input.isBindingActive("movement.rotateup")) rotation.x = -rotationSensitivity;
 //			if (input.isBindingActive("movement.rotatedown")) rotation.x = +rotationSensitivity;
 			camera.rotate(rotation);
@@ -148,6 +158,8 @@ public class RenderEngineTest {
 			shader.useShaderAndFormat();
 			shader.getUniform("ModelViewMat").setMatrix4f(viewMatrix);
 			shader.getUniform("ProjMat").setMatrix4f(projectionMatrix);
+			shader.getUniform("Texture").setTextureSampler(texture); // TODO
+			
 			vertexBuffer.drawAll(RenderPrimitive.TRIANGLES_STRIP);
 			shader.unbindShaderAndRestore();
 			vertexBuffer.unbind();

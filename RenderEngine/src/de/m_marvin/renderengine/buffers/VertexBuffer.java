@@ -37,6 +37,8 @@ public class VertexBuffer {
 		BufferBuilder.BufferPair pair = bufferBuilder.popNext();
 		ByteBuffer buffer = pair.buffer();
 		DrawState drawState = pair.drawState();
+		this.indecies = drawState.indecies();
+		this.vertecies = drawState.vertecies();
 		bindBuffers();
 		buffer.clear();
 		buffer.limit(drawState.vertecies() * drawState.format().getSize());
@@ -46,8 +48,6 @@ public class VertexBuffer {
 		buffer.limit(buffer.limit() + drawState.indecies() * Integer.BYTES);
 		GLStateManager.bufferData(GL33.GL_ELEMENT_ARRAY_BUFFER, buffer, GL33.GL_STATIC_DRAW);
 		unbindBuffers();
-		this.indecies = drawState.indecies();
-		this.vertecies = drawState.vertecies();
 	}
 	
 	public void bind() {

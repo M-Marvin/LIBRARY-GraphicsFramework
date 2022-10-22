@@ -7,11 +7,14 @@ import java.util.Map;
 import org.lwjgl.opengl.GL33;
 
 import de.m_marvin.renderengine.GLStateManager;
+import de.m_marvin.renderengine.textures.ITextureSampler;
 import de.m_marvin.renderengine.vertecies.VertexFormat;
 import de.m_marvin.unimat.impl.Matrix3f;
 import de.m_marvin.unimat.impl.Matrix4f;
 
 public class ShaderInstance {
+
+	protected Map<UniformType, Integer> typeCount = new HashMap<>();
 	
 	protected int vertexShader;
 	protected int fragmentShader;
@@ -21,14 +24,16 @@ public class ShaderInstance {
 	
 	public class Uniform<T> {
 		
+		protected int index;
 		protected int location;
 		protected UniformType type;
 		protected T defaultValue;
 		
-		public Uniform(int location, UniformType type, T defaultValue) {
+		public Uniform(int location, UniformType type, T defaultValue, int index) {
 			this.location = location;
 			this.type = type;
 			this.defaultValue = defaultValue;
+			this.index = index;
 		}
 		
 		public void set(T value) {
@@ -39,6 +44,10 @@ public class ShaderInstance {
 				count = arr.length;
 			}
 			this.type.set(location, count, value);
+		}
+		
+		public int getIndex() {
+			return index;
 		}
 		
 		public void setFloatArr(float[] value) {
@@ -63,6 +72,11 @@ public class ShaderInstance {
 
 		public void setMatrix3f(Matrix3f value) {
 			this.type.set(location, 1, value.toFloatArr());
+		}
+
+		public void setTextureSampler(ITextureSampler texture) {
+			texture.bindTexture(index);
+			this.type.set(location, 1, this.index);
 		}
 		
 		public void setDefault() {
@@ -132,7 +146,9 @@ public class ShaderInstance {
 	}
 	
 	public <T> void createUniform(String name, UniformType type, T defaultValue) {
-		this.uniforms.put(name, new Uniform<T>(GLStateManager.getUniformLocation(program, name), type, defaultValue));
+		int id = this.typeCount.getOrDefault(type, 0);
+		this.typeCount.put(type, 1 + id);
+		this.uniforms.put(name, new Uniform<T>(GLStateManager.getUniformLocation(program, name), type, defaultValue, id));
 	}
 	
 	public Uniform<?> getUniform(String name) {

@@ -4,6 +4,9 @@ import de.m_marvin.renderengine.GLStateManager;
 
 public enum UniformType {
 	
+	SAMPLER_2D("sampler2D", int.class, (location, count, value) -> {
+		GLStateManager.setUniformInt1(location, (int) value);
+	}),
 	MATRIX_3x3("matrix3x3", float[].class, (location, count, value) -> {
 		GLStateManager.setUniformMatrix3(location, false, (float[]) value);
 	}),

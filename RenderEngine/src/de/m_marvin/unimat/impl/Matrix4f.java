@@ -79,16 +79,47 @@ public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f, IVec
 		identity();
 	}
 	
-	public static Matrix4f perspective(double fovDegrees, float aspect, float zFar, float zNear) {
-		float f = (float) (1 / Math.tan(Math.toRadians(fovDegrees) / 2)) * aspect;
+	public static Matrix4f perspective(double fovDegrees, float aspect, float near, float far) {
+		float frustumLength = far - near;
+		float yScale = (float) ((1 / Math.tan(Math.toRadians(fovDegrees / 2))) * aspect);
+		float xScale = yScale / aspect;
+		
 		Matrix4f matrix4f = new Matrix4f();
-		matrix4f.m00 = f / aspect;
-		matrix4f.m11 = f;
-		matrix4f.m22 = -((zNear + zFar) / (zFar - zNear));
+		matrix4f.m00 = xScale;
+		matrix4f.m11 = yScale;
+		matrix4f.m22 = -((far + near) / frustumLength);
 		matrix4f.m23 = -1;
-		matrix4f.m32 = -((2.0F * zNear * zFar) / (zFar - zNear));
-		matrix4f.m33 = 0; // TODO
+		matrix4f.m32 = -((2 * near * far) / frustumLength);
+		matrix4f.m33 = 0;
+		
+//		float f = (float) (1 / Math.tan(Math.toRadians(fovDegrees) / 2)) * aspect;
+//		Matrix4f matrix4f = new Matrix4f();
+//		matrix4f.m00 = f / aspect;
+//		matrix4f.m11 = f;
+//		matrix4f.m22 = -((far + near) / (far - near));
+//		matrix4f.m23 = -1;
+//		matrix4f.m32 = -((2.0F * near * far) / (far - near));
+//		matrix4f.m33 = 0;
 		return matrix4f;
+		
+		
+//	      IntBuffer w = BufferUtils.createIntBuffer(4);
+//	      IntBuffer h = BufferUtils.createIntBuffer(4);
+//	      GLFW.glfwGetWindowSize(WindowManager.getWindow(), w, h);
+//	      float width = w.get(0);
+//	      float height = h.get(0);
+//	      float aspectRatio = width / height;
+//	      float yScale = (float) ((1f / Math.tan(Math.toRadians(FOV / 2f))) * aspectRatio);
+//	      float xScale = y_scale / aspectRatio;
+//	      float frustumLength = FAR_PLANE - NEAR_PLANE;
+//
+//	      projectionMatrix = new Matrix4f();
+//	      projectionMatrix.m00 = xScale;
+//	      projectionMatrix.m11 = yScale;
+//	      projectionMatrix.m22 = -((FAR_PLANE + NEAR_PLANE) / frustumLength);
+//	      projectionMatrix.m23 = -1;
+//	      projectionMatrix.m32 = -((2 * NEAR_PLANE * FAR_PLANE) / frustumLength);
+//	      projectionMatrix.m33 = 0;
 	}
 
 	public static Matrix4f orthographic(float left, float right, float bottom, float top, float near, float far) {
@@ -98,7 +129,7 @@ public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f, IVec
 		float f2 = far - near;
 		matrix4f.m00 = 2.0F / f;
 		matrix4f.m11 = 2.0F / f1;
-		matrix4f.m22 = -2.0F / f2;
+		matrix4f.m22 = 2.0F / f2;
 		matrix4f.m03 = -(right + left) / f;
 		matrix4f.m13 = -(bottom + top) / f1;
 		matrix4f.m23 = -(far + near) / f2;
@@ -417,10 +448,10 @@ public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f, IVec
 		this.m20 = 0;
 		this.m21 = 0;
 		this.m22 = 1;
-		this.m23 = 1;
+		this.m23 = 0;
 		this.m30 = 0;
 		this.m31 = 0;
-		this.m32 = 1;
+		this.m32 = 0;
 		this.m33 = 1;
 		return this;
 	}

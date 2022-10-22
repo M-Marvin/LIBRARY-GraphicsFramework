@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import de.m_marvin.renderengine.vertecies.VertexFormat;
@@ -46,7 +47,7 @@ public class ShaderLoader {
 			JsonObject uniformJson = uniformArray.get(i).getAsJsonObject();
 			String uniformName = uniformJson.get("Name").getAsString();
 			UniformType type = UniformType.byName(uniformJson.get("Type").getAsString());
-			Object defaultValue = gson.fromJson(uniformJson.get("Value").getAsJsonArray(), type.getValueType());
+			Object defaultValue = gson.fromJson(uniformJson.get("Value"), type.getValueType());
 			shaderInstance.createUniform(uniformName, type, defaultValue);
 		}
 		
