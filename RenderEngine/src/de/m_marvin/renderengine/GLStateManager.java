@@ -44,7 +44,11 @@ public class GLStateManager {
 	}
 	
 	public static void attributePointer(int attributeId, int size, int format, boolean normalize, int stride, long bufferOffset) {
-		GL33.glVertexAttribPointer(attributeId, size, format, normalize, stride, bufferOffset);
+		if (format != GL33.GL_INT && format != GL33.GL_UNSIGNED_INT) {
+			GL33.glVertexAttribPointer(attributeId, size, format, normalize, stride, bufferOffset);
+		} else {
+			GL33.glVertexAttribIPointer(attributeId, size, format, stride, bufferOffset);
+		}		
 	}
 	
 	public static int createShader(int type) {
@@ -134,6 +138,13 @@ public class GLStateManager {
 	}
 	public static void setUniformIntN(int location, int... arr) {
 		GL33.glUniform1iv(location, arr);
+	}
+
+	public static void setUniformUnsignedInt1(int location, int value) {
+		GL33.glUniform1ui(location, value);
+	}
+	public static void setUniformUnsignedIntN(int location, int... arr) {
+		GL33.glUniform1uiv(location, arr);
 	}
 
 	public static void setUniformFloat1(int location, float value) {

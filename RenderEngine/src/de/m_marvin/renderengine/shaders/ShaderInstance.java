@@ -35,6 +35,10 @@ public class ShaderInstance {
 			this.defaultValue = defaultValue;
 			this.index = index;
 		}
+
+		public void setDefault() {
+			set(this.defaultValue);
+		}
 		
 		public void set(T value) {
 			int count = 1;
@@ -49,6 +53,8 @@ public class ShaderInstance {
 		public int getIndex() {
 			return index;
 		}
+		
+		/* Type specific setter methods to avoid the instanceof check */
 		
 		public void setFloatArr(float[] value) {
 			this.type.set(location, value.length, value);
@@ -65,6 +71,10 @@ public class ShaderInstance {
 		public void setInt(int value) {
 			this.type.set(location, 1, value);
 		}
+
+		public void setUnsignedInt(int value) {
+			this.type.set(location, 1, value);
+		}
 		
 		public void setMatrix4f(Matrix4f value) {
 			this.type.set(location, 1, value.toFloatArr());
@@ -77,10 +87,6 @@ public class ShaderInstance {
 		public void setTextureSampler(ITextureSampler texture) {
 			texture.bindTexture(index);
 			this.type.set(location, 1, this.index);
-		}
-		
-		public void setDefault() {
-			set(this.defaultValue);
 		}
 		
 	}

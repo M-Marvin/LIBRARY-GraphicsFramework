@@ -20,6 +20,13 @@ public enum UniformType {
 			GLStateManager.setUniformIntN(location, (int[]) value);
 		}
 	}),
+	UINT("uint", int[].class, (location, count, value) -> {
+		if (count == 1) {
+			GLStateManager.setUniformUnsignedInt1(location, (int) value);
+		} else {
+			GLStateManager.setUniformUnsignedIntN(location, (int[]) value);
+		}
+	}),
 	FLOAT("float", float[].class, (location, count, value) -> {
 		if (count == 1) {
 			GLStateManager.setUniformFloat1(location, (float) value);
@@ -27,7 +34,7 @@ public enum UniformType {
 			GLStateManager.setUniformFloatN(location, (float[]) value);
 		}
 	});
-	
+		
 	private final String codeName;
 	private final UniformSetter glSetter;
 	private final Class<?> valueType;

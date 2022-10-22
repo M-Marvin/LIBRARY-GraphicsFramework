@@ -41,6 +41,7 @@ public class BufferBuilder implements IVertexConsumer {
 		this.uploadedBytes += drawState.format().getSize() * drawState.vertecies + drawState.indecies * Integer.BYTES;
 		this.buffer.limit(uploadedBytes);
 		ByteBuffer drawBuffer = this.buffer.slice();
+		drawBuffer.order(this.buffer.order());
 		this.buffer.clear();
 		return new BufferPair(drawBuffer, drawState);	
 	}

@@ -44,6 +44,36 @@ public class VertexBuffer {
 		buffer.limit(drawState.vertecies() * drawState.format().getSize());
 		GLStateManager.bufferData(GL33.GL_ARRAY_BUFFER, buffer, GL33.GL_STATIC_DRAW);
 		drawState.format().getElements().forEach((element) -> GLStateManager.attributePointer(element.index(), element.count(), element.format().gltype(), element.normalize(), drawState.format().getSize(), element.offset()));
+		
+//		System.out.println("Debug data print: ");
+//		drawState.format().getElements().forEach((element) -> {
+//			
+//			int bufferDataOffsetBytes = element.offset();
+//			int bufferDataStrideBytes = drawState.format().getSize();
+//			int elementCount = element.count();
+//			int elementSizeBytes = element.format().size();
+//			int attributeCount = drawState.vertecies();
+//			
+//			System.out.println("Read attribute '" + element.name() + "' with parameters: [" + bufferDataOffsetBytes + " " + bufferDataStrideBytes + " " + elementCount + " " + elementSizeBytes + " " + attributeCount + "]");
+//			
+//			for (int attributeNumber = 0; attributeNumber < attributeCount; attributeNumber++) {
+//				
+//				for (int elementNumber = 0; elementNumber < elementCount; elementNumber++) {
+//					
+//					int attributeBufferPosition = bufferDataOffsetBytes + attributeNumber * bufferDataStrideBytes;
+//					int elementBufferPosition = attributeBufferPosition + elementNumber * elementSizeBytes;
+//					float elementValue = buffer.getFloat(elementBufferPosition);
+//					
+//					System.out.print(elementValue + " ");
+//					
+//				}
+//				
+//				System.out.println("");
+//				
+//			}
+//			
+//		});
+		
 		buffer.position(buffer.limit());
 		buffer.limit(buffer.limit() + drawState.indecies() * Integer.BYTES);
 		GLStateManager.bufferData(GL33.GL_ELEMENT_ARRAY_BUFFER, buffer, GL33.GL_STATIC_DRAW);

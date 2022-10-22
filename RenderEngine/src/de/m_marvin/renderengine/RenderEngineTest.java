@@ -8,7 +8,6 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL33;
 import org.lwjgl.opengl.GLCapabilities;
 
 import de.m_marvin.renderengine.buffers.BufferBuilder;
@@ -28,6 +27,13 @@ import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.univec.impl.Vec3f;
 
 public class RenderEngineTest {
+	
+	/*
+	 * TODO List
+	 * - Animated Textures, Atlases, Animated Atlases
+	 * - SingleBuffer and ParalelBuffer
+	 * 
+	 */
 	
 	public static void main(String... args) {
 		try {
@@ -51,7 +57,11 @@ public class RenderEngineTest {
 			GLFW.glfwMakeContextCurrent(glWindow);
 			GLFW.glfwSwapInterval(1);
 			this.glCapabilities = GL.createCapabilities();
-			GL11.glClearColor(1, 0, 1, 1);
+			GL11.glClearColor(1, 1, 1, 1);
+		}
+		
+		public void makeContextCurrent() {
+			GLFW.glfwMakeContextCurrent(glWindow);
 		}
 		
 		public void swapFrames() {
@@ -111,11 +121,14 @@ public class RenderEngineTest {
 		buffer.begin(RenderPrimitive.TRIANGLES, format);
 		poseStack.translate(0, 0.5F, 0);
 		poseStack.scale(100, 100, 1);
-		buffer.vertex(-1, -1, 1).normal(1, 0, 1).color(1, 0, 0, 1).uv(0, 0).endVertex();
+		buffer.vertex(-1, -1, 0).normal(1, 0, 1).color(1, 0, 0, 1).uv(1, 1).endVertex();
 		buffer.vertex( 1, -1, 0).normal(0, 1, 1).color(0, 1, 0, 1).uv(1, 0).endVertex();
 		buffer.vertex( -1, 1, 0).normal(1, 1, 1).color(0, 0, 1, 1).uv(0, 1).endVertex();
+		buffer.vertex( 1, -1, -1).normal( 0, 0, 1).color(1, 0, 1, 1).uv(0, 0).endVertex();
+		buffer.vertex( -1, 1, -1).normal( 0, 0, 1).color(1, 0, 1, 1).uv(1, 0).endVertex();
 		buffer.vertex( 1, 1, -1).normal( 0, 0, 1).color(1, 0, 1, 1).uv(0, 0).endVertex();
 		buffer.index(0).index(1).index(2);//.index(3);
+		buffer.index(3).index(4).index(5);//.index(3);
 		buffer.end();
 		poseStack.pop();
 		
@@ -129,9 +142,9 @@ public class RenderEngineTest {
 		Matrix4f projectionMatrix = Matrix4f.perspective(65, 1000F / 600F, 1, 1000); //Matrix4f.orthographic(-100, 100, 100, -100, -10F, 10F);
 		
 		File textureFile = new File(this.getClass().getClassLoader().getResource("").getPath(), "textures/test.png");
-		ITextureSampler texture = new SingleTexture(); //new FileInputStream(textureFile));
+		ITextureSampler texture = new SingleTexture(new FileInputStream(textureFile));
 		
-		GL33.glEnable(GL33.GL_TEXTURE_2D);
+		//GL33.glEnable(GL33.GL_TEXTURE_2D);
 		
 		while (!window.shouldClose()) {
 			
@@ -154,13 +167,15 @@ public class RenderEngineTest {
 			camera.upadteViewMatrix();
 			Matrix4f viewMatrix = camera.getViewMatrix();
 			
+			window.makeContextCurrent();
+			
 			vertexBuffer.bind();
 			shader.useShaderAndFormat();
 			shader.getUniform("ModelViewMat").setMatrix4f(viewMatrix);
 			shader.getUniform("ProjMat").setMatrix4f(projectionMatrix);
 			shader.getUniform("Texture").setTextureSampler(texture); // TODO
 			
-			vertexBuffer.drawAll(RenderPrimitive.TRIANGLES_STRIP);
+			vertexBuffer.drawAll(RenderPrimitive.TRIANGLES);
 			shader.unbindShaderAndRestore();
 			vertexBuffer.unbind();
 			
