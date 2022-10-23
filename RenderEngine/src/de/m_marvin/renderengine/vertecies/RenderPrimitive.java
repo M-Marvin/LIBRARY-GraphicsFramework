@@ -35,7 +35,7 @@ public enum RenderPrimitive {
 		this.defaultIndexBuilder = defaultIndexBuilder;
 	}
 	
-	public int getGlType() {
+	public int getgltype() {
 		return glType;
 	}
 	

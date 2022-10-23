@@ -44,12 +44,6 @@ public class SingleTexture implements ITextureSampler {
 		init();
 	}
 	
-	public void setTextureFilter(TextureFilter minificationFilter, TextureFilter magnificationFilter) {
-		GLStateManager.bindTexture(GL33.GL_TEXTURE_2D, textureId);
-		GLStateManager.textureParameter(GL33.GL_TEXTURE_2D, GL33.GL_TEXTURE_MIN_FILTER, minificationFilter.glType());
-		GLStateManager.textureParameter(GL33.GL_TEXTURE_2D, GL33.GL_TEXTURE_MAG_FILTER, magnificationFilter.glType());
-	}
-	
 	public void init() {
 		this.textureId = GLStateManager.genTexture();
 		GLStateManager.bindTexture(GL33.GL_TEXTURE_2D, textureId);
@@ -58,6 +52,12 @@ public class SingleTexture implements ITextureSampler {
 		GLStateManager.bindTexture(GL33.GL_TEXTURE_2D, 0);
 	}
 	
+	public void setTextureFilter(TextureFilter minificationFilter, TextureFilter magnificationFilter) {
+		GLStateManager.bindTexture(GL33.GL_TEXTURE_2D, textureId);
+		GLStateManager.textureParameter(GL33.GL_TEXTURE_2D, GL33.GL_TEXTURE_MIN_FILTER, minificationFilter.glType());
+		GLStateManager.textureParameter(GL33.GL_TEXTURE_2D, GL33.GL_TEXTURE_MAG_FILTER, magnificationFilter.glType());
+	}
+		
 	@Override
 	public void bindTexture(int samplerId) {
 		GLStateManager.activeTexture(samplerId);

@@ -1,4 +1,4 @@
-package de.m_marvin.renderengine.buffers;
+package de.m_marvin.renderengine.vertecies;
 
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.univec.api.IVector3;
@@ -25,7 +25,8 @@ public interface IVertexConsumer {
 	
 	/* End of predefined layouts */
 	
-	public IVertexConsumer nextElement();
+	public IVertexConsumer nextElement(int targetIndex);
+	public default IVertexConsumer nextElement() { return nextElement(0); }
 	
 	public IVertexConsumer putFloat(float f);
 	public IVertexConsumer putInt(int i);

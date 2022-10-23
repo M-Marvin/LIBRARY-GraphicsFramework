@@ -10,7 +10,8 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLCapabilities;
 
-import de.m_marvin.renderengine.buffers.BufferBuilder;
+import de.m_marvin.renderengine.buffers.ParalelBufferBuilder;
+import de.m_marvin.renderengine.buffers.SerialBufferBuilder;
 import de.m_marvin.renderengine.buffers.VertexBuffer;
 import de.m_marvin.renderengine.inputbinding.InputBindings;
 import de.m_marvin.renderengine.inputbinding.KeySource;
@@ -31,8 +32,10 @@ public class RenderEngineTest {
 	/*
 	 * TODO List
 	 * - Animated Textures, Atlases, Animated Atlases
-	 * - SingleBuffer and ParalelBuffer
-	 * 
+	 * - ParalelBufferBuilder fix + Selective VAO upload
+	 * - Possibility to select usage of VAO on uploading
+	 * - Input-Methods for Mouse-Wheel and Movement
+	 * - Multi-Window handling/Window class
 	 */
 	
 	public static void main(String... args) {
@@ -62,6 +65,7 @@ public class RenderEngineTest {
 		
 		public void makeContextCurrent() {
 			GLFW.glfwMakeContextCurrent(glWindow);
+			GL.setCapabilities(glCapabilities);
 		}
 		
 		public void swapFrames() {
@@ -98,6 +102,7 @@ public class RenderEngineTest {
 		GLFWErrorCallback.createPrint(System.err).set();
 		
 		Window window = new Window(1000, 600, "Test");
+		//Window window2 = new Window(1000, 600, "Tes2t");
 		Camera camera = new Camera(new Vec3f(0F, 0F, 10F), new Vec3f(0F, 0F, 0F));
 		InputBindings input = new InputBindings();
 		input.attachToWindow(window.glWindow);
@@ -113,28 +118,50 @@ public class RenderEngineTest {
 		
 		VertexFormat format = new VertexFormat().appand("position", NumberFormat.FLOAT, 3, false).appand("normal", NumberFormat.FLOAT, 3, true).appand("color", NumberFormat.FLOAT, 4, false).appand("uv", NumberFormat.FLOAT, 2, false);
 		
-		BufferBuilder buffer = new BufferBuilder(3200);
+		SerialBufferBuilder buffer = new SerialBufferBuilder(3200);
+		
+		ParalelBufferBuilder bufferParalel = new ParalelBufferBuilder(3200, 10);
 		
 		PoseStack poseStack = new PoseStack();
 		
 		poseStack.push();
 		buffer.begin(RenderPrimitive.TRIANGLES, format);
-		poseStack.translate(0, 0.5F, 0);
-		poseStack.scale(100, 100, 1);
-		buffer.vertex(-1, -1, 0).normal(1, 0, 1).color(1, 0, 0, 1).uv(1, 1).endVertex();
-		buffer.vertex( 1, -1, 0).normal(0, 1, 1).color(0, 1, 0, 1).uv(1, 0).endVertex();
-		buffer.vertex( -1, 1, 0).normal(1, 1, 1).color(0, 0, 1, 1).uv(0, 1).endVertex();
-		buffer.vertex( 1, -1, -1).normal( 0, 0, 1).color(1, 0, 1, 1).uv(0, 0).endVertex();
-		buffer.vertex( -1, 1, -1).normal( 0, 0, 1).color(1, 0, 1, 1).uv(1, 0).endVertex();
-		buffer.vertex( 1, 1, -1).normal( 0, 0, 1).color(1, 0, 1, 1).uv(0, 0).endVertex();
+		poseStack.translate(0, 6.5F, 0);
+		poseStack.scale(2, 2, 1);
+		buffer.vertex(poseStack, -1, -1, 0).normal(poseStack, 1, 0, 1).color(1, 0, 0, 1).uv(1, 1).endVertex();
+		buffer.vertex(poseStack, 1, -1, 0).normal(poseStack, 0, 1, 1).color(0, 1, 0, 1).uv(1, 0).endVertex();
+		buffer.vertex(poseStack, -1, 1, 0).normal(poseStack, 1, 1, 1).color(0, 0, 1, 1).uv(0, 1).endVertex();
+		buffer.vertex(poseStack, 1, -1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, -1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(1, 0).endVertex();
+		buffer.vertex(poseStack, 1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(0, 0).endVertex();
 		buffer.index(0).index(1).index(2);//.index(3);
 		buffer.index(3).index(4).index(5);//.index(3);
 		buffer.end();
 		poseStack.pop();
 		
+		poseStack.push();
+		bufferParalel.begin(RenderPrimitive.TRIANGLES, format);
+		poseStack.translate(0, 0F, 0);
+		poseStack.scale(2, 2, 1);
+		bufferParalel.vertex(poseStack, -1, -1, 0).normal(poseStack, 1, 0, 1).color(1, 0, 0, 1).uv(1, 1).endVertex();
+		bufferParalel.vertex(poseStack, 1, -1, 0).normal(poseStack, 0, 1, 1).color(0, 1, 0, 1).uv(1, 0).endVertex();
+		bufferParalel.vertex(poseStack, -1, 1, 0).normal(poseStack, 1, 1, 1).color(0, 0, 1, 1).uv(0, 1).endVertex();
+		bufferParalel.vertex(poseStack, 1, -1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(0, 0).endVertex();
+		bufferParalel.vertex(poseStack, -1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(1, 0).endVertex();
+		bufferParalel.vertex(poseStack, 1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(0, 0).endVertex();
+//		bufferParalel.index(0).index(1).index(2);//.index(3);
+//		bufferParalel.index(3).index(4).index(5);//.index(3);
+		bufferParalel.end();
+		poseStack.pop();
+		
+		
+//		VertexBuffer vertexBuffer = new VertexBuffer();
+//		vertexBuffer.upload(buffer);
+//		buffer.freeMemory();
+		
 		VertexBuffer vertexBuffer = new VertexBuffer();
-		vertexBuffer.upload(buffer);
-		buffer.freeMemory();
+		vertexBuffer.upload(bufferParalel);
+		bufferParalel.freeMemory();
 		
 		File shaderFile = new File(this.getClass().getClassLoader().getResource("").getPath(), "shaders/testShader.json");
 		ShaderInstance shader = ShaderLoader.load(shaderFile, format);
@@ -143,8 +170,8 @@ public class RenderEngineTest {
 		
 		File textureFile = new File(this.getClass().getClassLoader().getResource("").getPath(), "textures/test.png");
 		ITextureSampler texture = new SingleTexture(new FileInputStream(textureFile));
-		
-		//GL33.glEnable(GL33.GL_TEXTURE_2D);
+
+		//window.makeContextCurrent();
 		
 		while (!window.shouldClose()) {
 			
@@ -166,8 +193,6 @@ public class RenderEngineTest {
 			
 			camera.upadteViewMatrix();
 			Matrix4f viewMatrix = camera.getViewMatrix();
-			
-			window.makeContextCurrent();
 			
 			vertexBuffer.bind();
 			shader.useShaderAndFormat();
