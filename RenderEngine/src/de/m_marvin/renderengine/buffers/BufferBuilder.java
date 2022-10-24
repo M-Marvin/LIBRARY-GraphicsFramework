@@ -13,11 +13,12 @@ import de.m_marvin.renderengine.vertecies.RenderPrimitive;
 import de.m_marvin.renderengine.vertecies.VertexFormat;
 import de.m_marvin.renderengine.vertecies.VertexFormat.VertexElement;
 
-public class ParalelBufferBuilder implements IBufferBuilder, IVertexConsumer {
-
-	protected ByteBuffer[] buffer;
+public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
+	
+	protected ByteBuffer buffer;
 	protected Queue<DrawState> drawStates;
-	protected int[] uploadedBytes;
+	protected int uploadedBytes;
+	protected int writtenBytes;
 
 	protected VertexFormat format;
 	protected RenderPrimitive type;
@@ -28,17 +29,9 @@ public class ParalelBufferBuilder implements IBufferBuilder, IVertexConsumer {
 	protected int currentElementIndex;
 	protected VertexElement currentElement;
 	
-	public ParalelBufferBuilder(int bufferSize, int paralelBuffers) {
-		this.buffer = new ByteBuffer[paralelBuffers];
-		for (int i = 0; i < this.buffer.length; i++)
-			this.buffer[i] = MemoryUtil.memAlloc(bufferSize);
-		this.uploadedBytes = new int[this.buffer.length];
+	public BufferBuilder(int bufferSize) {
+		this.buffer = MemoryUtil.memAlloc(bufferSize);
 		this.drawStates = Queues.newArrayDeque();
-	}
-	
-	@Override
-	public int paralelDataVAOs() {
-		return this.buffer.length;
 	}
 	
 	@Override
@@ -49,32 +42,19 @@ public class ParalelBufferBuilder implements IBufferBuilder, IVertexConsumer {
 	public BufferPair popNext() {
 		if (this.drawStates.isEmpty()) throw new IllegalStateException("Nothing has ben drawn to the buffer!");
 		DrawState drawState = this.drawStates.poll();
-		ByteBuffer[] drawBuffer = new ByteBuffer[paralelDataVAOs()];
-		
-		this.buffer[0].position(uploadedBytes[0]);
-		this.uploadedBytes[0] += NumberFormat.UINT.size() * drawState.indecies();
-		this.buffer[0].limit(uploadedBytes[0]);
-		drawBuffer[0] = this.buffer[0].slice();
-		drawBuffer[0].order(this.buffer[0].order());
-		
-		for (int i = 1; i < drawState.format().getElementCount() + 1; i++) {
-			VertexFormat.VertexElement element = drawState.format().elementWithIndex(i - 1);
-			this.buffer[i].position(uploadedBytes[i]);
-			this.uploadedBytes[i] += element.format().size() * element.count() * drawState.vertecies();
-			this.buffer[i].limit(uploadedBytes[i]);
-			drawBuffer[i] = this.buffer[i].slice();
-			drawBuffer[i].order(this.buffer[i].order());
-		}
-		
-		return new BufferPair(drawBuffer, drawState);
+		this.buffer.position(uploadedBytes);
+		this.uploadedBytes += drawState.format().getSize() * drawState.vertecies() + drawState.indecies() * NumberFormat.UINT.size();
+		this.buffer.limit(uploadedBytes);
+		ByteBuffer drawBuffer = this.buffer.slice();
+		drawBuffer.order(this.buffer.order());
+		this.buffer.clear();
+		return new BufferPair(drawBuffer, drawState);	
 	}
 	
 	@Override
 	public void discardStored() {
-		for (int i = 0; i < paralelDataVAOs(); i++) {
-			this.buffer[i].clear();
-			this.uploadedBytes[i] = 0;
-		}
+		this.buffer.clear();
+		this.uploadedBytes = 0;
 		this.drawStates.clear();
 		this.vertexCount = 0;
 		this.indexCount = 0;
@@ -84,15 +64,9 @@ public class ParalelBufferBuilder implements IBufferBuilder, IVertexConsumer {
 
 	public void freeMemory() {
 		discardStored();
-		for (int i = 0; i < paralelDataVAOs(); i++) {
-			MemoryUtil.memFree(buffer[i]);
-		}
+		MemoryUtil.memFree(buffer);
 	}
 	
-	protected int targetBuffer() {
-		return this.currentElementIndex == -1 ? 0 : this.currentElement.index() + 1;
-	}
-		
 	public void begin(RenderPrimitive type, VertexFormat format) {
 		if (this.building) {
 			throw new IllegalStateException("BufferBuilder already building!");
@@ -103,6 +77,7 @@ public class ParalelBufferBuilder implements IBufferBuilder, IVertexConsumer {
 			this.vertexCount = 0;
 			this.indexCount = 0;
 			this.currentElementIndex = -1;
+			this.buffer.position(this.writtenBytes);
 		}
 	}
 
@@ -116,6 +91,7 @@ public class ParalelBufferBuilder implements IBufferBuilder, IVertexConsumer {
 			this.indexCount = 0;
 			this.building = false;
 			this.buildingIndecies = false;
+			this.writtenBytes = buffer.position();
 		}
 	}
 
@@ -125,7 +101,6 @@ public class ParalelBufferBuilder implements IBufferBuilder, IVertexConsumer {
 
 	@Override
 	public IVertexConsumer nextElement(int targetIndex) {
-		if (targetIndex > paralelDataVAOs()) throw new IllegalStateException("Buffer does not support a vao index grater than " + paralelDataVAOs() + "!");
 		if (!this.building) throw new IllegalStateException("Buffer not building!");
 		this.currentElementIndex++;
 		if (this.currentElementIndex == this.format.getElementCount()) throw new IllegalStateException("The current VertexFormat does not have more than " + this.format.getElementCount() + " elements!");
@@ -135,42 +110,42 @@ public class ParalelBufferBuilder implements IBufferBuilder, IVertexConsumer {
 
 	@Override
 	public IVertexConsumer putFloat(float f) {
-		this.buffer[targetBuffer()].putFloat(f);
+		this.buffer.putFloat(f);
 		return this;
 	}
 	@Override
 	public IVertexConsumer putInt(int i) {
-		this.buffer[targetBuffer()].putInt(i);
+		this.buffer.putInt(i);
 		return this;
 	}
 	@Override
 	public IVertexConsumer putShort(short s) {
-		this.buffer[targetBuffer()].putShort(s);
+		this.buffer.putShort(s);
 		return this;
 	}
 	@Override
 	public IVertexConsumer putByte(byte b) {
-		this.buffer[targetBuffer()].put(b);
+		this.buffer.put(b);
 		return this;
 	}
 	@Override
 	public IVertexConsumer putIntArr(int... intArr) {
-		for (int i : intArr) this.buffer[targetBuffer()].putInt(i);
+		for (int i : intArr) this.buffer.putInt(i);
 		return this;
 	}
 	@Override
 	public IVertexConsumer putFloatArr(float... floatArr) {
-		for (float f : floatArr) this.buffer[targetBuffer()].putFloat(f);
+		for (float f : floatArr) this.buffer.putFloat(f);
 		return this;
 	}
 	@Override
 	public IVertexConsumer putShortArr(short... shortArr) {
-		for (short s : shortArr) this.buffer[targetBuffer()].putShort(s);
+		for (short s : shortArr) this.buffer.putShort(s);
 		return this;
 	}
 	@Override
 	public IVertexConsumer putByteArr(byte... floatArr) {
-		for (byte b : floatArr) this.buffer[targetBuffer()].put(b);
+		for (byte b : floatArr) this.buffer.put(b);
 		return this;
 	}
 	

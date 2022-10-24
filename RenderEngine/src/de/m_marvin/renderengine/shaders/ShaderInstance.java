@@ -92,6 +92,8 @@ public class ShaderInstance {
 	}
 	
 	public ShaderInstance(String vertexProgram, String fragmentProgram, VertexFormat arrayFormat) throws IOException {
+
+		GLStateManager.assertOnRenderThread();
 		
 		this.vertexShader = GLStateManager.createShader(GL33.GL_VERTEX_SHADER);
 		this.fragmentShader = GLStateManager.createShader(GL33.GL_FRAGMENT_SHADER);
@@ -133,25 +135,18 @@ public class ShaderInstance {
 	}
 	
 	public void useShader() {
+		GLStateManager.assertOnRenderThread();
 		GLStateManager.useShader(this.program);
 		this.uniforms.values().forEach(Uniform::setDefault);
 	}
 	
-	public void useShaderAndFormat() {
-		useShader();
-		this.format.enableAttributes();
-	}
-
 	public void unbindShader() {
+		GLStateManager.assertOnRenderThread();
 		GLStateManager.useShader(0);
 	}
-	
-	public void unbindShaderAndRestore() {
-		unbindShader();
-		this.format.disableAttributes();
-	}
-	
+		
 	public <T> void createUniform(String name, UniformType type, T defaultValue) {
+		GLStateManager.assertOnRenderThread();
 		int id = this.typeCount.getOrDefault(type, 0);
 		this.typeCount.put(type, 1 + id);
 		this.uniforms.put(name, new Uniform<T>(GLStateManager.getUniformLocation(program, name), type, defaultValue, id));

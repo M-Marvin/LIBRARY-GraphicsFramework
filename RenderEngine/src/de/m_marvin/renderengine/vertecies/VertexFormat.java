@@ -3,7 +3,6 @@ package de.m_marvin.renderengine.vertecies;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.utility.NumberFormat;
 
 public class VertexFormat {
@@ -33,18 +32,6 @@ public class VertexFormat {
 	
 	public int getElementCount() {
 		return this.elements.size();
-	}
-	
-	public void enableAttributes() {
-		for (VertexElement element : getElements()) {
-			GLStateManager.enableAttributeArray(element.index());
-		}
-	}
-	
-	public void disableAttributes() {
-		for (VertexElement element : getElements()) {
-			GLStateManager.disableAttributeArray(element.index());
-		}
 	}
 	
 }

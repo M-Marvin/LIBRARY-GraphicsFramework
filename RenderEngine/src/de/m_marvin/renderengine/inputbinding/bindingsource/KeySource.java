@@ -1,9 +1,11 @@
-package de.m_marvin.renderengine.inputbinding;
+package de.m_marvin.renderengine.inputbinding.bindingsource;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.lwjgl.glfw.GLFW;
+
+import de.m_marvin.renderengine.inputbinding.IBinding;
 
 public class KeySource {
 	

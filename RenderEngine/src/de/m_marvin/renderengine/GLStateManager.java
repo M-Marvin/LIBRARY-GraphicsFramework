@@ -1,20 +1,49 @@
 package de.m_marvin.renderengine;
 
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL33;
 
 public class GLStateManager {
+
+	public static boolean initialisate(PrintStream errorStream) {
+		if (!GLFW.glfwInit()) return false;
+		GLFWErrorCallback.createPrint(errorStream).set();
+		return true;
+	}
+	
+	public static void terminate() {
+		GLFW.glfwTerminate();
+	}
 	
 	public static boolean isOnRenderThread() {
-		return true; // TODO
+		return GLFW.glfwGetCurrentContext() > 0;
 	}
 	
 	public static void assertOnRenderThread() {
 		if (!isOnRenderThread()) throw new IllegalStateException("GL operations have to be performed on the render thread!");
 	}
 	
+	public static void drawElements(int mode, int count, int indecieFormat) {
+		GL33.glDrawElements(mode, count, indecieFormat, 0);
+	}
+
+	public static void enable(int target) {
+		GL33.glEnable(target);
+	}
+
+	public static void resizeViewport(int lx, int ly, int hx, int hy) {
+		GL33.glViewport(lx, ly, hx, hy);
+	}
+
+	public static void clearColor(float r, float g, float b, float a) {
+		GL33.glClearColor(r, g, b, a);
+	}
+
 	public static int genVertexArray() {
 		return GL33.glGenVertexArrays();
 	}
@@ -43,14 +72,26 @@ public class GLStateManager {
 		GL33.glBindVertexArray(arrayObjectId);
 	}
 	
-	public static void attributePointer(int attributeId, int size, int format, boolean normalize, int stride, long bufferOffset) {
-		if (format != GL33.GL_INT && format != GL33.GL_UNSIGNED_INT) {
-			GL33.glVertexAttribPointer(attributeId, size, format, normalize, stride, bufferOffset);
-		} else {
-			GL33.glVertexAttribIPointer(attributeId, size, format, stride, bufferOffset);
-		}		
+	public static int genTexture() {
+		return GL33.glGenTextures();
 	}
-	
+
+	public static void bindTexture(int target, int textureId) {
+		GL33.glBindTexture(target, textureId);
+	}
+
+	public static void textureParameter(int target, int parameter, int value) {
+		GL33.glTexParameteri(target, parameter, value);
+	}
+
+	public static void loadTexture(int target, int level, int internalformat, int format, int width, int height, int border, int type, IntBuffer pixels) {
+		GL33.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+	}
+
+	public static void activeTexture(int textureId) {
+		GL33.glActiveTexture(GL33.GL_TEXTURE0 + textureId);
+	}
+
 	public static int createShader(int type) {
 		return GL33.glCreateShader(type);
 	}
@@ -59,6 +100,14 @@ public class GLStateManager {
 		GL33.glShaderSource(shader, shaderCode);
 	}
 	
+	public static void attributePointer(int attributeId, int size, int format, boolean normalize, int stride, long bufferOffset) {
+		if (format != GL33.GL_INT && format != GL33.GL_UNSIGNED_INT) {
+			GL33.glVertexAttribPointer(attributeId, size, format, normalize, stride, bufferOffset);
+		} else {
+			GL33.glVertexAttribIPointer(attributeId, size, format, stride, bufferOffset);
+		}		
+	}
+
 	public static void compileShader(int shader) {
 		GL33.glCompileShader(shader);
 	}
@@ -113,6 +162,10 @@ public class GLStateManager {
 		return GL33.glGetAttribLocation(programm, name);
 	}
 	
+	public static void useShader(int program) {
+		GL33.glUseProgram(program);
+	}
+
 	public static void enableClientState(int state) {
 		GL33.glEnableClientState(state);
 	}
@@ -160,38 +213,6 @@ public class GLStateManager {
 
 	public static void setUniformMatrix4(int location, boolean transpose, float[] value) {
 		GL33.glUniformMatrix4fv(location, transpose, value);
-	}
-	
-	public static void useShader(int program) {
-		GL33.glUseProgram(program);
-	}
-	
-	public static void drawElements(int mode, int count, int indecieFormat) {
-		GL33.glDrawElements(mode, count, indecieFormat, 0);
-	}
-	
-	public static void enable(int target) {
-		GL33.glEnable(target);
-	}
-	
-	public static int genTexture() {
-		return GL33.glGenTextures();
-	}
-	
-	public static void bindTexture(int target, int textureId) {
-		GL33.glBindTexture(target, textureId);
-	}
-	
-	public static void textureParameter(int target, int parameter, int value) {
-		GL33.glTexParameteri(target, parameter, value);
-	}
-	
-	public static void loadTexture(int target, int level, int internalformat, int format, int width, int height, int border, int type, IntBuffer pixels) {
-		GL33.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
-	}
-	
-	public static void activeTexture(int textureId) {
-		GL33.glActiveTexture(GL33.GL_TEXTURE0 + textureId);
 	}
 	
 }
