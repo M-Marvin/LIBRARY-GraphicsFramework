@@ -63,12 +63,28 @@ public class Matrix3f implements IMatrix3f<Matrix3f>, IMatrixMath<Matrix3f, IVec
 		identity();
 	}
 
-	public static Matrix3f createScaleMatrix(float p_8175_, float p_8176_, float p_8177_) {
-		Matrix3f matrix3f = new Matrix3f();
-		matrix3f.m00 = p_8175_;
-		matrix3f.m11 = p_8176_;
-		matrix3f.m22 = p_8177_;
-		return matrix3f;
+	public static Matrix3f createScaleMatrix(float sx, float sy, float sz) {
+		return new Matrix3f(
+				sx, 0, 0,
+				0, sy, 0,
+				0, 0, sz
+				);
+	}
+	
+	public static Matrix3f createScaleMatrix(float sx, float sy) {
+		return new Matrix3f(
+				sx, 0, 0,
+				0, sy, 0,
+				0, 0, 1
+				);
+	}
+	
+	public static Matrix3f createTranslationMatrix(float x, float y) {
+		return new Matrix3f(
+				1, 0, x,
+				0, 1, y,
+				0, 0, 1
+				);
 	}
 
 	@Override
@@ -204,9 +220,15 @@ public class Matrix3f implements IMatrix3f<Matrix3f>, IMatrixMath<Matrix3f, IVec
 	@Override
 	public Matrix3f mul(Matrix3f mat) {
 		return new Matrix3f(
-				m00 * m00, m10 * m01, m20 * m02,
-				m01 * m10, m11 * m11, m21 * m12,
-				m02 * m20, m12 * m21, m22 * m22
+				this.m00 * mat.m00 + this.m01 * mat.m10 + this.m02 * mat.m20,
+				this.m00 * mat.m01 + this.m01 * mat.m11 + this.m02 * mat.m21,
+				this.m00 * mat.m02 + this.m01 * mat.m12 + this.m02 * mat.m22,
+				this.m10 * mat.m00 + this.m11 * mat.m10 + this.m12 * mat.m20,
+				this.m10 * mat.m01 + this.m11 * mat.m11 + this.m12 * mat.m21,
+				this.m10 * mat.m02 + this.m11 * mat.m12 + this.m12 * mat.m22,
+				this.m20 * mat.m00 + this.m21 * mat.m10 + this.m22 * mat.m20,
+				this.m20 * mat.m01 + this.m21 * mat.m11 + this.m22 * mat.m21,
+				this.m20 * mat.m02 + this.m21 * mat.m12 + this.m22 * mat.m22
 				);
 	}
 
@@ -316,9 +338,9 @@ public class Matrix3f implements IMatrix3f<Matrix3f>, IMatrixMath<Matrix3f, IVec
 	}
 
 	public String toString() {
-		return "Matrix3f:"
-				+ this.m00 + " " + this.m01 + " " + this.m02
-				+ this.m10 + " " + this.m11 + " " + this.m12
+		return "Matrix3f:\n"
+				+ this.m00 + " " + this.m01 + " " + this.m02 + "\n"
+				+ this.m10 + " " + this.m11 + " " + this.m12 + "\n"
 				+ this.m20 + " " + this.m21 + " " + this.m22;
 	}
 	
@@ -337,7 +359,7 @@ public class Matrix3f implements IMatrix3f<Matrix3f>, IMatrixMath<Matrix3f, IVec
 	@Override
 	public float[] toFloatArr() {
 		return new float[] {
-				m00, m11, m20,
+				m00, m10, m20,
 				m01, m11, m21,
 				m02, m12, m22
 		};
@@ -347,13 +369,13 @@ public class Matrix3f implements IMatrix3f<Matrix3f>, IMatrixMath<Matrix3f, IVec
 	public void loadFloatArr(float[] arr) {
 		if (arr.length != 9) throw new IllegalArgumentException("Matrix float arr has to be of length 9!");
 		this.m00 = arr[0];
-		this.m01 = arr[1];
-		this.m02 = arr[2];
-		this.m10 = arr[3];
+		this.m10 = arr[1];
+		this.m20 = arr[2];
+		this.m01 = arr[3];
 		this.m11 = arr[4];
-		this.m12 = arr[5];
-		this.m20 = arr[6];
-		this.m21 = arr[7];
+		this.m21 = arr[5];
+		this.m02 = arr[6];
+		this.m12 = arr[7];
 		this.m22 = arr[8];
 	}
 

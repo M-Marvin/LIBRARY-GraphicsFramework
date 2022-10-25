@@ -4,5 +4,5 @@ public interface ITextureSampler {
 	
 	public void bindTexture(int samplerId);
 	public void unbindTexture();
-	
+		
 }

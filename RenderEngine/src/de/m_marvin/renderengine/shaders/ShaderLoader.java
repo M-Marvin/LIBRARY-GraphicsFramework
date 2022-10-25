@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import de.m_marvin.renderengine.vertecies.VertexFormat;
@@ -25,19 +26,8 @@ public class ShaderLoader {
 		
 		String vertexShaderFile = json.get("VertexShaderFile").getAsString();
 		String fragmentShaderFile = json.get("FragmentShaderFile").getAsString();
-		
-		String line;
-		BufferedReader vertexShaderInputStream = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sourceFolder, vertexShaderFile))));
-		StringBuilder stringBuilder = new StringBuilder();
-		while ((line = vertexShaderInputStream.readLine()) != null) stringBuilder.append(line + "\n");
-		String vertexShaderSource = stringBuilder.toString();
-		vertexShaderInputStream.close();
-		
-		BufferedReader fragmentShaderInputStream = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sourceFolder, fragmentShaderFile))));
-		stringBuilder = new StringBuilder();
-		while ((line = fragmentShaderInputStream.readLine()) != null) stringBuilder.append(line + "\n");
-		String fragmentShaderSource = stringBuilder.toString();
-		fragmentShaderInputStream.close();
+		String vertexShaderSource = loadGLSLFile(sourceFolder, vertexShaderFile);
+		String fragmentShaderSource = loadGLSLFile(sourceFolder, fragmentShaderFile);
 		
 		ShaderInstance shaderInstance = new ShaderInstance(vertexShaderSource, fragmentShaderSource, vertexFormat);
 		
@@ -46,13 +36,33 @@ public class ShaderLoader {
 			JsonObject uniformJson = uniformArray.get(i).getAsJsonObject();
 			String uniformName = uniformJson.get("Name").getAsString();
 			UniformType type = UniformType.byName(uniformJson.get("Type").getAsString());
-			Object defaultValue = gson.fromJson(uniformJson.get("Value"), type.getValueType());
+			JsonElement defaultValueJson = uniformJson.get("Value");
+			boolean definedAsArray = defaultValueJson.isJsonArray();
+			Object defaultValue = gson.fromJson(defaultValueJson, type.getValueType(definedAsArray));
 			shaderInstance.createUniform(uniformName, type, defaultValue);
 		}
 		
 		inputStream.close();
 		
 		return shaderInstance;
+	}
+	
+	protected static final String INCLUDE_LINE = "#include ";
+	protected static final String INCLUDE_FILE_TYPE = ".glsl";
+	protected static String loadGLSLFile(File sourceFolder, String fileName) throws IOException {
+		String line;
+		BufferedReader vertexShaderInputStream = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sourceFolder, fileName))));
+		StringBuilder stringBuilder = new StringBuilder();
+		while ((line = vertexShaderInputStream.readLine()) != null) {
+			if (line.startsWith(INCLUDE_LINE)) {
+				String includeCode = loadGLSLFile(sourceFolder, line.substring(INCLUDE_LINE.length()) + INCLUDE_FILE_TYPE);
+				stringBuilder.append(includeCode);
+			} else {
+				stringBuilder.append(line + "\n");
+			}
+		}
+		vertexShaderInputStream.close();
+		return stringBuilder.toString();
 	}
 	
 }

@@ -7,13 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 
 import org.lwjgl.glfw.GLFW;
 
 import de.m_marvin.univec.impl.Vec2d;
 
-public class InputBindings {
+public class UserInput {
 	
 	protected Map<String, InputSet> bindings = new HashMap<>();
 	protected List<Long> attachedWindows = new ArrayList<>();
@@ -21,10 +20,11 @@ public class InputBindings {
 	protected List<MouseEventConsumer> mouseListeners = new ArrayList<>();
 	protected List<TextInputConsumer> textInputListeners = new ArrayList<>();
 	
-	protected boolean caps = false;
-	
-	public InputBindings() {
-		addKeyboardListener((key, scancode, pressed, repeated) -> handleTextInput(key, pressed, repeated, (character, fkey) -> this.textInputListeners.forEach((listener) -> listener.input(character, fkey))));
+	public UserInput() {
+		addKeyboardListener((key, scancode, pressed, repeated) -> {
+			Optional<FunctionalKey> fkey = Optional.ofNullable(FunctionalKey.getKey(key));
+			if (fkey.isPresent() && (pressed || repeated)) this.textInputListeners.forEach((listener) -> listener.input((char) -1, fkey));
+		});
 	}
 	
 	public static enum FunctionalKey {
@@ -80,18 +80,6 @@ public class InputBindings {
 		public void input(char character, Optional<FunctionalKey> functionalKey);
 	}
 	
-	// TODO: Shift/Capslock does not work with all keys, Alt not implemented
-	protected void handleTextInput(int keycode, boolean pressed, boolean repeated, BiConsumer<Character, Optional<FunctionalKey>> target) {
-		FunctionalKey fkey = FunctionalKey.getKey(keycode);
-		if (fkey != null) {
-			if (!repeated && (fkey == FunctionalKey.LEFT_SHIFT || fkey == FunctionalKey.RIGHT_SHIFT)) caps = pressed;
-			target.accept((char) -1, Optional.of(fkey));
-		} else {
-			char character = isShiftActive() ? Character.toUpperCase((char) keycode) : Character.toLowerCase((char) keycode);
-			target.accept(character, Optional.empty());
-		}
-	}
-	
 	public void addKeyboardListener(KeyEventConsumer eventConsumer) {
 		this.keyboardListeners.add(eventConsumer);
 	}
@@ -135,6 +123,8 @@ public class InputBindings {
 		GLFW.glfwSetKeyCallback(windowId, (window, key, scancode, action, mods) -> this.keyboardListeners.forEach((listener) -> listener.keyEvent(key, scancode, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
 		GLFW.glfwSetMouseButtonCallback(windowId, (window, button, action, mods) -> this.mouseListeners.forEach((listener) -> listener.mouseEvent(Optional.empty(), button, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
 		GLFW.glfwSetScrollCallback(windowId, (window, xoffset, yoffset) ->  this.mouseListeners.forEach((listener) -> listener.mouseEvent(Optional.of(new Vec2d(xoffset, yoffset)), 0, false, false)));		
+		GLFW.glfwSetCharCallback(windowId, (window, codepoint) -> this.textInputListeners.forEach((listener) -> listener.input((char) codepoint, Optional.empty())));
+		
 	}
 	
 	public InputSet registerBinding(String name) {
@@ -163,10 +153,6 @@ public class InputBindings {
 
 	public boolean isNumLockOn() {
 		return Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_NUM_LOCK);
-	}
-	
-	public boolean isShiftActive() {
-		return isCapsLockOn() || caps;
 	}
 	
 }

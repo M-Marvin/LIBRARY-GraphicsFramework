@@ -41,13 +41,7 @@ public class ShaderInstance {
 		}
 		
 		public void set(T value) {
-			int count = 1;
-			if (value instanceof int[] arr) {
-				count = arr.length;
-			} else if (value instanceof float[] arr) {
-				count = arr.length;
-			}
-			this.type.set(location, count, value);
+			this.type.set(location, value);
 		}
 		
 		public int getIndex() {
@@ -57,36 +51,36 @@ public class ShaderInstance {
 		/* Type specific setter methods to avoid the instanceof check */
 		
 		public void setFloatArr(float[] value) {
-			this.type.set(location, value.length, value);
+			this.type.set(location, value);
 		}
 
 		public void setIntArr(int[] value) {
-			this.type.set(location, value.length, value);
+			this.type.set(location, value);
 		}
 		
 		public void setFloat(float value) {
-			this.type.set(location, 1, value);
+			this.type.set(location, value);
 		}
 
 		public void setInt(int value) {
-			this.type.set(location, 1, value);
+			this.type.set(location, value);
 		}
 
 		public void setUnsignedInt(int value) {
-			this.type.set(location, 1, value);
+			this.type.set(location, value);
 		}
 		
 		public void setMatrix4f(Matrix4f value) {
-			this.type.set(location, 1, value.toFloatArr());
+			this.type.set(location, value.toFloatArr());
 		}
 
 		public void setMatrix3f(Matrix3f value) {
-			this.type.set(location, 1, value.toFloatArr());
+			this.type.set(location, value.toFloatArr());
 		}
 
 		public void setTextureSampler(ITextureSampler texture) {
 			texture.bindTexture(index);
-			this.type.set(location, 1, this.index);
+			this.type.set(location, this.index);
 		}
 		
 	}

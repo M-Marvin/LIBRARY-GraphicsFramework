@@ -2,7 +2,6 @@ package de.m_marvin.renderengine;
 
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -84,7 +83,7 @@ public class GLStateManager {
 		GL33.glTexParameteri(target, parameter, value);
 	}
 
-	public static void loadTexture(int target, int level, int internalformat, int format, int width, int height, int border, int type, IntBuffer pixels) {
+	public static void loadTexture(int target, int level, int internalformat, int format, int width, int height, int border, int type, int[] pixels) {
 		GL33.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
 	}
 
@@ -213,6 +212,10 @@ public class GLStateManager {
 
 	public static void setUniformMatrix4(int location, boolean transpose, float[] value) {
 		GL33.glUniformMatrix4fv(location, transpose, value);
+	}
+
+	public static void blendFunc(int sfactor, int dfactor) {
+		GL33.glBlendFunc(sfactor, dfactor);
 	}
 	
 }

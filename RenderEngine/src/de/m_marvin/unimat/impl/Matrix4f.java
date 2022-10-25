@@ -83,7 +83,6 @@ public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f, IVec
 		float frustumLength = far - near;
 		float yScale = (float) ((1 / Math.tan(Math.toRadians(fovDegrees / 2))) * aspect);
 		float xScale = yScale / aspect;
-		
 		Matrix4f matrix4f = new Matrix4f();
 		matrix4f.m00 = xScale;
 		matrix4f.m11 = yScale;
@@ -91,35 +90,7 @@ public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f, IVec
 		matrix4f.m23 = -1;
 		matrix4f.m32 = -((2 * near * far) / frustumLength);
 		matrix4f.m33 = 0;
-		
-//		float f = (float) (1 / Math.tan(Math.toRadians(fovDegrees) / 2)) * aspect;
-//		Matrix4f matrix4f = new Matrix4f();
-//		matrix4f.m00 = f / aspect;
-//		matrix4f.m11 = f;
-//		matrix4f.m22 = -((far + near) / (far - near));
-//		matrix4f.m23 = -1;
-//		matrix4f.m32 = -((2.0F * near * far) / (far - near));
-//		matrix4f.m33 = 0;
 		return matrix4f;
-		
-		
-//	      IntBuffer w = BufferUtils.createIntBuffer(4);
-//	      IntBuffer h = BufferUtils.createIntBuffer(4);
-//	      GLFW.glfwGetWindowSize(WindowManager.getWindow(), w, h);
-//	      float width = w.get(0);
-//	      float height = h.get(0);
-//	      float aspectRatio = width / height;
-//	      float yScale = (float) ((1f / Math.tan(Math.toRadians(FOV / 2f))) * aspectRatio);
-//	      float xScale = y_scale / aspectRatio;
-//	      float frustumLength = FAR_PLANE - NEAR_PLANE;
-//
-//	      projectionMatrix = new Matrix4f();
-//	      projectionMatrix.m00 = xScale;
-//	      projectionMatrix.m11 = yScale;
-//	      projectionMatrix.m22 = -((FAR_PLANE + NEAR_PLANE) / frustumLength);
-//	      projectionMatrix.m23 = -1;
-//	      projectionMatrix.m32 = -((2 * NEAR_PLANE * FAR_PLANE) / frustumLength);
-//	      projectionMatrix.m33 = 0;
 	}
 
 	public static Matrix4f orthographic(float left, float right, float bottom, float top, float near, float far) {
@@ -144,13 +115,6 @@ public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f, IVec
 				0, 0, sz, 0,
 				0, 0, 0, 1
 				);
-		
-//		Matrix4f matrix4f = new Matrix4f();
-//		matrix4f.m00 = p_27633_;
-//		matrix4f.m11 = p_27634_;
-//		matrix4f.m22 = p_27635_;
-//		matrix4f.m33 = 1.0F;
-//		return matrix4f;
 	}
 
 	public static Matrix4f translateMatrix(float x, float y, float z) {
@@ -160,22 +124,6 @@ public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f, IVec
 				0, 0, 1, z,
 				0, 0, 0, 1
 				);
-		
-//		Matrix4f matrix4f = new Matrix4f();
-//		matrix4f.m00 = 1.0F;
-//		matrix4f.m11 = 1.0F;
-//		matrix4f.m22 = 1.0F;
-//		matrix4f.m33 = 1.0F;
-//		matrix4f.m03 = p_27654_;
-//		matrix4f.m13 = p_27655_;
-//		matrix4f.m23 = p_27656_;
-//		
-//		matrix4f.m03 = x;
-//		matrix.m03 = x;
-//		matrix.m03 = x;
-//		
-//		
-//		return matrix4f;
 	}
 
 	public static Matrix4f rotationMatrixX(float radians) {
@@ -632,20 +580,20 @@ public class Matrix4f implements IMatrix4f<Matrix4f>, IMatrixMath<Matrix4f, IVec
 	public void loadFloatArr(float[] arr) {
 		if (arr.length != 16) throw new IllegalArgumentException("Matrix float arr has to be of length 16!");
 		this.m00 = arr[0];
-		this.m01 = arr[1];
-		this.m02 = arr[2];
-		this.m03 = arr[3];
-		this.m10 = arr[4];
+		this.m10 = arr[1];
+		this.m20 = arr[2];
+		this.m30 = arr[3];
+		this.m01 = arr[4];
 		this.m11 = arr[5];
-		this.m12 = arr[6];
-		this.m13 = arr[7];
-		this.m20 = arr[8];
-		this.m21 = arr[9];
+		this.m21 = arr[6];
+		this.m31 = arr[7];
+		this.m02 = arr[8];
+		this.m12 = arr[9];
 		this.m22 = arr[10];
-		this.m23 = arr[11];
-		this.m30 = arr[12];
-		this.m31 = arr[13];
-		this.m32 = arr[14];
+		this.m32 = arr[11];
+		this.m03 = arr[12];
+		this.m13 = arr[13];
+		this.m23 = arr[14];
 		this.m33 = arr[15];
 	}
 

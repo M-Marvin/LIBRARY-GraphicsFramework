@@ -5,16 +5,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL33;
 
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.BufferUsage;
 import de.m_marvin.renderengine.buffers.VertexBuffer;
-import de.m_marvin.renderengine.inputbinding.InputBindings;
+import de.m_marvin.renderengine.inputbinding.UserInput;
 import de.m_marvin.renderengine.inputbinding.bindingsource.KeySource;
 import de.m_marvin.renderengine.shaders.ShaderInstance;
 import de.m_marvin.renderengine.shaders.ShaderLoader;
-import de.m_marvin.renderengine.textures.ITextureSampler;
-import de.m_marvin.renderengine.textures.SingleTexture;
+import de.m_marvin.renderengine.textures.SingleTextureMap;
 import de.m_marvin.renderengine.translation.Camera;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.renderengine.utility.NumberFormat;
@@ -28,8 +28,7 @@ public class RenderEngineTest {
 	
 	/*
 	 * TODO List
-	 * - Animated Textures, Atlases, Animated Atlases
-	 * - Finish Text Input
+	 * - Animated Atlases
 	 */
 	
 	public static void main(String... args) {
@@ -40,6 +39,9 @@ public class RenderEngineTest {
 		}		
 	}
 	
+	public static SingleTextureMap texture;
+	public static long currentTickTime;
+	
 	public void start() throws IOException {
 		
 		System.out.println("start");
@@ -49,7 +51,7 @@ public class RenderEngineTest {
 		Window window2 = new Window(1000, 600, "Test");
 		window2.makeContextCurrent();
 		Camera camera = new Camera(new Vec3f(0F, 0F, 10F), new Vec3f(0F, 0F, 0F));
-		InputBindings input = new InputBindings();
+		UserInput input = new UserInput();
 		input.attachToWindow(window2.windowId());
 		
 		input.registerBinding("movement.forward").addBinding(KeySource.getKey(GLFW.GLFW_KEY_W));
@@ -71,12 +73,12 @@ public class RenderEngineTest {
 		buffer.begin(RenderPrimitive.TRIANGLES, format);
 		poseStack.translate(0, 0.5F, 0);
 		poseStack.scale(2, 2, 1);
-		buffer.vertex(poseStack, -1, -1, 0).normal(poseStack, 1, 0, 1).color(1, 0, 0, 1).uv(1, 1).endVertex();
+		buffer.vertex(poseStack, -1, -1, 0).normal(poseStack, 1, 0, 1).color(1, 0, 0, 1).uv(0, 0).endVertex();
 		buffer.vertex(poseStack, 1, -1, 0).normal(poseStack, 0, 1, 1).color(0, 1, 0, 1).uv(1, 0).endVertex();
 		buffer.vertex(poseStack, -1, 1, 0).normal(poseStack, 1, 1, 1).color(0, 0, 1, 1).uv(0, 1).endVertex();
-		buffer.vertex(poseStack, 1, -1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(0, 0).endVertex();
-		buffer.vertex(poseStack, -1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(1, 0).endVertex();
-		buffer.vertex(poseStack, 1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, 1, -1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(1, 0).endVertex();
+		buffer.vertex(poseStack, -1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(0, 1).endVertex();
+		buffer.vertex(poseStack, 1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(1, 1).endVertex();
 		buffer.index(0).index(1).index(2);//.index(3);
 		buffer.index(3).index(4).index(5);//.index(3);
 		buffer.end();
@@ -86,12 +88,12 @@ public class RenderEngineTest {
 		buffer.begin(RenderPrimitive.TRIANGLES, format);
 		poseStack.translate(0, 6.5F, 0);
 		poseStack.scale(2, 2, 1);
-		buffer.vertex(poseStack, -1, -1, 0).normal(poseStack, 1, 0, 1).color(1, 1, 0, 1).uv(1, 1).endVertex();
+		buffer.vertex(poseStack, -1, -1, 0).normal(poseStack, 1, 0, 1).color(1, 1, 0, 1).uv(0, 0).endVertex();
 		buffer.vertex(poseStack, 1, -1, 0).normal(poseStack, 0, 1, 1).color(0, 1, 1, 1).uv(1, 0).endVertex();
 		buffer.vertex(poseStack, -1, 1, 0).normal(poseStack, 1, 1, 1).color(0, 1, 1, 1).uv(0, 1).endVertex();
-		buffer.vertex(poseStack, 1, -1, -1).normal(poseStack, 0, 0, 1).color(1, 1, 1, 1).uv(0, 0).endVertex();
-		buffer.vertex(poseStack, -1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(1, 0).endVertex();
-		buffer.vertex(poseStack, 1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 1, 1, 1).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, 1, -1, -1).normal(poseStack, 0, 0, 1).color(1, 1, 1, 1).uv(1, 0).endVertex();
+		buffer.vertex(poseStack, -1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 1, 1, 1).uv(0, 1).endVertex();
+		buffer.vertex(poseStack, 1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 1, 1, 1).uv(1, 1).endVertex();
 		buffer.index(0).index(1).index(2);//.index(3);
 		buffer.index(3).index(4).index(5);//.index(3);
 		buffer.end();
@@ -109,18 +111,43 @@ public class RenderEngineTest {
 		
 		Matrix4f projectionMatrix = Matrix4f.perspective(65, 1000F / 600F, 1, 1000); //Matrix4f.orthographic(-100, 100, 100, -100, -10F, 10F);
 		
-		File textureFile = new File(this.getClass().getClassLoader().getResource("").getPath(), "textures/test.png");
-		ITextureSampler texture = new SingleTexture(new FileInputStream(textureFile));
+		File textureFile = new File(this.getClass().getClassLoader().getResource("").getPath(), "textures/testA.png");
+		texture = new SingleTextureMap(new FileInputStream(textureFile), new int[] {0, 1, 2, 3}, true);
 		
 		window2.registerWindowListener((shouldClose, resized, focused, unfocused, maximized, restored) -> {
 			if (resized.isPresent()) GLStateManager.resizeViewport(0, 0, resized.get().x(), resized.get().y());
 		});
 		
 		GLStateManager.clearColor(1, 1, 1, 0.5F);
+		GLStateManager.enable(GL33.GL_DEPTH_TEST);
+		GLStateManager.enable(GL33.GL_BLEND);
+		GLStateManager.blendFunc(GL33.GL_SRC_ALPHA, GL33.GL_ONE_MINUS_SRC_ALPHA);
 		
 		//input.addTextInputListener((character, functionalKey) -> System.out.println(character + " " + functionalKey));
 		
+		Thread testThread = new Thread(() -> {
+						
+			while (texture != null) {
+				
+				texture.nextFrame();
+				currentTickTime = System.currentTimeMillis();
+				
+				try {
+					Thread.sleep(3000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+			
+		}, "TestThread");
+		testThread.start();
+		
 		while (!window2.shouldClose()) {
+			
+			long currentTime = System.currentTimeMillis();
+			float partialTick = (currentTickTime + 3000 - currentTime) / 3000F;
 			
 			Vec3f motion = new Vec3f(0F, 0F, 0F);
 			float motionSensitivity = 0.2F;
@@ -144,7 +171,10 @@ public class RenderEngineTest {
 			shader.useShader();
 			shader.getUniform("ModelViewMat").setMatrix4f(viewMatrix);
 			shader.getUniform("ProjMat").setMatrix4f(projectionMatrix);
-			shader.getUniform("Texture").setTextureSampler(texture); // TODO
+			shader.getUniform("Texture").setTextureSampler(texture);
+			shader.getUniform("AnimMat").setMatrix3f(texture.frameMatrix());
+			shader.getUniform("AnimMatLast").setMatrix3f(texture.lastFrameMatrix());
+			shader.getUniform("Interpolation").setFloat(partialTick);
 			
 			vertexBuffer.bind();
 			vertexBuffer.drawAll(RenderPrimitive.TRIANGLES);
@@ -163,6 +193,7 @@ public class RenderEngineTest {
 		
 		vertexBuffer2.discard();
 		
+		texture = null;
 		GLStateManager.terminate();
 		
 		System.out.println("exit");
