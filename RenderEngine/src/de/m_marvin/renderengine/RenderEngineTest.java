@@ -1,8 +1,13 @@
 package de.m_marvin.renderengine;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL33;
@@ -15,6 +20,10 @@ import de.m_marvin.renderengine.inputbinding.bindingsource.KeySource;
 import de.m_marvin.renderengine.shaders.ShaderInstance;
 import de.m_marvin.renderengine.shaders.ShaderLoader;
 import de.m_marvin.renderengine.textures.SingleTextureMap;
+import de.m_marvin.renderengine.textures.atlasbuilding.AtlasLayoutBuilder;
+import de.m_marvin.renderengine.textures.atlasbuilding.AtlasLayoutBuilder.AtlasImage;
+import de.m_marvin.renderengine.textures.atlasbuilding.AtlasLayoutBuilder.AtlasImageLayout;
+import de.m_marvin.renderengine.textures.atlasbuilding.AtlasLayoutBuilder.AtlasLayout;
 import de.m_marvin.renderengine.translation.Camera;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.renderengine.utility.NumberFormat;
@@ -33,7 +42,7 @@ public class RenderEngineTest {
 	
 	public static void main(String... args) {
 		try {
-			new RenderEngineTest().start();
+			new RenderEngineTest().test();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}		
@@ -41,6 +50,41 @@ public class RenderEngineTest {
 	
 	public static SingleTextureMap texture;
 	public static long currentTickTime;
+	
+	public void test() throws IOException {
+		
+		File textureFolder = new File(this.getClass().getClassLoader().getResource("").getPath(), "textures/");
+		
+		AtlasLayoutBuilder builder = new AtlasLayoutBuilder();
+		
+		for (File textureFile : textureFolder.listFiles()) {
+			
+			BufferedImage image = ImageIO.read(textureFile);
+			
+			AtlasImage atlasImage = new AtlasImage(image.getWidth(), image.getHeight(), image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth()));
+			builder.addAtlasImage(atlasImage);
+			
+		}
+		
+		AtlasLayout layout = builder.buildLayout(false);
+		
+		System.out.println("Create image with size " + layout.width() + " " + layout.height());
+		BufferedImage atlasImage = new BufferedImage(layout.width(), layout.height(), BufferedImage.TYPE_4BYTE_ABGR);
+		
+		for (AtlasImageLayout imageLayout : layout.imageLayouts()) {
+			
+			System.out.println("Print image from " + imageLayout.x() + " " + imageLayout.y() + " to " + (imageLayout.x() + imageLayout.image().width()) + " " + (imageLayout.y() + imageLayout.image().height()));
+			atlasImage.setRGB(imageLayout.x(), imageLayout.y(), imageLayout.image().width(), imageLayout.image().height(), imageLayout.image().pixels(), 0, imageLayout.image().width());
+			
+		}
+		
+		File outputFile = new File(textureFolder.getParentFile(), "/atlas.png");
+		System.out.println("Write file to " + outputFile);
+		FileOutputStream s = new FileOutputStream(outputFile);
+		ImageIO.write(atlasImage, "png", s);
+		s.close();
+		
+	}
 	
 	public void start() throws IOException {
 		
