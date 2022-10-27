@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -17,13 +18,16 @@ import de.m_marvin.renderengine.buffers.BufferUsage;
 import de.m_marvin.renderengine.buffers.VertexBuffer;
 import de.m_marvin.renderengine.inputbinding.UserInput;
 import de.m_marvin.renderengine.inputbinding.bindingsource.KeySource;
+import de.m_marvin.renderengine.resources.ResourceLoader;
+import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
 import de.m_marvin.renderengine.shaders.ShaderInstance;
 import de.m_marvin.renderengine.shaders.ShaderLoader;
 import de.m_marvin.renderengine.textures.SingleTextureMap;
-import de.m_marvin.renderengine.textures.atlasbuilding.AtlasLayoutBuilder;
-import de.m_marvin.renderengine.textures.atlasbuilding.AtlasLayoutBuilder.AtlasImage;
-import de.m_marvin.renderengine.textures.atlasbuilding.AtlasLayoutBuilder.AtlasImageLayout;
-import de.m_marvin.renderengine.textures.atlasbuilding.AtlasLayoutBuilder.AtlasLayout;
+import de.m_marvin.renderengine.textures.atlasbuilding.MultiFrameAtlasLayoutBuilder;
+import de.m_marvin.renderengine.textures.atlasbuilding.MultiFrameAtlasLayoutBuilder.AtlasFrameLayout;
+import de.m_marvin.renderengine.textures.atlasbuilding.MultiFrameAtlasLayoutBuilder.AtlasMultiFrameLayout;
+import de.m_marvin.renderengine.textures.utility.TextureLoader;
+import de.m_marvin.renderengine.textures.utility.TextureLoader.TextureMetaData;
 import de.m_marvin.renderengine.translation.Camera;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.renderengine.utility.NumberFormat;
@@ -37,7 +41,7 @@ public class RenderEngineTest {
 	
 	/*
 	 * TODO List
-	 * - Animated Atlases
+	 * - TextureLoader (automatic atlas building for all textures)
 	 */
 	
 	public static void main(String... args) {
@@ -52,30 +56,65 @@ public class RenderEngineTest {
 	public static long currentTickTime;
 	
 	public void test() throws IOException {
+
+		ResourceLoader<ResourceLocation, TestSourceFolders> resourceLoader = new ResourceLoader<>((loaction) -> loaction.getNamespace() + "/" + loaction.getPath());
+		ShaderLoader<ResourceLocation, TestSourceFolders> shaderLoader = new ShaderLoader<ResourceLocation, TestSourceFolders>(TestSourceFolders.SHADERS, resourceLoader);
+		TextureLoader<ResourceLocation, TestSourceFolders> textureLoader = new TextureLoader<ResourceLocation, TestSourceFolders>(TestSourceFolders.TEXTURES, resourceLoader);
 		
-		File textureFolder = new File(this.getClass().getClassLoader().getResource("").getPath(), "textures/");
 		
-		AtlasLayoutBuilder builder = new AtlasLayoutBuilder();
 		
-		for (File textureFile : textureFolder.listFiles()) {
+		File textureFolder = resourceLoader.getResourceFolderPath(TestSourceFolders.TEXTURES); //new File(this.getClass().getClassLoader().getResource("").getPath(), "textures/");
+		
+		ResourceLocation textureLoc = new ResourceLocation("test", "dust_block");
+		
+		File texturePath2 = resourceLoader.resolveLocation(TestSourceFolders.TEXTURES, textureLoc);
+		System.out.println(texturePath2);
+		
+		MultiFrameAtlasLayoutBuilder<int[]> builder = new MultiFrameAtlasLayoutBuilder<>();
+		
+		for (String textureFile : textureFolder.list()) {
 			
-			BufferedImage image = ImageIO.read(textureFile);
-			
-			AtlasImage atlasImage = new AtlasImage(image.getWidth(), image.getHeight(), image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth()));
-			builder.addAtlasImage(atlasImage);
+			if (textureFile.endsWith(".png")) {
+
+				File metaFile = new File(textureFolder, textureFile.replace(".png", ".json"));
+				File texturePath = new File(textureFolder, textureFile);
+				
+				BufferedImage image = ImageIO.read(texturePath);
+				TextureMetaData data = metaFile.exists() ? TextureLoader.loadJsonMetaData(new FileInputStream(metaFile)) : TextureLoader.DEFAULT_META_DATA;
+				
+				System.out.println(data);
+				
+				int[] pixels = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
+				int[] frames = data.frames();
+				int frametime = data.frametime();
+				
+				builder.addAtlasImage(image.getWidth(), image.getHeight(), frames, frametime, data.interpolate(), pixels);
+				
+			}
 			
 		}
 		
-		AtlasLayout layout = builder.buildLayout(false);
+		AtlasMultiFrameLayout<int[]> layout = builder.buildLayout(false);
 		
-		System.out.println("Create image with size " + layout.width() + " " + layout.height());
+		System.out.println("Create atlas with size " + layout.width() + " " + layout.height());
 		BufferedImage atlasImage = new BufferedImage(layout.width(), layout.height(), BufferedImage.TYPE_4BYTE_ABGR);
 		
-		for (AtlasImageLayout imageLayout : layout.imageLayouts()) {
-			
-			System.out.println("Print image from " + imageLayout.x() + " " + imageLayout.y() + " to " + (imageLayout.x() + imageLayout.image().width()) + " " + (imageLayout.y() + imageLayout.image().height()));
-			atlasImage.setRGB(imageLayout.x(), imageLayout.y(), imageLayout.image().width(), imageLayout.image().height(), imageLayout.image().pixels(), 0, imageLayout.image().width());
-			
+		for (List<AtlasFrameLayout<int[]>> frameLayout : layout.frameLayouts()) {
+			for (AtlasFrameLayout<int[]> imageLayout : frameLayout) {
+				
+				int pixels[] = framePixels(imageLayout.image(), imageLayout.frame(), imageLayout.frameHeight(), imageLayout.width());
+				
+				if (imageLayout.interpolate()) {
+					
+					int[] nextPixels = framePixels(imageLayout.image(), imageLayout.nextFrame(), imageLayout.frameHeight(), imageLayout.width());
+					
+					pixels = interpolatePixels(pixels, nextPixels, imageLayout.subframe());
+					
+				}
+				
+				atlasImage.setRGB(imageLayout.x(), imageLayout.y(), imageLayout.width(), imageLayout.frameHeight(), pixels, 0, imageLayout.width());
+				
+			}
 		}
 		
 		File outputFile = new File(textureFolder.getParentFile(), "/atlas.png");
@@ -83,6 +122,22 @@ public class RenderEngineTest {
 		FileOutputStream s = new FileOutputStream(outputFile);
 		ImageIO.write(atlasImage, "png", s);
 		s.close();
+		
+	}
+	
+	public int[] interpolatePixels(int[] pixels1, int[] pixels2, float interpolation) {
+		int[] pixels = new int[pixels1.length];
+		for (int i = 0; i < pixels1.length; i++) {
+			pixels[i] = (int) (pixels1[i] * (1F - interpolation) + pixels2[i] * interpolation); // TODO: Incorrect interpolation, only for testing!
+		}
+		return pixels;
+	}
+	
+	public int[] framePixels(int[] pixels, int frame, int frameHeight, int width) {
+		
+		int begin = frame * frameHeight * width;
+		int end = begin + frameHeight * width;
+		return Arrays.copyOfRange(pixels, begin, end);
 		
 	}
 	

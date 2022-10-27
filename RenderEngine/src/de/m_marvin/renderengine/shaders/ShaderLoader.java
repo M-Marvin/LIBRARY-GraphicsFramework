@@ -12,22 +12,48 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import de.m_marvin.renderengine.resources.ISourceFolder;
+import de.m_marvin.renderengine.resources.ResourceLoader;
 import de.m_marvin.renderengine.vertecies.VertexFormat;
 
-public class ShaderLoader {
+public class ShaderLoader<R, FE extends ISourceFolder> {
+	
+	public static final String VERTEX_SHADER_FORMAT = "vsh";
+	public static final String FRAGMENT_SHADER_FORMAT = "fsh";
+	public static final String SHADER_META_FORMAT = "json";
+	public static final String SHADER_LIB_FORMAT = "glsl";
+	protected static final String INCLUDE_LINE = "#include ";
+	
+	protected final FE sourceFolder;
+	protected final ResourceLoader<R, FE> resourceLoader;
+	
+	public ShaderLoader(FE sourceFolder, ResourceLoader<R, FE> resourceLoader) {
+		this.sourceFolder = sourceFolder;
+		this.resourceLoader = resourceLoader;
+	}
+	
+	public ShaderInstance load(R shaderLocation, VertexFormat format) {
+		File path = resourceLoader.resolveLocation(sourceFolder, shaderLocation);
+		try {
+			return load(path, format);
+		} catch (IOException e) {
+			System.err.println("Failed to load shader " + shaderLocation.toString());
+			return null;
+		}
+	}
 	
 	public static ShaderInstance load(File shaderFile, VertexFormat vertexFormat) throws IOException {
 		File sourceFolder = shaderFile.getParentFile();
 		
 		Gson gson = new GsonBuilder().create();
-		InputStreamReader inputStream = new InputStreamReader(new FileInputStream(shaderFile));
+		InputStreamReader inputStream = new InputStreamReader(new FileInputStream(new File(shaderFile, SHADER_META_FORMAT)));
 		
 		JsonObject json = gson.fromJson(inputStream, JsonObject.class);
 		
 		String vertexShaderFile = json.get("VertexShaderFile").getAsString();
 		String fragmentShaderFile = json.get("FragmentShaderFile").getAsString();
-		String vertexShaderSource = loadGLSLFile(sourceFolder, vertexShaderFile);
-		String fragmentShaderSource = loadGLSLFile(sourceFolder, fragmentShaderFile);
+		String vertexShaderSource = loadGLSLFile(sourceFolder, vertexShaderFile + VERTEX_SHADER_FORMAT);
+		String fragmentShaderSource = loadGLSLFile(sourceFolder, fragmentShaderFile + FRAGMENT_SHADER_FORMAT);
 		
 		ShaderInstance shaderInstance = new ShaderInstance(vertexShaderSource, fragmentShaderSource, vertexFormat);
 		
@@ -47,15 +73,13 @@ public class ShaderLoader {
 		return shaderInstance;
 	}
 	
-	protected static final String INCLUDE_LINE = "#include ";
-	protected static final String INCLUDE_FILE_TYPE = ".glsl";
 	protected static String loadGLSLFile(File sourceFolder, String fileName) throws IOException {
 		String line;
 		BufferedReader vertexShaderInputStream = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sourceFolder, fileName))));
 		StringBuilder stringBuilder = new StringBuilder();
 		while ((line = vertexShaderInputStream.readLine()) != null) {
 			if (line.startsWith(INCLUDE_LINE)) {
-				String includeCode = loadGLSLFile(sourceFolder, line.substring(INCLUDE_LINE.length()) + INCLUDE_FILE_TYPE);
+				String includeCode = loadGLSLFile(sourceFolder, line.substring(INCLUDE_LINE.length()) + "." + SHADER_LIB_FORMAT);
 				stringBuilder.append(includeCode);
 			} else {
 				stringBuilder.append(line + "\n");

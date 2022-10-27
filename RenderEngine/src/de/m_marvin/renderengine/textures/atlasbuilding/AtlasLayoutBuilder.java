@@ -6,40 +6,40 @@ import java.util.List;
 
 import de.m_marvin.univec.impl.Vec2i;
 
-public class AtlasLayoutBuilder {
+public class AtlasLayoutBuilder<T> {
 	
-	public static record AtlasImage(int width, int height, int[] pixels) {}
-	public static record AtlasImageLayout(int x, int y, AtlasImage image) {}
-	public static record AtlasLayout(List<AtlasImageLayout> imageLayouts, int width, int height) {}
+	public static record AtlasImage<T>(int width, int height, T image) {}
+	public static record AtlasImageLayout<T>(int x, int y, AtlasImage<T> image) {}
+	public static record AtlasLayout<T>(List<AtlasImageLayout<T>> imageLayouts, int width, int height) {}
 	
-	protected List<AtlasImage> atlasImages = new ArrayList<>();
-	protected List<AtlasImageLayout> atlasLayout = new ArrayList<>();
+	protected List<AtlasImage<T>> atlasImages = new ArrayList<>();
+	protected List<AtlasImageLayout<T>> atlasLayout = new ArrayList<>();
 	protected List<Vec2i> pastePoints = new ArrayList<>();
 	
-	public void addAtlasImage(AtlasImage image) {
+	public void addAtlasImage(AtlasImage<T> image) {
 		this.atlasImages.add(image);
 	}
 	
-	public void addAtlasImage(int width, int height, int[] pixels) {
-		this.atlasImages.add(new AtlasImage(width, height, pixels));
+	public void addAtlasImage(int width, int height, T image) {
+		this.atlasImages.add(new AtlasImage<T>(width, height, image));
 	}
 	
-	public AtlasLayout buildLayout(boolean prioritizeHeight) {
+	public AtlasLayout<T> buildLayout(boolean prioritizeHeight) {
 		
 		if (this.atlasImages.size() == 0) throw new IllegalStateException("Can't build layout with zero images! (Would not make any sense ...)");
 		
 		// Relay simple layout ...
 		if (this.atlasImages.size() == 1) {
-			AtlasImage image = this.atlasImages.get(0);
-			AtlasImageLayout imageLayout = new AtlasImageLayout(0, 0, image);
-			AtlasLayout layout = new AtlasLayout(Arrays.asList(imageLayout), image.width, image.height);
+			AtlasImage<T> image = this.atlasImages.get(0);
+			AtlasImageLayout<T> imageLayout = new AtlasImageLayout<T>(0, 0, image);
+			AtlasLayout<T> layout = new AtlasLayout<T>(Arrays.asList(imageLayout), image.width, image.height);
 			this.atlasImages = new ArrayList<>();
 			return layout;
 		}
 		
 		// Calculate the plane size of all images combined
 		int planeSize = 0;
-		for (AtlasImage image : this.atlasImages) planeSize += image.width * image.height;
+		for (AtlasImage<T> image : this.atlasImages) planeSize += image.width * image.height;
 		
 		// Calculate the minimum required size of the atlas, assuming 100% efficiency when combine the images
 		int minWidth = (int) Math.sqrt(planeSize);
@@ -72,14 +72,14 @@ public class AtlasLayoutBuilder {
 					.findFirst().get();
 			this.pastePoints.remove(nextPoint);
 			
-			AtlasImage fittingImage = null;
+			AtlasImage<T> fittingImage = null;
 			if (prioritizeHeight) {
 				
 				// Calculate maximum height of the image for that point
 				int maxY = nextPoint.y();
 				for (; maxY <= minHeight; maxY++) {
 					boolean occupied = false;
-					for (AtlasImageLayout layout : this.atlasLayout) {
+					for (AtlasImageLayout<T> layout : this.atlasLayout) {
 						
 						// Check if layout occupies the position
 						float y = maxY;
@@ -95,7 +95,7 @@ public class AtlasLayoutBuilder {
 				int maxHeight = maxY - nextPoint.y();
 				
 				// Try to find a image that fits at this position
-				for (AtlasImage image : this.atlasImages) {
+				for (AtlasImage<T> image : this.atlasImages) {
 					if (image.height <= maxHeight) {
 						fittingImage = image;
 						break;
@@ -108,7 +108,7 @@ public class AtlasLayoutBuilder {
 				int maxX = nextPoint.x();
 				for (; maxX <= minWidth; maxX++) {
 					boolean occupied = false;
-					for (AtlasImageLayout layout : this.atlasLayout) {
+					for (AtlasImageLayout<T> layout : this.atlasLayout) {
 						
 						// Check if layout occupies the position
 						float x = maxX;
@@ -124,7 +124,7 @@ public class AtlasLayoutBuilder {
 				int maxWidth = maxX - nextPoint.x();
 
 				// Try to find a image that fits at this position
-				for (AtlasImage image : this.atlasImages) {
+				for (AtlasImage<T> image : this.atlasImages) {
 					if (image.width <= maxWidth) {
 						fittingImage = image;
 						break;
@@ -136,7 +136,7 @@ public class AtlasLayoutBuilder {
 			// If found, place image layout
 			if (fittingImage != null) {
 				
-				this.atlasLayout.add(new AtlasImageLayout(nextPoint.x(), nextPoint.y(), fittingImage));
+				this.atlasLayout.add(new AtlasImageLayout<T>(nextPoint.x(), nextPoint.y(), fittingImage));
 
 				// Modify height/size if required
 				if (prioritizeHeight) {
@@ -159,7 +159,7 @@ public class AtlasLayoutBuilder {
 					} else {
 						
 						// Find image behind this image
-						AtlasImageLayout image = this.atlasLayout.stream()
+						AtlasImageLayout<T> image = this.atlasLayout.stream()
 								.filter((layout) -> layout.x <= nextPoint.x() && layout.x + layout.image.width > nextPoint.x())
 								.filter((layout) -> layout.y + layout.image.height <= nextPoint.y())
 								.sorted((layout1, layout2) -> Integer.compare(layout1.y(), layout2.y()))
@@ -183,7 +183,7 @@ public class AtlasLayoutBuilder {
 					} else {
 						
 						// Find image behind this image
-						AtlasImageLayout image = this.atlasLayout.stream()
+						AtlasImageLayout<T> image = this.atlasLayout.stream()
 								.filter((layout) -> layout.y <= nextPoint.y() && layout.y + layout.image.height > nextPoint.y())
 								.filter((layout) -> layout.x + layout.image.width <= nextPoint.x())
 								.sorted((layout1, layout2) -> Integer.compare(layout1.x(), layout2.x()))
@@ -214,10 +214,10 @@ public class AtlasLayoutBuilder {
 			
 			// Everything placed, cleanup
 			this.pastePoints.clear();
-			List<AtlasImageLayout> layout = this.atlasLayout;
+			List<AtlasImageLayout<T>> layout = this.atlasLayout;
 			this.atlasLayout = new ArrayList<>();
 			
-			return new AtlasLayout(layout, minWidth, minHeight);
+			return new AtlasLayout<T>(layout, minWidth, minHeight);
 			
 		} else {
 

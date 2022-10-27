@@ -1,4 +1,4 @@
-package de.m_marvin.renderengine.textures;
+package de.m_marvin.renderengine.textures.utility;
 
 import org.lwjgl.opengl.GL33;
 

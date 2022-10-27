@@ -3,6 +3,7 @@ package de.m_marvin.renderengine.textures;
 import org.lwjgl.opengl.GL33;
 
 import de.m_marvin.renderengine.GLStateManager;
+import de.m_marvin.renderengine.textures.utility.TextureFilter;
 
 public abstract class AbstractTextureMap implements ITextureSampler, IUVModifyer {
 	
