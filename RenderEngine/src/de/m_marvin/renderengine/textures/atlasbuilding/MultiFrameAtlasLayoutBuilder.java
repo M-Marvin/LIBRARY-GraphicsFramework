@@ -27,6 +27,8 @@ public class MultiFrameAtlasLayoutBuilder<T> {
 	
 	public AtlasMultiFrameLayout<T> buildLayout(boolean prioritizeHeight) {
 		
+		if (this.atlasImages.isEmpty()) throw new IllegalStateException("No images have ban added to the builder!");
+		
 		// Calculate required frame time for atlas
 		List<List<Integer>> divs = this.atlasImages
 			.stream()

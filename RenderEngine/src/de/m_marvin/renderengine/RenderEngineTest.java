@@ -22,6 +22,7 @@ import de.m_marvin.renderengine.resources.ResourceLoader;
 import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
 import de.m_marvin.renderengine.shaders.ShaderInstance;
 import de.m_marvin.renderengine.shaders.ShaderLoader;
+import de.m_marvin.renderengine.textures.AbstractTextureMap;
 import de.m_marvin.renderengine.textures.SingleTextureMap;
 import de.m_marvin.renderengine.textures.atlasbuilding.MultiFrameAtlasLayoutBuilder;
 import de.m_marvin.renderengine.textures.atlasbuilding.MultiFrameAtlasLayoutBuilder.AtlasFrameLayout;
@@ -46,100 +47,14 @@ public class RenderEngineTest {
 	
 	public static void main(String... args) {
 		try {
-			new RenderEngineTest().test();
+			new RenderEngineTest().start();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}		
 	}
 	
-	public static SingleTextureMap texture;
+	public static AbstractTextureMap texture;
 	public static long currentTickTime;
-	
-	public void test() throws IOException {
-
-		ResourceLoader<ResourceLocation, TestSourceFolders> resourceLoader = new ResourceLoader<>((loaction) -> loaction.getNamespace() + "/" + loaction.getPath());
-		ShaderLoader<ResourceLocation, TestSourceFolders> shaderLoader = new ShaderLoader<ResourceLocation, TestSourceFolders>(TestSourceFolders.SHADERS, resourceLoader);
-		TextureLoader<ResourceLocation, TestSourceFolders> textureLoader = new TextureLoader<ResourceLocation, TestSourceFolders>(TestSourceFolders.TEXTURES, resourceLoader);
-		
-		
-		
-		File textureFolder = resourceLoader.getResourceFolderPath(TestSourceFolders.TEXTURES); //new File(this.getClass().getClassLoader().getResource("").getPath(), "textures/");
-		
-		ResourceLocation textureLoc = new ResourceLocation("test", "dust_block");
-		
-		File texturePath2 = resourceLoader.resolveLocation(TestSourceFolders.TEXTURES, textureLoc);
-		System.out.println(texturePath2);
-		
-		MultiFrameAtlasLayoutBuilder<int[]> builder = new MultiFrameAtlasLayoutBuilder<>();
-		
-		for (String textureFile : textureFolder.list()) {
-			
-			if (textureFile.endsWith(".png")) {
-
-				File metaFile = new File(textureFolder, textureFile.replace(".png", ".json"));
-				File texturePath = new File(textureFolder, textureFile);
-				
-				BufferedImage image = ImageIO.read(texturePath);
-				TextureMetaData data = metaFile.exists() ? TextureLoader.loadJsonMetaData(new FileInputStream(metaFile)) : TextureLoader.DEFAULT_META_DATA;
-				
-				System.out.println(data);
-				
-				int[] pixels = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
-				int[] frames = data.frames();
-				int frametime = data.frametime();
-				
-				builder.addAtlasImage(image.getWidth(), image.getHeight(), frames, frametime, data.interpolate(), pixels);
-				
-			}
-			
-		}
-		
-		AtlasMultiFrameLayout<int[]> layout = builder.buildLayout(false);
-		
-		System.out.println("Create atlas with size " + layout.width() + " " + layout.height());
-		BufferedImage atlasImage = new BufferedImage(layout.width(), layout.height(), BufferedImage.TYPE_4BYTE_ABGR);
-		
-		for (List<AtlasFrameLayout<int[]>> frameLayout : layout.frameLayouts()) {
-			for (AtlasFrameLayout<int[]> imageLayout : frameLayout) {
-				
-				int pixels[] = framePixels(imageLayout.image(), imageLayout.frame(), imageLayout.frameHeight(), imageLayout.width());
-				
-				if (imageLayout.interpolate()) {
-					
-					int[] nextPixels = framePixels(imageLayout.image(), imageLayout.nextFrame(), imageLayout.frameHeight(), imageLayout.width());
-					
-					pixels = interpolatePixels(pixels, nextPixels, imageLayout.subframe());
-					
-				}
-				
-				atlasImage.setRGB(imageLayout.x(), imageLayout.y(), imageLayout.width(), imageLayout.frameHeight(), pixels, 0, imageLayout.width());
-				
-			}
-		}
-		
-		File outputFile = new File(textureFolder.getParentFile(), "/atlas.png");
-		System.out.println("Write file to " + outputFile);
-		FileOutputStream s = new FileOutputStream(outputFile);
-		ImageIO.write(atlasImage, "png", s);
-		s.close();
-		
-	}
-	
-	public int[] interpolatePixels(int[] pixels1, int[] pixels2, float interpolation) {
-		int[] pixels = new int[pixels1.length];
-		for (int i = 0; i < pixels1.length; i++) {
-			pixels[i] = (int) (pixels1[i] * (1F - interpolation) + pixels2[i] * interpolation); // TODO: Incorrect interpolation, only for testing!
-		}
-		return pixels;
-	}
-	
-	public int[] framePixels(int[] pixels, int frame, int frameHeight, int width) {
-		
-		int begin = frame * frameHeight * width;
-		int end = begin + frameHeight * width;
-		return Arrays.copyOfRange(pixels, begin, end);
-		
-	}
 	
 	public void start() throws IOException {
 		
@@ -147,11 +62,17 @@ public class RenderEngineTest {
 		
 		GLStateManager.initialisate(System.err);
 		
+		ResourceLoader<ResourceLocation, TestSourceFolders> resourceLoader = new ResourceLoader<>();
+		ShaderLoader<ResourceLocation, TestSourceFolders> shaderLoader = new ShaderLoader<ResourceLocation, TestSourceFolders>(TestSourceFolders.SHADERS, resourceLoader);
+		TextureLoader<ResourceLocation, TestSourceFolders> textureLoader = new TextureLoader<ResourceLocation, TestSourceFolders>(TestSourceFolders.TEXTURES, resourceLoader);
+		
 		Window window2 = new Window(1000, 600, "Test");
 		window2.makeContextCurrent();
 		Camera camera = new Camera(new Vec3f(0F, 0F, 10F), new Vec3f(0F, 0F, 0F));
 		UserInput input = new UserInput();
 		input.attachToWindow(window2.windowId());
+
+		textureLoader.buildAtlasMapFromTextures(new ResourceLocation("test", ""), false);
 		
 		input.registerBinding("movement.forward").addBinding(KeySource.getKey(GLFW.GLFW_KEY_W));
 		input.registerBinding("movement.backward").addBinding(KeySource.getKey(GLFW.GLFW_KEY_S));
@@ -197,7 +118,7 @@ public class RenderEngineTest {
 		buffer.index(3).index(4).index(5);//.index(3);
 		buffer.end();
 		poseStack.pop();
-
+		
 		VertexBuffer vertexBuffer = new VertexBuffer();
 		vertexBuffer.upload(buffer, BufferUsage.STATIC);
 		
@@ -205,13 +126,11 @@ public class RenderEngineTest {
 		vertexBuffer2.upload(buffer, BufferUsage.STATIC);
 		buffer.freeMemory();
 		
-		File shaderFile = new File(this.getClass().getClassLoader().getResource("").getPath(), "shaders/testShader.json");
-		ShaderInstance shader = ShaderLoader.load(shaderFile, format);
+		ShaderInstance shader = shaderLoader.load(new ResourceLocation("test", "testShader"), format);
 		
 		Matrix4f projectionMatrix = Matrix4f.perspective(65, 1000F / 600F, 1, 1000); //Matrix4f.orthographic(-100, 100, 100, -100, -10F, 10F);
 		
-		File textureFile = new File(this.getClass().getClassLoader().getResource("").getPath(), "textures/testA.png");
-		texture = new SingleTextureMap(new FileInputStream(textureFile), new int[] {0, 1, 2, 3}, true);
+		texture = textureLoader.getTexture(new ResourceLocation("test", "testA"));
 		
 		window2.registerWindowListener((shouldClose, resized, focused, unfocused, maximized, restored) -> {
 			if (resized.isPresent()) GLStateManager.resizeViewport(0, 0, resized.get().x(), resized.get().y());

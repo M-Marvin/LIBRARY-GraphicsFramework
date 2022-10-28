@@ -12,4 +12,17 @@ public class ResourcePath {
 		return path;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof ResourcePath loc) {
+			return loc.path.equals(path);
+ 		}
+		return false;
+	}
+	
+	@Override
+	public String toString() {
+		return "Resource{" + this.path + "}";
+	}
+	
 }

@@ -7,8 +7,8 @@ import de.m_marvin.renderengine.resources.ResourceLoader;
 
 public enum TestSourceFolders implements ISourceFolder {
 	
-	TEXTURES((loader) -> new File(ResourceLoader.getRuntimeFolder(), "textures/")),
-	SHADERS((loader) -> new File(ResourceLoader.getRuntimeFolder(), "shaders/"));
+	TEXTURES((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/textures/")),
+	SHADERS((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/shaders/"));
 	
 	private final ISourceFolder resolver;
 	
@@ -17,8 +17,8 @@ public enum TestSourceFolders implements ISourceFolder {
 	}
 	
 	@Override
-	public File getPath(ResourceLoader<?, ?> loader) {
-		return this.resolver.getPath(loader);
+	public File getPath(ResourceLoader<?, ?> loader, String namespace) {
+		return this.resolver.getPath(loader, namespace);
 	}
 
 }

@@ -12,11 +12,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.resources.ResourceLoader;
 import de.m_marvin.renderengine.vertecies.VertexFormat;
 
-public class ShaderLoader<R, FE extends ISourceFolder> {
+public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFolder> {
 	
 	public static final String VERTEX_SHADER_FORMAT = "vsh";
 	public static final String FRAGMENT_SHADER_FORMAT = "fsh";
@@ -38,6 +39,7 @@ public class ShaderLoader<R, FE extends ISourceFolder> {
 			return load(path, format);
 		} catch (IOException e) {
 			System.err.println("Failed to load shader " + shaderLocation.toString());
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -46,14 +48,14 @@ public class ShaderLoader<R, FE extends ISourceFolder> {
 		File sourceFolder = shaderFile.getParentFile();
 		
 		Gson gson = new GsonBuilder().create();
-		InputStreamReader inputStream = new InputStreamReader(new FileInputStream(new File(shaderFile, SHADER_META_FORMAT)));
+		InputStreamReader inputStream = new InputStreamReader(new FileInputStream(new File(shaderFile + "." + SHADER_META_FORMAT)));
 		
 		JsonObject json = gson.fromJson(inputStream, JsonObject.class);
 		
 		String vertexShaderFile = json.get("VertexShaderFile").getAsString();
 		String fragmentShaderFile = json.get("FragmentShaderFile").getAsString();
-		String vertexShaderSource = loadGLSLFile(sourceFolder, vertexShaderFile + VERTEX_SHADER_FORMAT);
-		String fragmentShaderSource = loadGLSLFile(sourceFolder, fragmentShaderFile + FRAGMENT_SHADER_FORMAT);
+		String vertexShaderSource = loadGLSLFile(sourceFolder, vertexShaderFile + "." + VERTEX_SHADER_FORMAT);
+		String fragmentShaderSource = loadGLSLFile(sourceFolder, fragmentShaderFile + "." + FRAGMENT_SHADER_FORMAT);
 		
 		ShaderInstance shaderInstance = new ShaderInstance(vertexShaderSource, fragmentShaderSource, vertexFormat);
 		
