@@ -10,11 +10,18 @@ public enum NumberFormat {
 		this.bytes = bytes;
 		this.glType = glType;
 	}
+	public String getName() {
+		return name().toLowerCase();
+	}
 	public int size() {
 		return this.bytes;
 	}
 	public int gltype() {
 		return this.glType;
+	}
+	
+	public static NumberFormat byName(String name) {
+		return NumberFormat.valueOf(name.toUpperCase());
 	}
 }
 

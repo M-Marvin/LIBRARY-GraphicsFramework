@@ -9,16 +9,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import javax.imageio.ImageIO;
-
-import org.w3c.dom.Text;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -28,12 +24,9 @@ import com.google.gson.JsonPrimitive;
 import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.resources.ResourceLoader;
-import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
 import de.m_marvin.renderengine.textures.AbstractTextureMap;
+import de.m_marvin.renderengine.textures.AtlasTextureMap;
 import de.m_marvin.renderengine.textures.SingleTextureMap;
-import de.m_marvin.renderengine.textures.atlasbuilding.MultiFrameAtlasLayoutBuilder;
-import de.m_marvin.renderengine.textures.atlasbuilding.MultiFrameAtlasLayoutBuilder.AtlasFrameLayout;
-import de.m_marvin.renderengine.textures.atlasbuilding.MultiFrameAtlasLayoutBuilder.AtlasMultiFrameLayout;
 
 public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFolder> {
 	
@@ -44,7 +37,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	public static final String DEFAULT_TEXTURE_FORMAT = "png";
 	public static final TextureMetaData DEFAULT_META_DATA = new TextureMetaData(1, new int[] {0}, false, DEFAULT_TEXTURE_FORMAT);
 
-	public static final Supplier<SingleTextureMap> INVALID_TEXTURE_FALLBACK = () -> new SingleTextureMap(2, 2, new int[] {0}, 1, new int[] {
+	public static final Supplier<SingleTextureMap<?>> INVALID_TEXTURE_FALLBACK = () -> new SingleTextureMap<>(2, 2, new int[] {0}, 1, new int[] {
 			new Color(255, 0, 255, 255).getRGB(),
 			new Color(0, 0, 0, 255).getRGB(),
 			new Color(0, 0, 0, 255).getRGB(),
@@ -54,14 +47,12 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	protected final FE sourceFolder;
 	protected final ResourceLoader<R, FE> resourceLoader;
 	
-	protected Map<R, AbstractTextureMap> textureCache = new HashMap<>();
+	protected LinkedHashMap<R, AbstractTextureMap<R>> textureCache = new LinkedHashMap<>();
 	
 	public TextureLoader(FE sourceFolder, ResourceLoader<R, FE> resourceLoader) {
 		this.sourceFolder = sourceFolder;
 		this.resourceLoader = resourceLoader;
 	}
-	
-	// TODO Getter method for the texture maps
 	
 	public void buildSingleMapsFromTextures(R textureFolderLocation) {
 		try {
@@ -72,9 +63,9 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		}
 	}
 	
-	public void buildAtlasMapFromTextures(R textureFolderLocation, boolean prioritizeAtlasHeight) {
+	public void buildAtlasMapFromTextures(R textureFolderLocation, R atlasName, boolean prioritizeAtlasHeight, boolean selectInterpolatedTextures) {
 		try {
-			buildAtlasMapFromTexutes0(textureFolderLocation, prioritizeAtlasHeight);
+			buildAtlasMapFromTexutes0(textureFolderLocation, atlasName, prioritizeAtlasHeight, selectInterpolatedTextures);
 		} catch (IOException e) {
 			System.err.println("Failed to read some of the textures in " + textureFolderLocation);
 			e.printStackTrace();
@@ -92,7 +83,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 				TexturePack textureData = loadTexture(texturePath);
 				R locationName = textureFolderLocation.locationOfFile(textureName);
 				
-				SingleTextureMap map = new SingleTextureMap(textureData.texture(), textureData.metaData().frames(), textureData.metaData().frametime(), textureData.metaData().interpolate());
+				SingleTextureMap<R> map = new SingleTextureMap<R>(textureData.texture(), textureData.metaData().frames(), textureData.metaData().frametime(), textureData.metaData().interpolate());
 				this.textureCache.put(locationName, map);
 				
 			} catch (FileNotFoundException e) {
@@ -104,11 +95,11 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		
 	}
 	
-	public void buildAtlasMapFromTexutes0(R textureFolderLocation, boolean prioritizeAtlasHeight) throws IOException {
+	public void buildAtlasMapFromTexutes0(R textureFolderLocation, R atlasName, boolean prioritizeAtlasHeight, boolean selectInterpolatedTextures) throws IOException {
 
 		File path = resourceLoader.resolveLocation(sourceFolder, textureFolderLocation);
 		
-		MultiFrameAtlasLayoutBuilder<int[]> layoutBuilder = new MultiFrameAtlasLayoutBuilder<>();
+		AtlasTextureMap<R> map = new AtlasTextureMap<>();
 		List<R> locationsToLink = new ArrayList<>();
 		
 		for (String textureName : listTextureNames(path)) {
@@ -117,23 +108,29 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 
 				File texturePath = new File(path, textureName);
 				TexturePack textureData = loadTexture(texturePath);
-				R locationName = textureFolderLocation.locationOfFile(textureName);
 				
-				BufferedImage image = textureData.texture();
-				int width = image.getWidth();
-				int height= image.getHeight();
-				int[] pixels = image.getRGB(0, 0, width, height, null, 0, width);
-								
-				layoutBuilder.addAtlasImage(
-						width, 
-						height, 
-						textureData.metaData().frames(), 
-						textureData.metaData().frametime(), 
-						textureData.metaData().interpolate(), 
-						pixels
+				if (textureData.metaData().interpolate() == selectInterpolatedTextures) {
+
+					R locationName = textureFolderLocation.locationOfFile(textureName);
+					
+					BufferedImage image = textureData.texture();
+					int width = image.getWidth();
+					int height= image.getHeight();
+					int[] pixels = image.getRGB(0, 0, width, height, null, 0, width);
+					
+					map.addTexture(
+							locationName,
+							width,
+							height,
+							textureData.metaData.frames,
+							textureData.metaData.frametime,
+							textureData.metaData.interpolate,
+							pixels
 					);
-				locationsToLink.add(locationName);
-				
+					locationsToLink.add(locationName);
+					
+				}
+					
 			} catch (FileNotFoundException e) {
 				System.err.println("Warning: A texture could not be loaded!");
 				e.printStackTrace();	
@@ -141,57 +138,12 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 			
 		}
 		
-		// TODO Move code into atlas map
-		 
-		AtlasMultiFrameLayout<int[]> layout = layoutBuilder.buildLayout(prioritizeAtlasHeight);
-		BufferedImage atlasImage = new BufferedImage(layout.width(), layout.height(), BufferedImage.TYPE_4BYTE_ABGR);
-		
-		System.out.println("Create atlas with size " + layout.width() + " " + layout.height());
-		
-		for (List<AtlasFrameLayout<int[]>> frameLayout : layout.frameLayouts()) {
-			for (AtlasFrameLayout<int[]> imageLayout : frameLayout) {
-				
-				int pixels[] = framePixels(imageLayout.image(), imageLayout.frame(), imageLayout.frameHeight(), imageLayout.width());
-				
-				if (imageLayout.interpolate()) {
-					
-					int[] nextPixels = framePixels(imageLayout.image(), imageLayout.nextFrame(), imageLayout.frameHeight(), imageLayout.width());
-					
-					pixels = interpolatePixels(pixels, nextPixels, imageLayout.subframe());
-					
-				}
-				
-				atlasImage.setRGB(imageLayout.x(), imageLayout.y(), imageLayout.width(), imageLayout.frameHeight(), pixels, 0, imageLayout.width());
-				
-			}
-		}
-		
-//		File outputFile = new File(textureFolder.getParentFile(), "/atlas.png");
-//		System.out.println("Write file to " + outputFile);
-//		FileOutputStream s = new FileOutputStream(outputFile);
-//		ImageIO.write(atlasImage, "png", s);
-//		s.close();
-		
-		
+		map.buildAtlas(prioritizeAtlasHeight, selectInterpolatedTextures);
+		this.textureCache.put(atlasName, map);
+		for (R location : locationsToLink) this.textureCache.put(location, map);
 		
 	}
 
-	protected static int[] interpolatePixels(int[] pixels1, int[] pixels2, float interpolation) {
-		int[] pixels = new int[pixels1.length];
-		for (int i = 0; i < pixels1.length; i++) {
-			pixels[i] = (int) (pixels1[i] * (1F - interpolation) + pixels2[i] * interpolation); // TODO: Incorrect interpolation, only for testing!
-		}
-		return pixels;
-	}
-	
-	protected static int[] framePixels(int[] pixels, int frame, int frameHeight, int width) {
-		
-		int begin = frame * frameHeight * width;
-		int end = begin + frameHeight * width;
-		return Arrays.copyOfRange(pixels, begin, end);
-		
-	}
-	
 	protected static List<String> listTextureNames(File textureFolder) throws IOException {
 		if (!textureFolder.isDirectory()) throw new IOException("The texture folder path '" + textureFolder + "' ist not valid!");
 		List<String> textureNames = new ArrayList<>();
@@ -243,12 +195,15 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		
 	}
 
-	public AbstractTextureMap getTexture(R resourceLocation) {
+	@SuppressWarnings("unchecked")
+	public AbstractTextureMap<R> getTexture(R resourceLocation) {
 		if (!this.textureCache.containsKey(resourceLocation)) {
 			System.err.println("Texture " + resourceLocation + " does not exist!");
-			this.textureCache.put(resourceLocation, INVALID_TEXTURE_FALLBACK.get());
+			this.textureCache.put(resourceLocation, (AbstractTextureMap<R>) INVALID_TEXTURE_FALLBACK.get());
 		}
-		return this.textureCache.get(resourceLocation);
+		AbstractTextureMap<R> texture = this.textureCache.get(resourceLocation);
+		texture.activateTexture(resourceLocation);
+		return texture;
 	}
 	
 }

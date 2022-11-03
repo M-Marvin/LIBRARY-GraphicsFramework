@@ -1,14 +1,6 @@
 package de.m_marvin.renderengine;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.imageio.ImageIO;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL33;
@@ -23,12 +15,7 @@ import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
 import de.m_marvin.renderengine.shaders.ShaderInstance;
 import de.m_marvin.renderengine.shaders.ShaderLoader;
 import de.m_marvin.renderengine.textures.AbstractTextureMap;
-import de.m_marvin.renderengine.textures.SingleTextureMap;
-import de.m_marvin.renderengine.textures.atlasbuilding.MultiFrameAtlasLayoutBuilder;
-import de.m_marvin.renderengine.textures.atlasbuilding.MultiFrameAtlasLayoutBuilder.AtlasFrameLayout;
-import de.m_marvin.renderengine.textures.atlasbuilding.MultiFrameAtlasLayoutBuilder.AtlasMultiFrameLayout;
 import de.m_marvin.renderengine.textures.utility.TextureLoader;
-import de.m_marvin.renderengine.textures.utility.TextureLoader.TextureMetaData;
 import de.m_marvin.renderengine.translation.Camera;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.renderengine.utility.NumberFormat;
@@ -53,7 +40,7 @@ public class RenderEngineTest {
 		}		
 	}
 	
-	public static AbstractTextureMap texture;
+	public static AbstractTextureMap<ResourceLocation> texture;
 	public static long currentTickTime;
 	
 	public void start() throws IOException {
@@ -72,7 +59,11 @@ public class RenderEngineTest {
 		UserInput input = new UserInput();
 		input.attachToWindow(window2.windowId());
 
-		textureLoader.buildAtlasMapFromTextures(new ResourceLocation("test", ""), false);
+		textureLoader.buildAtlasMapFromTextures(new ResourceLocation("test", ""), new ResourceLocation("test", "atlas_1"), false, false);
+		textureLoader.buildAtlasMapFromTextures(new ResourceLocation("test", ""), new ResourceLocation("test", "atlas_1_interpolated"), false, true);
+
+		shaderLoader.loadShadersIn(new ResourceLocation("test", ""));
+		//shaderLoader.loadShader(new ResourceLocation("test", "testShader"), new ResourceLocation("test", "shader1"), Optional.empty());
 		
 		input.registerBinding("movement.forward").addBinding(KeySource.getKey(GLFW.GLFW_KEY_W));
 		input.registerBinding("movement.backward").addBinding(KeySource.getKey(GLFW.GLFW_KEY_S));
@@ -91,14 +82,15 @@ public class RenderEngineTest {
 		
 		poseStack.push();
 		buffer.begin(RenderPrimitive.TRIANGLES, format);
+		AbstractTextureMap<ResourceLocation> texture2 = textureLoader.getTexture(new ResourceLocation("test", "testA2"));
 		poseStack.translate(0, 0.5F, 0);
 		poseStack.scale(2, 2, 1);
-		buffer.vertex(poseStack, -1, -1, 0).normal(poseStack, 1, 0, 1).color(1, 0, 0, 1).uv(0, 0).endVertex();
-		buffer.vertex(poseStack, 1, -1, 0).normal(poseStack, 0, 1, 1).color(0, 1, 0, 1).uv(1, 0).endVertex();
-		buffer.vertex(poseStack, -1, 1, 0).normal(poseStack, 1, 1, 1).color(0, 0, 1, 1).uv(0, 1).endVertex();
-		buffer.vertex(poseStack, 1, -1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(1, 0).endVertex();
-		buffer.vertex(poseStack, -1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(0, 1).endVertex();
-		buffer.vertex(poseStack, 1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(1, 1).endVertex();
+		buffer.vertex(poseStack, -1, -1, 0).normal(poseStack, 1, 0, 1).color(1, 0, 0, 1).uv(texture2, 0, 0).endVertex();
+		buffer.vertex(poseStack, 1, -1, 0).normal(poseStack, 0, 1, 1).color(0, 1, 0, 1).uv(texture2, 1, 0).endVertex();
+		buffer.vertex(poseStack, -1, 1, 0).normal(poseStack, 1, 1, 1).color(0, 0, 1, 1).uv(texture2, 0, 1).endVertex();
+		buffer.vertex(poseStack, 1, -1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(texture2, 1, 0).endVertex();
+		buffer.vertex(poseStack, -1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(texture2, 0, 1).endVertex();
+		buffer.vertex(poseStack, 1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 0, 1, 1).uv(texture2, 1, 1).endVertex();
 		buffer.index(0).index(1).index(2);//.index(3);
 		buffer.index(3).index(4).index(5);//.index(3);
 		buffer.end();
@@ -106,14 +98,15 @@ public class RenderEngineTest {
 
 		poseStack.push();
 		buffer.begin(RenderPrimitive.TRIANGLES, format);
+		//texture2 = textureLoader.getTexture(new ResourceLocation("test", "dust_block"));
 		poseStack.translate(0, 6.5F, 0);
 		poseStack.scale(2, 2, 1);
-		buffer.vertex(poseStack, -1, -1, 0).normal(poseStack, 1, 0, 1).color(1, 1, 0, 1).uv(0, 0).endVertex();
-		buffer.vertex(poseStack, 1, -1, 0).normal(poseStack, 0, 1, 1).color(0, 1, 1, 1).uv(1, 0).endVertex();
-		buffer.vertex(poseStack, -1, 1, 0).normal(poseStack, 1, 1, 1).color(0, 1, 1, 1).uv(0, 1).endVertex();
-		buffer.vertex(poseStack, 1, -1, -1).normal(poseStack, 0, 0, 1).color(1, 1, 1, 1).uv(1, 0).endVertex();
-		buffer.vertex(poseStack, -1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 1, 1, 1).uv(0, 1).endVertex();
-		buffer.vertex(poseStack, 1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 1, 1, 1).uv(1, 1).endVertex();
+		buffer.vertex(poseStack, -1, -1, 0).normal(poseStack, 1, 0, 1).color(1, 1, 0, 1).uv( 0, 0).endVertex();
+		buffer.vertex(poseStack, 1, -1, 0).normal(poseStack, 0, 1, 1).color(0, 1, 1, 1).uv( 1, 0).endVertex();
+		buffer.vertex(poseStack, -1, 1, 0).normal(poseStack, 1, 1, 1).color(0, 1, 1, 1).uv( 0, 1).endVertex();
+		buffer.vertex(poseStack, 1, -1, -1).normal(poseStack, 0, 0, 1).color(1, 1, 1, 1).uv( 1, 0).endVertex();
+		buffer.vertex(poseStack, -1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 1, 1, 1).uv( 0, 1).endVertex();
+		buffer.vertex(poseStack, 1, 1, -1).normal(poseStack, 0, 0, 1).color(1, 1, 1, 1).uv( 1, 1).endVertex();
 		buffer.index(0).index(1).index(2);//.index(3);
 		buffer.index(3).index(4).index(5);//.index(3);
 		buffer.end();
@@ -126,11 +119,9 @@ public class RenderEngineTest {
 		vertexBuffer2.upload(buffer, BufferUsage.STATIC);
 		buffer.freeMemory();
 		
-		ShaderInstance shader = shaderLoader.load(new ResourceLocation("test", "testShader"), format);
-		
 		Matrix4f projectionMatrix = Matrix4f.perspective(65, 1000F / 600F, 1, 1000); //Matrix4f.orthographic(-100, 100, 100, -100, -10F, 10F);
 		
-		texture = textureLoader.getTexture(new ResourceLocation("test", "testA"));
+		texture = textureLoader.getTexture(new ResourceLocation("test", "atlas_1_interpolated"));
 		
 		window2.registerWindowListener((shouldClose, resized, focused, unfocused, maximized, restored) -> {
 			if (resized.isPresent()) GLStateManager.resizeViewport(0, 0, resized.get().x(), resized.get().y());
@@ -161,7 +152,7 @@ public class RenderEngineTest {
 			
 		}, "TestThread");
 		testThread.start();
-		
+		ShaderInstance shader = shaderLoader.getShader(new ResourceLocation("test", "testShader"));
 		while (!window2.shouldClose()) {
 			
 			long currentTime = System.currentTimeMillis();

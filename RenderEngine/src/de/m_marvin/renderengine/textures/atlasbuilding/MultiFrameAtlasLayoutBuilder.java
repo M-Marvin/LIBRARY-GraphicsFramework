@@ -12,8 +12,8 @@ import de.m_marvin.renderengine.textures.atlasbuilding.AtlasLayoutBuilder.AtlasL
 public class MultiFrameAtlasLayoutBuilder<T> {
 	
 	public static record AtlasMultiFrameImage<T>(int width, int height, int frameCount, int[] frames, int frametime, boolean interpolate, T image) {}
-	public static record AtlasFrameLayout<T>(int x, int y, int width, int frameHeight, int frame, int nextFrame, float subframe, boolean interpolate, T image) {}
-	public static record AtlasMultiFrameLayout<T>(int width, int height, int frames, List<List<AtlasFrameLayout<T>>> frameLayouts) {}
+	public static record AtlasFrameLayout<T>(int x, int y, int framey, int width, int frameHeight, int frame, int nextFrame, float subframe, boolean interpolate, T image) {}
+	public static record AtlasMultiFrameLayout<T>(int width, int height, int frames, int frametime, List<List<AtlasFrameLayout<T>>> frameLayouts) {}
 	
 	protected List<AtlasMultiFrameImage<T>> atlasImages = new ArrayList<>();
 	
@@ -40,7 +40,6 @@ public class MultiFrameAtlasLayoutBuilder<T> {
 				.toList()
 			)
 			.toList();
-		System.out.println(divs);
 		int atlasFrametime = IntStream.range(
 				1, 
 				divs.stream().mapToInt((divStream) -> 
@@ -49,7 +48,6 @@ public class MultiFrameAtlasLayoutBuilder<T> {
 			)
 			.filter((i) -> divs.stream().filter((list) -> list.contains(i)).count() == divs.size())
 			.max().getAsInt();
-		System.out.println("Required frame time for atlas texture: " + atlasFrametime);
 		
 		// Calculate atlas frames per image frame
 		Map<AtlasMultiFrameImage<T>, Integer> atlasFramesPerImageFrame = this.atlasImages.stream().collect(Collectors.toMap((image) -> image, (image) -> image.frames().length > 1 ? image.frametime / atlasFrametime : 1));
@@ -68,7 +66,6 @@ public class MultiFrameAtlasLayoutBuilder<T> {
 				}
 			}
 		}
-		System.out.println("Required frames for atlas texture: " + atlasFrameCount);
 		
 		// Build atlas frame layout
 		AtlasLayoutBuilder<AtlasMultiFrameImage<T>> layoutBuilder = new AtlasLayoutBuilder<>();
@@ -80,7 +77,6 @@ public class MultiFrameAtlasLayoutBuilder<T> {
 		// Calculate atlas format
 		int atlasWidth = frameLayout.width();
 		int atlasHeight = frameLayout.height() * atlasFrameCount;
-		System.out.println("Atlas texture size: " + atlasWidth + " x " + atlasHeight);
 		
 		// Build frame layouts
 		List<List<AtlasFrameLayout<T>>> multiFrameLayouts = new ArrayList<>();
@@ -94,6 +90,7 @@ public class MultiFrameAtlasLayoutBuilder<T> {
 						new AtlasFrameLayout<T>(
 								layout.x(), 
 								layout.y() + frameLayout.height() * atlasFrameIndex,
+								layout.y(),
 								layout.image().width(),
 								layout.image().height(),
 								layout.image().image().frames()[imageFrameIndex],
@@ -107,7 +104,7 @@ public class MultiFrameAtlasLayoutBuilder<T> {
 		}
 		
 		// Complete, cleanup
-		AtlasMultiFrameLayout<T> layout = new AtlasMultiFrameLayout<>(atlasWidth, atlasHeight, atlasFrameCount, multiFrameLayouts);
+		AtlasMultiFrameLayout<T> layout = new AtlasMultiFrameLayout<>(atlasWidth, atlasHeight, atlasFrameCount, atlasFrametime, multiFrameLayouts);
 		this.atlasImages.clear();
 		return layout;
 		

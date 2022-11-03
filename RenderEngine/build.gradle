@@ -13,6 +13,7 @@ project.ext.lwjglNatives = "natives-windows"
 
 repositories {
 	mavenCentral()
+	maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -32,7 +33,9 @@ dependencies {
 	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
 	runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
 	
-	implementation "com.google.guava:guava:16+"
+	implementation 'com.github.M-Marvin:LIBRARY-UnifiedVectors:v1.0'
 	
 	implementation "com.google.code.gson:gson:2.9.1"
+	implementation "com.google.guava:guava:16+"
+	
 }

@@ -7,7 +7,9 @@ import java.util.stream.IntStream;
 
 import javax.imageio.ImageIO;
 
-public class SingleTextureMap extends AbstractTextureMap {
+import de.m_marvin.renderengine.resources.IResourceProvider;
+
+public class SingleTextureMap<R extends IResourceProvider<R>> extends AbstractTextureMap<R> {
 	
 	public SingleTextureMap(int width, int height, int[] frames, int frametime, int[] pixels, boolean interpolate) {
 		this.width = width;
@@ -32,6 +34,9 @@ public class SingleTextureMap extends AbstractTextureMap {
 	public SingleTextureMap(InputStream imageStream, int[] frames, int frametime, boolean interpolate) throws IOException {
 		this(ImageIO.read(imageStream), frames, frametime, interpolate);
 	}
+
+	@Override
+	public void activateTexture(R textureLoc) {}
 	
 	@Override
 	public float mapU(float u) {

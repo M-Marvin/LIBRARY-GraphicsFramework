@@ -3,10 +3,11 @@ package de.m_marvin.renderengine.textures;
 import org.lwjgl.opengl.GL33;
 
 import de.m_marvin.renderengine.GLStateManager;
+import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.renderengine.textures.utility.TextureFilter;
 import de.m_marvin.unimat.impl.Matrix3f;
 
-public abstract class AbstractTextureMap implements ITextureSampler, IUVModifyer {
+public abstract class AbstractTextureMap<R extends IResourceProvider<R>> implements ITextureSampler, IUVModifyer {
 
 	protected Matrix3f animationMatrixLast;
 	protected Matrix3f animationMatrix;
@@ -50,6 +51,8 @@ public abstract class AbstractTextureMap implements ITextureSampler, IUVModifyer
 		GLStateManager.bindTexture(GL33.GL_TEXTURE_2D, 0);
 	}
 
+	public abstract void activateTexture(R textureLoc);
+	
 	public int getFrametime() {
 		return frametime;
 	}
@@ -79,7 +82,7 @@ public abstract class AbstractTextureMap implements ITextureSampler, IUVModifyer
 	}
 	@Override
 	public Matrix3f lastFrameMatrix() {
-		return this.interpolate ? this.animationMatrixLast : this.animationMatrix;
+		return doFrameInterpolation() ? this.animationMatrixLast : this.animationMatrix;
 	}
 	@Override
 	public boolean doFrameInterpolation() {

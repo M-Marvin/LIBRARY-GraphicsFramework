@@ -1,5 +1,6 @@
 package de.m_marvin.renderengine.vertecies;
 
+import de.m_marvin.renderengine.textures.IUVModifyer;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.univec.api.IVector3;
 import de.m_marvin.univec.api.IVector4;
@@ -21,6 +22,9 @@ public interface IVertexConsumer {
 	}
 	public IVertexConsumer normal(float x, float y, float z);
 	public IVertexConsumer color(float r, float g, float b, float a);
+	public default IVertexConsumer uv(IUVModifyer modifier, float u, float v) {
+		return uv(modifier.mapU(u), modifier.mapV(v));
+	}
 	public IVertexConsumer uv(float u, float v);
 	
 	/* End of predefined layouts */

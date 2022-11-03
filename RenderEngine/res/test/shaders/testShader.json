@@ -8,5 +8,11 @@
 		{ "Name": "AnimMat", "Type": "matrix3x3", "Value": [ 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0 ] },
 		{ "Name": "AnimMatLast", "Type": "matrix3x3", "Value": [ 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0 ] },
 		{ "Name": "Interpolation", "Type": "float", "Value": 1.0 }
+	],
+	"Attributes": [
+		{ "Name": "position", "Type": "float", "Count": 3, "Normalize": false },
+		{ "Name": "normal", "Type": "float", "Count": 3, "Normalize": true },
+		{ "Name": "color", "Type": "float", "Count": 4, "Normalize": false },
+		{ "Name": "uv", "Type": "float", "Count": 2, "Normalize": false }
 	]
 }

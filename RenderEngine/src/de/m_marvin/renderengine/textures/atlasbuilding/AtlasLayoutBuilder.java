@@ -141,13 +141,10 @@ public class AtlasLayoutBuilder<T> {
 				// Modify height/size if required
 				if (prioritizeHeight) {
 					int x = nextPoint.x() + fittingImage.width;
-					System.out.println(x);
 					if (x > minWidth) minWidth = x;
 				} else {
 					int y = nextPoint.y() + fittingImage.height;
-					int x = nextPoint.x() + fittingImage.width;
 					if (y > minHeight) minHeight = y;
-					System.out.println(nextPoint + " " + fittingImage + " " +  y +  "     " + minHeight + "     " + x);
 				}
 				
 				// Calculate new paste points resulting from the placed image
