@@ -2,6 +2,12 @@ package de.m_marvin.renderengine.utility;
 
 import org.lwjgl.opengl.GL33;
 
+/**
+ * Represents the different number formats supported by OpenGL.
+ * 
+ * @author Marvin Köhler
+ *
+ */
 public enum NumberFormat {
 	UBYTE(Byte.BYTES, GL33.GL_UNSIGNED_BYTE),USHORT(Short.BYTES, GL33.GL_UNSIGNED_SHORT),UINT(Integer.BYTES, GL33.GL_UNSIGNED_INT),INT(Integer.BYTES, GL33.GL_INT),SHORT(Short.BYTES, GL33.GL_SHORT),FLOAT(Float.BYTES, GL33.GL_FLOAT),BYTE(Byte.BYTES, GL33.GL_BYTE);
 	private final int bytes;

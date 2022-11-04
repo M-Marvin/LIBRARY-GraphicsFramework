@@ -13,6 +13,14 @@ import de.m_marvin.renderengine.vertecies.RenderPrimitive;
 import de.m_marvin.renderengine.vertecies.VertexFormat;
 import de.m_marvin.renderengine.vertecies.VertexFormat.VertexElement;
 
+/**
+ * The BufferBuilder is used to create VertexBuffers by calling the necessary draw methods like {@link #vertex(float, float, float)}.
+ * 
+ * It can store multiple data-streams for multiple VertexBuffers at the same time.
+ * It can be reused after building all VertexBuffers via {@link #popNext()} or by calling {@link #discardStored()}.
+ * @author Marvin Koehler
+ *
+ */
 public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 	
 	protected ByteBuffer buffer;
@@ -29,6 +37,11 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 	protected int currentElementIndex;
 	protected VertexElement currentElement;
 	
+	/**
+	 * Allocates a new empty BufferBuilder with the given size in bytes.
+	 * 
+	 * @param bufferSize The size of the buffer in bytes
+	 **/
 	public BufferBuilder(int bufferSize) {
 		this.buffer = MemoryUtil.memAlloc(bufferSize);
 		this.drawStates = Queues.newArrayDeque();
@@ -39,6 +52,7 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 		return this.drawStates.size();
 	}
 	
+	@Override
 	public BufferPair popNext() {
 		if (this.drawStates.isEmpty()) throw new IllegalStateException("Nothing has ben drawn to the buffer!");
 		DrawState drawState = this.drawStates.poll();
@@ -62,11 +76,15 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 		this.currentElementIndex = -1;
 	}
 
+	/**
+	 * Destroys this BufferBuilder and frees its allocated memory.
+	 */
 	public void freeMemory() {
 		discardStored();
 		MemoryUtil.memFree(buffer);
 	}
 	
+	@Override
 	public void begin(RenderPrimitive type, VertexFormat format) {
 		if (this.building) {
 			throw new IllegalStateException("BufferBuilder already building!");
@@ -80,7 +98,8 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 			this.buffer.position(this.writtenBytes);
 		}
 	}
-
+	
+	@Override
 	public void end() {
 		if (this.building) {
 			if (!this.buildingIndecies) {
@@ -95,12 +114,16 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 		}
 	}
 
+	/**
+	 * Returns the vertex-data element that is required next in the order of the format specified in the {@link #begin(RenderPrimitive, VertexFormat)} call.
+	 * @return The next required vertex data element of the specified attribute format
+	 */
 	public VertexElement getCurrentElement() {
 		return currentElement;
 	}
-
+	
 	@Override
-	public IVertexConsumer nextElement(int targetIndex) {
+	public IVertexConsumer nextElement() {
 		if (!this.building) throw new IllegalStateException("Buffer not building!");
 		this.currentElementIndex++;
 		if (this.currentElementIndex == this.format.getElementCount()) throw new IllegalStateException("The current VertexFormat does not have more than " + this.format.getElementCount() + " elements!");

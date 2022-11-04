@@ -135,7 +135,7 @@ public class RenderEngineTest {
 		//input.addTextInputListener((character, functionalKey) -> System.out.println(character + " " + functionalKey));
 		
 		Thread testThread = new Thread(() -> {
-						
+			
 			while (texture != null) {
 				
 				texture.nextFrame();

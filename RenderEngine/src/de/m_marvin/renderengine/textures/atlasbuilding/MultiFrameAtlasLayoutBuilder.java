@@ -9,22 +9,50 @@ import java.util.stream.IntStream;
 import de.m_marvin.renderengine.textures.atlasbuilding.AtlasLayoutBuilder.AtlasImageLayout;
 import de.m_marvin.renderengine.textures.atlasbuilding.AtlasLayoutBuilder.AtlasLayout;
 
+/**
+ * Provides an algorithm to build an animated atlas from animated textures.
+ * Uses the {@link AtlasLayoutBuilder} for the frame layout and extends its layout to multiple frames.
+ * 
+ * @author Marvin Köhler
+ *
+ * @param <T> The type of the image
+ */
 public class MultiFrameAtlasLayoutBuilder<T> {
 	
-	public static record AtlasMultiFrameImage<T>(int width, int height, int frameCount, int[] frames, int frametime, boolean interpolate, T image) {}
-	public static record AtlasFrameLayout<T>(int x, int y, int framey, int width, int frameHeight, int frame, int nextFrame, float subframe, boolean interpolate, T image) {}
+	public static record AtlasMultiFrameImage<T>(int width, int height, int frameCount, int[] frames, int frametime, T image) {}
+	public static record AtlasFrameLayout<T>(int x, int y, int framey, int width, int frameHeight, int frame, int nextFrame, float subframe, T image) {}
 	public static record AtlasMultiFrameLayout<T>(int width, int height, int frames, int frametime, List<List<AtlasFrameLayout<T>>> frameLayouts) {}
 	
 	protected List<AtlasMultiFrameImage<T>> atlasImages = new ArrayList<>();
 	
+	/**
+	 * Adds the image to the list of images to place in the atlas.
+	 * @param image The image represented by an {@link AtlasMultiFrameImage}
+	 */
 	public void addAtlasImage(AtlasMultiFrameImage<T> image) {
 		this.atlasImages.add(image);
 	}
-	public void addAtlasImage(int width, int height, int[] frames, int frametime, boolean interpolate, T image) {
+	
+	/**
+	 * Adds the image to the list of images to place in the atlas.
+	 * @param width The image width
+	 * @param height The image height
+	 * @param frames The frames of the animation
+	 * @param frametime The tick-count one frame lasts
+	 * @param interpolate If the texture interpolates between the frames
+	 * @param image The image data
+	 */
+	public void addAtlasImage(int width, int height, int[] frames, int frametime, T image) {
 		int frameCount = IntStream.of(frames).max().getAsInt() + 1;
-		this.atlasImages.add(new AtlasMultiFrameImage<T>(width, height, frameCount, frames, frametime, interpolate, image));
+		this.atlasImages.add(new AtlasMultiFrameImage<T>(width, height, frameCount, frames, frametime, image));
 	}
 	
+	/**
+	 * Tries to build the atlas layout from the added images.
+	 * @param prioritizeHeight Determines the arrangement of the textures (x or y axis).
+	 * @return If successful the layout for the atlas
+	 * @throws IllegalStateException if the building of the layout fails
+	 */
 	public AtlasMultiFrameLayout<T> buildLayout(boolean prioritizeHeight) {
 		
 		if (this.atlasImages.isEmpty()) throw new IllegalStateException("No images have ban added to the builder!");
@@ -96,7 +124,6 @@ public class MultiFrameAtlasLayoutBuilder<T> {
 								layout.image().image().frames()[imageFrameIndex],
 								layout.image().image().frames()[nextImageFrameIngex],
 								((atlasFrameIndex % framesPerImageFrame) / (float) framesPerImageFrame),
-								layout.image().image().interpolate(),
 								layout.image().image().image()
 							));
 			}

@@ -28,6 +28,14 @@ import de.m_marvin.renderengine.textures.AbstractTextureMap;
 import de.m_marvin.renderengine.textures.AtlasTextureMap;
 import de.m_marvin.renderengine.textures.SingleTextureMap;
 
+/**
+ * Handles the loading of textures from files.
+ * 
+ * @author Marvin Koehler
+ *
+ * @param <R> The type of the resource locations
+ * @param <FE> The implementation of the source folder list
+ */
 public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFolder> {
 	
 	public static record TextureMetaData(int frametime, int[] frames, boolean interpolate, String fileFormat) {}
@@ -36,7 +44,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	public static final String TEXTURE_META_DATA_FORMAT = "json";
 	public static final String DEFAULT_TEXTURE_FORMAT = "png";
 	public static final TextureMetaData DEFAULT_META_DATA = new TextureMetaData(1, new int[] {0}, false, DEFAULT_TEXTURE_FORMAT);
-
+	
 	public static final Supplier<SingleTextureMap<?>> INVALID_TEXTURE_FALLBACK = () -> new SingleTextureMap<>(2, 2, new int[] {0}, 1, new int[] {
 			new Color(255, 0, 255, 255).getRGB(),
 			new Color(0, 0, 0, 255).getRGB(),
@@ -49,11 +57,24 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	
 	protected LinkedHashMap<R, AbstractTextureMap<R>> textureCache = new LinkedHashMap<>();
 	
+	/**
+	 * Creates a new texture loader.
+	 * @param sourceFolder The source folder
+	 * @param resourceLoader The resource loader used for the file access
+	 */
 	public TextureLoader(FE sourceFolder, ResourceLoader<R, FE> resourceLoader) {
 		this.sourceFolder = sourceFolder;
 		this.resourceLoader = resourceLoader;
 	}
 	
+	/**
+	 * Loads all textures in the given folder and sores them as multiple textures on the GPU and caches them as {@link SingleTextureMap}s in the cache.
+	 * The textures have to be in the default {@link #DEFAULT_TEXTURE_FORMAT} format or require a metadata-json with the same file containing the name format used.
+	 * Textures without such a file and without the default format are not loaded.
+	 * The metadata JSON can also hold informations about animation.
+	 * 
+	 * @param textureFolderLocation The texture folder location of the textures to load
+	 */
 	public void buildSingleMapsFromTextures(R textureFolderLocation) {
 		try {
 			buildSingleMapsFromTextures0(textureFolderLocation);
@@ -63,6 +84,19 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		}
 	}
 	
+	/**
+	 * Loads all textures in the given folder and sores them as one texture-atlas on the GPU and caches this texture as {@link AtlasTextureMap}s in the cache.
+	 * The atlas gets cached under the name of all textures that are placed in the atlas and an additional custom name, so it can be queried by the name of any texture from the atlas or its custom name.
+	 * The atlas does not allow to mix interpolated and non interpolated animated textures, therefore a parameter to specify which textures should be loaded is required for this method.
+	 * The textures have to be in the default {@link #DEFAULT_TEXTURE_FORMAT} format or require a metadata-json with the same file containing the name format used.
+	 * Textures without such a file and without the default format are not loaded.
+	 * The metadata JSON can also hold informations about animation.
+	 * 
+	 * @param textureFolderLocation The texture folder location of the textures to load
+	 * @param atlasName The additional custom name for the atlas
+	 * @param prioritizeAtlasHeight Decides if the aligment of the images in the atlas are oriented on the x or y axis
+	 * @param selectInterpolatedTextures If true, only interpolated textures are loaded into the atlas, if false only non interpolated textures are loaded, mixing is not allowed
+	 */
 	public void buildAtlasMapFromTextures(R textureFolderLocation, R atlasName, boolean prioritizeAtlasHeight, boolean selectInterpolatedTextures) {
 		try {
 			buildAtlasMapFromTexutes0(textureFolderLocation, atlasName, prioritizeAtlasHeight, selectInterpolatedTextures);
@@ -72,6 +106,12 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		}
 	}
 	
+	/**
+	 * Non try-catch version of {@link #buildSingleMapsFromTextures(IResourceProvider)}.
+	 * 
+	 * @param textureFolderLocation The texture folder location of the textures to load
+	 * @throws IOException If an error occurs accessing the texture files
+	 */
 	public void buildSingleMapsFromTextures0(R textureFolderLocation) throws IOException {
 		
 		File path = resourceLoader.resolveLocation(sourceFolder, textureFolderLocation);
@@ -95,6 +135,15 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		
 	}
 	
+	/**
+	 * Non try-catch version of {@link #buildAtlasMapFromTextures(IResourceProvider, IResourceProvider, boolean, boolean)}.
+	 * 
+	 * @param textureFolderLocation The texture folder location of the textures to load
+	 * @param atlasName The additional custom name for the atlas
+	 * @param prioritizeAtlasHeight Decides if the aligment of the images in the atlas are oriented on the x or y axis
+	 * @param selectInterpolatedTextures If true, only interpolated textures are loaded into the atlas, if false only non interpolated textures are loaded
+	 * @throws IOException If an error occurs accessing the texture files
+	 */
 	public void buildAtlasMapFromTexutes0(R textureFolderLocation, R atlasName, boolean prioritizeAtlasHeight, boolean selectInterpolatedTextures) throws IOException {
 
 		File path = resourceLoader.resolveLocation(sourceFolder, textureFolderLocation);
@@ -124,7 +173,6 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 							height,
 							textureData.metaData.frames,
 							textureData.metaData.frametime,
-							textureData.metaData.interpolate,
 							pixels
 					);
 					locationsToLink.add(locationName);
@@ -144,6 +192,14 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		
 	}
 
+	/**
+	 * Lists all texture names found in the fiven folder.
+	 * Does not search in sub-folders.
+	 * 
+	 * @param textureFolder The folder to search for textures
+	 * @return A list containing all found texture names
+	 * @throws IOException If an error occurs accessing the files
+	 */
 	protected static List<String> listTextureNames(File textureFolder) throws IOException {
 		if (!textureFolder.isDirectory()) throw new IOException("The texture folder path '" + textureFolder + "' ist not valid!");
 		List<String> textureNames = new ArrayList<>();
@@ -158,6 +214,14 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		return textureNames;
 	}
 	
+	/**
+	 * Loads a given textures meta-json and texture and returns it as {@link TexturePack}.
+	 * The returned texture pack is used to construct the implementations of {@link AbstractMethodError}.
+	 * 
+	 * @param texturePath The path to the texture to load
+	 * @return A {@link TexturePack} containing all informations about the texture
+	 * @throws IOException If an error occurs accessing the files
+	 */
 	public static TexturePack loadTexture(File texturePath) throws IOException {
 		File textureMeta = new File(texturePath + "." + TEXTURE_META_DATA_FORMAT);
 		TextureMetaData metaData = textureMeta.isFile() ? loadJsonMetaData(new FileInputStream(textureMeta)) : DEFAULT_META_DATA;
@@ -167,10 +231,22 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		return new TexturePack(metaData, texture);
 	}
 	
+	/**
+	 * Loads a texture from an input stream.
+	 * @param inputStream The input stream to read from
+	 * @return The texture as {@link BufferedImage}
+	 * @throws IOException If an error occurs accessing the input stream
+	 */
 	public static BufferedImage loadBufferedTexture(InputStream inputStream) throws IOException {
 		return ImageIO.read(inputStream);
 	}
 	
+	/**
+	 * Loads the metadata of a texture from an input stream.
+	 * @param inputSteam The input stream to read from
+	 * @return The metadata as {@link TextureMetaData}
+	 * @throws IOException If an error occurs accessing the input stream
+	 */
 	public static TextureMetaData loadJsonMetaData(InputStream inputSteam) throws IOException {
 		
 		Gson gson = new Gson();
@@ -194,7 +270,16 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		return new TextureMetaData(frameTime, frames, interpolate, formatName);
 		
 	}
-
+	
+	/**
+	 * Returns the texture map cached under the given name.
+	 * Also if the map contains multiple texture, selects the required one by calling {@link AbstractTextureMap#activateTexture(IResourceProvider)}.
+	 * If no texture is cached under the name, a default texture is created with {@link #INVALID_TEXTURE_FALLBACK}.
+	 * The default texture is then cached under that name.
+	 * 
+	 * @param resourceLocation The location/name of the texture
+	 * @return The texture map cached under that name or the invalid-texture if no texture was found
+	 */
 	@SuppressWarnings("unchecked")
 	public AbstractTextureMap<R> getTexture(R resourceLocation) {
 		if (!this.textureCache.containsKey(resourceLocation)) {

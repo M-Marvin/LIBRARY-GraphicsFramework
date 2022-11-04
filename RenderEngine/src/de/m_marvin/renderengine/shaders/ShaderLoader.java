@@ -3,6 +3,7 @@ package de.m_marvin.renderengine.shaders;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -23,6 +24,14 @@ import de.m_marvin.renderengine.resources.ResourceLoader;
 import de.m_marvin.renderengine.utility.NumberFormat;
 import de.m_marvin.renderengine.vertecies.VertexFormat;
 
+/**
+ * Handles the loading of shaders from files.
+ * 
+ * @author Marvin Koehler
+ *
+ * @param <R> The type of the resource locations
+ * @param <FE> The implementation of the source folder list
+ */
 public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFolder> {
 	
 	public static final String VERTEX_SHADER_FORMAT = "vsh";
@@ -36,11 +45,20 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 
 	protected Map<R, ShaderInstance> shaderCache = new HashMap<>();
 	
+	/**
+	 * Creates a new shader loader.
+	 * @param sourceFolder The source folder
+	 * @param resourceLoader The resource loader used for the file access
+	 */
 	public ShaderLoader(FE sourceFolder, ResourceLoader<R, FE> resourceLoader) {
 		this.sourceFolder = sourceFolder;
 		this.resourceLoader = resourceLoader;
 	}
 	
+	/**
+	 * Loads all shaders in the given folder and caches them.
+	 * @param shaderFolderLocation The location of the folder
+	 */
 	public void loadShadersIn(R shaderFolderLocation) {
 		try {
 			loadShadersIn0(shaderFolderLocation);
@@ -50,6 +68,13 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 		}
 	}
 	
+	/**
+	 * Loads all shaders in the given folder and caches them.
+	 * Non-catch-block version of {@link #loadShadersIn(IResourceProvider)}.
+	 * 
+	 * @param shaderFolderLocation The location of the folder
+	 * @throws IOException If an error occurs in the loading of a shader
+	 */
 	public void loadShadersIn0(R shaderFolderLocation) throws IOException {
 		
 		File path = resourceLoader.resolveLocation(sourceFolder, shaderFolderLocation);
@@ -64,8 +89,15 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 		
 	}
 
-	protected static List<String> listShaderNames(File shaderFolder) throws IOException {
-		if (!shaderFolder.isDirectory()) throw new IOException("The shader folder path '" + shaderFolder + "' ist not valid!");
+	/**
+	 * Lists all shaders in the given folders.
+	 * 
+	 * @param shaderFolder The shader source folder
+	 * @return A list of all shader names in the folder
+	 * @throws FileNotFoundException if the path is not valid
+	 */
+	protected static List<String> listShaderNames(File shaderFolder) throws FileNotFoundException {
+		if (!shaderFolder.isDirectory()) throw new FileNotFoundException("The shader folder path '" + shaderFolder + "' ist not valid!");
 		List<String> shaderNames = new ArrayList<>();
 		for (String fileName : shaderFolder.list()) {
 			String[] fileNameParts = fileName.split("\\.");
@@ -79,6 +111,16 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 		return shaderNames;
 	}
 	
+	/**
+	 * Loads the shader at the given location and stores its {@link ShaderInstance} in the cache.
+	 * The shaderName parameter can be used to store the sahder under a different name than its path.
+	 * This allows loading a shader multiple times with different vertex formats.
+	 * 
+	 * @param shaderLocation The location of the shader JSON file
+	 * @param shaderName The name under which the shader instance gets cached
+	 * @param format The vertex format applied to the shader instance
+	 * @return The loaded and cached shader instance
+	 */
 	public ShaderInstance loadShader(R shaderLocation, R shaderName, Optional<VertexFormat> format) {
 		if (!shaderCache.containsKey(shaderName)) {
 			File path = resourceLoader.resolveLocation(sourceFolder, shaderLocation);
@@ -93,10 +135,25 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 		return shaderCache.get(shaderName);
 	}
 	
+	/**
+	 * Returns the shader cached under the given name.
+	 * 
+	 * @param shaderName The shader name
+	 * @return The shader under the given name or null if no shader was found
+	 */
 	public ShaderInstance getShader(R shaderName) {
 		return this.shaderCache.get(shaderName);
 	}
 	
+	/**
+	 * Loads the shader under the given path with the given vertex format.
+	 * If no vertex format is specified the default from the shader JSON is applied.
+	 * 
+	 * @param shaderFile The path to the shader JSON (without the .json ending)
+	 * @param vertexFormat The (optional) applied vertex format
+	 * @return The loaded uncached shader instance
+	 * @throws IOException If an error occurs accessing the files
+	 */
 	public static ShaderInstance load(File shaderFile, Optional<VertexFormat> vertexFormat) throws IOException {
 		File sourceFolder = shaderFile.getParentFile();
 		
@@ -146,6 +203,16 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 		return shaderInstance;
 	}
 	
+	/**
+	 * Loads GLSL code from a library file.
+	 * Resolves any #includes in the library file.
+	 * Used by {@link #load(File, Optional)}.
+	 * 
+	 * @param sourceFolder The folder containing the library files
+	 * @param fileName The name of the library to load
+	 * @return The GLSL code of the library with all #includes resolved
+	 * @throws IOException If an error occurs accessing the files
+	 */
 	protected static String loadGLSLFile(File sourceFolder, String fileName) throws IOException {
 		String line;
 		BufferedReader vertexShaderInputStream = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sourceFolder, fileName))));

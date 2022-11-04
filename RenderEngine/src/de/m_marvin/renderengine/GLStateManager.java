@@ -7,6 +7,11 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL33;
 
+/**
+ * This class contains all used OpenGL methods.
+ * 
+ * @author Marvin Koehler
+ */
 public class GLStateManager {
 
 	public static boolean initialisate(PrintStream errorStream) {

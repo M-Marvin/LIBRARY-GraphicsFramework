@@ -5,6 +5,12 @@ import java.util.function.IntConsumer;
 
 import org.lwjgl.opengl.GL33;
 
+/**
+ * Represents the different primitives supported by this render engine.
+ * 
+ * @author Marvin Köhler
+ *
+ */
 public enum RenderPrimitive {
 	
 	TRIANGLES(GL33.GL_TRIANGLES, (vertecies, indexconsumer) -> {
@@ -39,6 +45,13 @@ public enum RenderPrimitive {
 		return glType;
 	}
 	
+	/**
+	 * Builds the default indecies required for rendering geometry with this primitive type.
+	 * This method can be used to auto generate the indecies if the used vertex data is in the correct standard order for this primitive.
+	 * 
+	 * @param vertexCount The number of vertecies to draw
+	 * @param indexconsumer An consumer to receive the index values
+	 */
 	public void buildDefaultIndecies(int vertexCount, IntConsumer indexconsumer) {
 		this.defaultIndexBuilder.accept(vertexCount, indexconsumer);
 	}

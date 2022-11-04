@@ -5,6 +5,13 @@ import java.util.function.Function;
 
 import de.m_marvin.renderengine.GLStateManager;
 
+/**
+ * Represents the different uniform types supported by OpenGL and the render engine.
+ * Provides the different type specific setter methods for uploading data to the GPU.
+ * 
+ * @author Marvin Köhler
+ *
+ */
 public enum UniformType {
 	
 	SAMPLER_2D("sampler2D", (array) -> int.class, (location, value) -> {
@@ -48,18 +55,40 @@ public enum UniformType {
 		this.valueTypeSupplier = valueTypeSupplier;
 	}
 	
+	/**
+	 * Returns the value type of the uniform type.
+	 * Depending on the argument it returns the array version of the value.
+	 * @param definedAsArray If the method should return the array version
+	 * 
+	 * @return The value type class
+	 */
 	public Class<?> getValueType(boolean definedAsArray) {
 		return valueTypeSupplier.apply(definedAsArray);
 	}
 	
+	/**
+	 * Type unspecific setter method to upload new values to the GPU.
+	 * 
+	 * @param location The index of the target uniform on the GPU
+	 * @param value The new value to upload to the GPU
+	 */
 	public void set(int location, Object value) {
 		this.glSetter.accept(location, value);
 	}
 	
+	/**
+	 * Returns the name of the uniform type used in the shader JSON
+	 * @return The name of the uniform type
+	 */
 	public String getCodeName() {
 		return codeName;
 	}
 	
+	/**
+	 * Tries to find the uniform type with the given name
+	 * @param name The name of the uniform type
+	 * @return The uniform type or null if no type if found
+	 */
 	public static UniformType byName(String name) {
 		for (UniformType type : UniformType.values()) if (type.getCodeName().equals(name)) return type;
 		return FLOAT;

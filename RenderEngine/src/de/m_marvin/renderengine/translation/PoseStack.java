@@ -3,11 +3,18 @@ package de.m_marvin.renderengine.translation;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.m_marvin.renderengine.vertecies.IVertexConsumer;
 import de.m_marvin.unimat.impl.Matrix3f;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.api.IVector3;
 
+/**
+ * Used to apply translations to draw calls of the {@link IVertexConsumer}.
+ * 
+ * @author Marvin Köhler
+ *
+ */
 public class PoseStack {
 	
 	protected List<Pose> poseStack = new ArrayList<>();

@@ -6,6 +6,14 @@ import java.util.List;
 
 import de.m_marvin.univec.impl.Vec2i;
 
+/**
+ * Provides an algorithm that tries to place the images into a single texture atlas.
+ * Sometimes this can fail if the sizes of the textures are to different.
+ * 
+ * @author Marvin Köhler
+ *
+ * @param <T> Type of the textures
+ */
 public class AtlasLayoutBuilder<T> {
 	
 	public static record AtlasImage<T>(int width, int height, T image) {}
@@ -16,14 +24,30 @@ public class AtlasLayoutBuilder<T> {
 	protected List<AtlasImageLayout<T>> atlasLayout = new ArrayList<>();
 	protected List<Vec2i> pastePoints = new ArrayList<>();
 	
+	/**
+	 * Adds the image to the list of images to place in the atlas.
+	 * @param image The image represented by an {@link AtlasImage}
+	 */
 	public void addAtlasImage(AtlasImage<T> image) {
 		this.atlasImages.add(image);
 	}
 	
+	/**
+	 * Adds the image to the list of images to place in the atlas.
+	 * @param width The image width
+	 * @param height The image height
+	 * @param image The image data
+	 */
 	public void addAtlasImage(int width, int height, T image) {
 		this.atlasImages.add(new AtlasImage<T>(width, height, image));
 	}
 	
+	/**
+	 * Tries to build the atlas layout from the added images.
+	 * @param prioritizeHeight Determines the arrangement of the textures (x or y axis).
+	 * @return If successful the layout for the atlas
+	 * @throws IllegalStateException if the building of the layout fails
+	 */
 	public AtlasLayout<T> buildLayout(boolean prioritizeHeight) {
 		
 		if (this.atlasImages.size() == 0) throw new IllegalStateException("Can't build layout with zero images! (Would not make any sense ...)");
