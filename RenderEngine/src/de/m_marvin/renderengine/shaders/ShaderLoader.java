@@ -113,7 +113,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	
 	/**
 	 * Loads the shader at the given location and stores its {@link ShaderInstance} in the cache.
-	 * The shaderName parameter can be used to store the sahder under a different name than its path.
+	 * The shaderName parameter can be used to store the shader under a different name than its path.
 	 * This allows loading a shader multiple times with different vertex formats.
 	 * 
 	 * @param shaderLocation The location of the shader JSON file

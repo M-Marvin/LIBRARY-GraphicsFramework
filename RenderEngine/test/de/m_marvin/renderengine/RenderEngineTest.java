@@ -10,6 +10,8 @@ import de.m_marvin.renderengine.buffers.BufferUsage;
 import de.m_marvin.renderengine.buffers.VertexBuffer;
 import de.m_marvin.renderengine.inputbinding.UserInput;
 import de.m_marvin.renderengine.inputbinding.bindingsource.KeySource;
+import de.m_marvin.renderengine.models.OBJLoader;
+import de.m_marvin.renderengine.models.RawModel;
 import de.m_marvin.renderengine.resources.ResourceLoader;
 import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
 import de.m_marvin.renderengine.shaders.ShaderInstance;
@@ -26,12 +28,7 @@ import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.univec.impl.Vec3f;
 
 public class RenderEngineTest {
-	
-	/*
-	 * TODO List
-	 * - TextureLoader (automatic atlas building for all textures)
-	 */
-	
+		
 	public static void main(String... args) {
 		try {
 			new RenderEngineTest().start();
@@ -52,6 +49,7 @@ public class RenderEngineTest {
 		ResourceLoader<ResourceLocation, TestSourceFolders> resourceLoader = new ResourceLoader<>();
 		ShaderLoader<ResourceLocation, TestSourceFolders> shaderLoader = new ShaderLoader<ResourceLocation, TestSourceFolders>(TestSourceFolders.SHADERS, resourceLoader);
 		TextureLoader<ResourceLocation, TestSourceFolders> textureLoader = new TextureLoader<ResourceLocation, TestSourceFolders>(TestSourceFolders.TEXTURES, resourceLoader);
+		OBJLoader<ResourceLocation, TestSourceFolders> modelLoader = new OBJLoader<ResourceLocation, TestSourceFolders>(TestSourceFolders.MODELS, resourceLoader);
 		
 		Window window2 = new Window(1000, 600, "Test");
 		window2.makeContextCurrent();
@@ -62,6 +60,8 @@ public class RenderEngineTest {
 		textureLoader.buildAtlasMapFromTextures(new ResourceLocation("test", ""), new ResourceLocation("test", "atlas_1"), false, false);
 		textureLoader.buildAtlasMapFromTextures(new ResourceLocation("test", ""), new ResourceLocation("test", "atlas_1_interpolated"), false, true);
 
+		modelLoader.loadModelsIn(new ResourceLocation("test", ""), new ResourceLocation("test", ""));
+		
 		shaderLoader.loadShadersIn(new ResourceLocation("test", ""));
 		//shaderLoader.loadShader(new ResourceLocation("test", "testShader"), new ResourceLocation("test", "shader1"), Optional.empty());
 		
@@ -117,11 +117,11 @@ public class RenderEngineTest {
 		
 		VertexBuffer vertexBuffer2 = new VertexBuffer();
 		vertexBuffer2.upload(buffer, BufferUsage.STATIC);
-		buffer.freeMemory();
+		//buffer.freeMemory();
 		
 		Matrix4f projectionMatrix = Matrix4f.perspective(65, 1000F / 600F, 1, 1000); //Matrix4f.orthographic(-100, 100, 100, -100, -10F, 10F);
 		
-		texture = textureLoader.getTexture(new ResourceLocation("test", "atlas_1_interpolated"));
+		texture = textureLoader.getTexture(new ResourceLocation("test", "atlas_1"));
 		
 		window2.registerWindowListener((shouldClose, resized, focused, unfocused, maximized, restored) -> {
 			if (resized.isPresent()) GLStateManager.resizeViewport(0, 0, resized.get().x(), resized.get().y());
@@ -133,6 +133,18 @@ public class RenderEngineTest {
 		GLStateManager.blendFunc(GL33.GL_SRC_ALPHA, GL33.GL_ONE_MINUS_SRC_ALPHA);
 		
 		//input.addTextInputListener((character, functionalKey) -> System.out.println(character + " " + functionalKey));
+		
+		RawModel<ResourceLocation> model = modelLoader.getModel(new ResourceLocation("test", "test"));
+		
+		buffer.begin(RenderPrimitive.QUADS, format);
+		model.drawModelToBuffer((texture, vertex, normal, uv) -> {
+			buffer.vertex(vertex.x(), vertex.y(), vertex.z()).normal(normal.x(), normal.y(), normal.z()).color(1, 1, 1, 1).uv(textureLoader.getTexture(texture), uv.x(), uv.y()).endVertex();
+		});
+		buffer.end();
+		
+		VertexBuffer modelBuffer = new VertexBuffer();
+		modelBuffer.upload(buffer, BufferUsage.STATIC);
+		buffer.freeMemory();
 		
 		Thread testThread = new Thread(() -> {
 			
@@ -192,6 +204,10 @@ public class RenderEngineTest {
 			vertexBuffer2.bind();
 			vertexBuffer2.drawAll(RenderPrimitive.TRIANGLES);
 			vertexBuffer2.unbind();
+			
+			modelBuffer.bind();
+			modelBuffer.drawAll(RenderPrimitive.QUADS);
+			modelBuffer.unbind();
 			
 			shader.unbindShader();
 			

@@ -8,7 +8,8 @@ import de.m_marvin.renderengine.resources.ResourceLoader;
 public enum TestSourceFolders implements ISourceFolder {
 	
 	TEXTURES((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/textures/")),
-	SHADERS((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/shaders/"));
+	SHADERS((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/shaders/")),
+	MODELS((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/models/"));
 	
 	private final ISourceFolder resolver;
 	

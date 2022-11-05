@@ -5,8 +5,11 @@ import java.util.function.IntConsumer;
 
 import org.lwjgl.opengl.GL33;
 
+import de.m_marvin.renderengine.buffers.VertexBuffer;
+
 /**
  * Represents the different primitives supported by this render engine.
+ * @implNote The quads implementation just provides a special index-algorithm to convert the vertex data to triangle primitives, so it does not mater if {@link QUADS} or {@link TRIANGLES} is passes to the drawing function of {@link VertexBuffer#drawAll(RenderPrimitive)}.
  * 
  * @author Marvin Köhler
  *
