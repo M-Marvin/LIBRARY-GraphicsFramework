@@ -9,21 +9,36 @@ import org.lwjgl.opengl.GL33;
 
 /**
  * This class contains all used OpenGL methods.
+ * Contains the {@link GLStateManager#initialize(PrintStream)} method that must be called before any OpenGL or GLFW methods can be used.
  * 
  * @author Marvin Koehler
  */
 public class GLStateManager {
 
-	public static boolean initialisate(PrintStream errorStream) {
+	/**
+	 * Initializes GLFW, must be called before any OpenGL or GLFW related methods can be used.
+	 * 
+	 * @param errorStream Error stream to print GLFW and OpenGL errors.
+	 * @return True if GLFW could be initialized, false if an error occurred
+	 */
+	public static boolean initialize(PrintStream errorStream) {
 		if (!GLFW.glfwInit()) return false;
 		GLFWErrorCallback.createPrint(errorStream).set();
 		return true;
 	}
 	
+	/**
+	 * Calls the GLFW terminate method.
+	 * Should be called to cleanup everything.
+	 */
 	public static void terminate() {
 		GLFW.glfwTerminate();
 	}
 	
+	/**
+	 * Returns true if the calling thread has a OpenGL context bound to it and can perform rendering operations.
+	 * @return True if a OpenGL context is bound
+	 */
 	public static boolean isOnRenderThread() {
 		return GLFW.glfwGetCurrentContext() > 0;
 	}
@@ -79,6 +94,10 @@ public class GLStateManager {
 	public static int genTexture() {
 		return GL33.glGenTextures();
 	}
+	
+	public static void deleteTexture(int textureId) {
+		GL33.glDeleteTextures(textureId);
+	}
 
 	public static void bindTexture(int target, int textureId) {
 		GL33.glBindTexture(target, textureId);
@@ -98,6 +117,10 @@ public class GLStateManager {
 
 	public static int createShader(int type) {
 		return GL33.glCreateShader(type);
+	}
+	
+	public static void deleteShader(int shader) {
+		GL33.glDeleteShader(shader);
 	}
 	
 	public static void shaderSource(int shader, String shaderCode) {
@@ -127,7 +150,11 @@ public class GLStateManager {
 	}
 	
 	public static int createProgram() {
-	 return GL33.glCreateProgram();
+		return GL33.glCreateProgram();
+	}
+	
+	public static void deleteProgram(int program) {
+		GL33.glDeleteProgram(program);
 	}
 	
 	public static void attachShader(int program, int shader) {

@@ -1,0 +1,14 @@
+# Made in Blockbench 4.4.3
+newmtl m_70cdfb3a-be6b-a0b9-cdbb-3c16487c7a2a
+map_Kd motor_base.png 
+newmtl m_fe021898-db29-5016-201a-9683e0bb2626
+map_Kd motor_back.png 
+newmtl m_e4757caf-5ae3-7eaf-8208-9af0e13d5f56
+map_Kd motor_bars.png 
+newmtl m_b7e3ceb8-1237-748d-7f84-59052b851956
+map_Kd motor_side.png 
+newmtl m_974d80d2-f1fa-e2ed-62a4-9d8240ca9311
+map_Kd create_axis_top.png 
+newmtl m_83474dd6-1166-6aa8-e356-23d2ffe56442
+map_Kd create_axis.png 
+newmtl none

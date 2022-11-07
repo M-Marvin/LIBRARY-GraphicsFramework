@@ -57,7 +57,6 @@ public class RawModel<R extends IResourceProvider<R>> {
 	 */
 	public void drawModelToBuffer(VertexPrinter<R> vertexConsumer) {
 		for (String partName : this.modelObjects.keySet()) {
-			System.out.println(partName);
 			drawPartToBuffer(partName, vertexConsumer);
 		}
 	}

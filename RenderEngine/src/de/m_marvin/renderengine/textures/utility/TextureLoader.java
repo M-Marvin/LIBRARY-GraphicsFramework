@@ -1,6 +1,8 @@
 package de.m_marvin.renderengine.textures.utility;
 
 import java.awt.Color;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,6 +23,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import de.m_marvin.renderengine.resources.IClearableLoader;
 import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.resources.ResourceLoader;
@@ -36,7 +39,7 @@ import de.m_marvin.renderengine.textures.SingleTextureMap;
  * @param <R> The type of the resource locations
  * @param <FE> The implementation of the source folder list
  */
-public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFolder> {
+public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFolder> implements IClearableLoader {
 	
 	public static record TextureMetaData(int frametime, int[] frames, boolean interpolate, String fileFormat) {}
 	public static record TexturePack(TextureMetaData metaData, BufferedImage texture) {}
@@ -45,12 +48,19 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	public static final String DEFAULT_TEXTURE_FORMAT = "png";
 	public static final TextureMetaData DEFAULT_META_DATA = new TextureMetaData(1, new int[] {0}, false, DEFAULT_TEXTURE_FORMAT);
 	
-	public static final Supplier<SingleTextureMap<?>> INVALID_TEXTURE_FALLBACK = () -> new SingleTextureMap<>(2, 2, new int[] {0}, 1, new int[] {
+	public static final int[] INVALID_TEXTURE_FALLBACK_PIXELS = new int[] {
 			new Color(255, 0, 255, 255).getRGB(),
 			new Color(0, 0, 0, 255).getRGB(),
 			new Color(0, 0, 0, 255).getRGB(),
 			new Color(255, 0, 255, 255).getRGB()
-	}, false);
+	};
+	public static final Supplier<BufferedImage> INVALID_TEXTURE_FALLBACK_IMAGE = () -> {
+			BufferedImage image = new BufferedImage(2, 2, BufferedImage.TYPE_INT_ARGB);
+			image.setRGB(0, 0, 2, 2, INVALID_TEXTURE_FALLBACK_PIXELS, 0, 2);
+			return image;
+	};
+	public static final TexturePack INVALID_TEXTURE_FALLBACK_PACK = new TexturePack(DEFAULT_META_DATA, INVALID_TEXTURE_FALLBACK_IMAGE.get());
+	public static final Supplier<SingleTextureMap<?>> INVALID_TEXTURE_FALLBACK = () -> new SingleTextureMap<>(2, 2, new int[] {0}, 1, INVALID_TEXTURE_FALLBACK_PIXELS, false);
 	
 	protected final FE sourceFolder;
 	protected final ResourceLoader<R, FE> resourceLoader;
@@ -65,6 +75,12 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	public TextureLoader(FE sourceFolder, ResourceLoader<R, FE> resourceLoader) {
 		this.sourceFolder = sourceFolder;
 		this.resourceLoader = resourceLoader;
+	}
+	
+	@Override
+	public void clearCached() {
+		this.textureCache.values().forEach(AbstractTextureMap::delete);
+		this.textureCache.clear();
 	}
 	
 	/**
@@ -151,6 +167,18 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		AtlasTextureMap<R> map = new AtlasTextureMap<>();
 		List<R> locationsToLink = new ArrayList<>();
 		
+		// Put fallback texture as with location "null" as default into the atlas
+		TexturePack fallbackData = INVALID_TEXTURE_FALLBACK_PACK;
+		map.addTexture(
+				null,
+				fallbackData.texture().getWidth(),
+				fallbackData.texture().getHeight(),
+				fallbackData.metaData.frames,
+				fallbackData.metaData.frametime,
+				fallbackData.texture().getRGB(0, 0, fallbackData.texture().getWidth(), fallbackData.texture.getHeight(), null, 0, fallbackData.texture().getWidth())
+		);
+		
+		boolean addedImages = false;
 		for (String textureName : listTextureNames(path)) {
 			
 			try {
@@ -167,6 +195,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 					int height= image.getHeight();
 					int[] pixels = image.getRGB(0, 0, width, height, null, 0, width);
 					
+					addedImages = true;
 					map.addTexture(
 							locationName,
 							width,
@@ -186,9 +215,13 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 			
 		}
 		
-		map.buildAtlas(prioritizeAtlasHeight, selectInterpolatedTextures);
-		this.textureCache.put(atlasName, map);
-		for (R location : locationsToLink) this.textureCache.put(location, map);
+		if (addedImages) {
+
+			map.buildAtlas(prioritizeAtlasHeight, selectInterpolatedTextures);
+			this.textureCache.put(atlasName, map);
+			for (R location : locationsToLink) this.textureCache.put(location, map);
+			
+		}
 		
 	}
 
@@ -238,7 +271,12 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	 * @throws IOException If an error occurs accessing the input stream
 	 */
 	public static BufferedImage loadBufferedTexture(InputStream inputStream) throws IOException {
-		return ImageIO.read(inputStream);
+		BufferedImage image = ImageIO.read(inputStream);
+		final AffineTransform tx = AffineTransform.getScaleInstance(1, -1);
+        tx.translate(0, -image.getHeight());
+        final AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        image = op.filter(image, null);
+        return image;
 	}
 	
 	/**
@@ -280,15 +318,27 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	 * @param resourceLocation The location/name of the texture
 	 * @return The texture map cached under that name or the invalid-texture if no texture was found
 	 */
-	@SuppressWarnings("unchecked")
 	public AbstractTextureMap<R> getTexture(R resourceLocation) {
+		AbstractTextureMap<R> texture = getTextureMap(resourceLocation);
+		texture.activateTexture(resourceLocation);
+		return texture;
+	}
+
+	/**
+	 * Returns the texture map cached under the given name.
+	 * If no texture is cached under the name, a default texture is created with {@link #INVALID_TEXTURE_FALLBACK}.
+	 * The default texture is then cached under that name.
+	 * 
+	 * @param resourceLocation The location/name of the texture
+	 * @return The texture map cached under that name or the invalid-texture if no texture was found
+	 */
+	@SuppressWarnings("unchecked")
+	public AbstractTextureMap<R> getTextureMap(R resourceLocation) {
 		if (!this.textureCache.containsKey(resourceLocation)) {
 			System.err.println("Texture " + resourceLocation + " does not exist!");
 			this.textureCache.put(resourceLocation, (AbstractTextureMap<R>) INVALID_TEXTURE_FALLBACK.get());
 		}
-		AbstractTextureMap<R> texture = this.textureCache.get(resourceLocation);
-		texture.activateTexture(resourceLocation);
-		return texture;
-	}
+		return this.textureCache.get(resourceLocation);
+	}	
 	
 }

@@ -17,7 +17,7 @@ public interface IResourceProvider<R> {
 	
 	/**
 	 * Appends the given filename or path to this resource and returns the resulting location as new instance.
-	 * @param fileName The filename or path to append to this location
+	 * @param fileName The filename or path to append to this location or null if the filename is null
 	 * @return The resulting location
 	 */
 	public R locationOfFile(String fileName);

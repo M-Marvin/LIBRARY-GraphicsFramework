@@ -156,25 +156,24 @@ public class AtlasTextureMap<R extends IResourceProvider<R>> extends AbstractTex
 	
 	@Override
 	public void activateTexture(R textureLoc) {
-		if (location2uv.containsKey(textureLoc)) activeTexture = textureLoc;
+		if (location2uv.containsKey(textureLoc)) {
+			activeTexture = textureLoc;
+		} else {
+			System.err.println("The texture '" + textureLoc + "' does not exist in the atlas!");
+			activeTexture = null;
+		}
 	}
 
 	@Override
 	public float mapU(float u) {
-		if (activeTexture != null) {
-			Vec4f texUV = location2uv.get(activeTexture);
-			return texUV.x() + texUV.z() * u;
-		}
-		return u;
+		Vec4f texUV = location2uv.get(activeTexture);
+		return texUV.x() + texUV.z() * u;
 	}
 
 	@Override
 	public float mapV(float v) {
-		if (activeTexture != null) {
-			Vec4f texUV = location2uv.get(activeTexture);
-			return texUV.y() + texUV.w() * v;
-		}
-		return v;
+		Vec4f texUV = location2uv.get(activeTexture);
+		return texUV.y() + texUV.w() * v;
 	}
 	
 }

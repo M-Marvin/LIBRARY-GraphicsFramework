@@ -1,31 +1,46 @@
-package de.m_marvin.enginetest;
+package de.m_marvin.renderengine;
+
+import java.io.File;
 
 import org.lwjgl.opengl.GL33;
 
-import de.m_marvin.enginetest.world.ClientLevel;
-import de.m_marvin.enginetest.world.objects.WorldObject;
-import de.m_marvin.physicengine.d3.BroadphaseAlgorithm;
-import de.m_marvin.physicengine.d3.RigidPhysicSolver;
-import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.models.OBJLoader;
+import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.resources.ResourceLoader;
 import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
 import de.m_marvin.renderengine.shaders.ShaderLoader;
 import de.m_marvin.renderengine.textures.utility.TextureLoader;
-import de.m_marvin.renderengine.translation.Camera;
 import de.m_marvin.renderengine.windows.Window;
-import de.m_marvin.univec.impl.Vec3f;
 
-public class EngineTest {
-
-	public static void main(String... args) {
-		new EngineTest().run();
+public class EngineExample {
+	
+	public static enum ResourceFolders implements ISourceFolder {
+		
+		SHADERS((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/shaders/")),
+		TEXTURES((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/textures/")),
+		MODELS((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/models/"));
+		
+		private ISourceFolder pathSource;
+		
+		private ResourceFolders(ISourceFolder pathSource) {
+			this.pathSource = pathSource;
+		}
+		
+		@Override
+		public File getPath(ResourceLoader<?, ?> loader, String namespace) {
+			return this.pathSource.getPath(loader, namespace);
+		}
+	
 	}
 	
-	private static EngineTest instance;
-	private EngineTest() { instance = this; }
+	public static void main(String... args) {
+		new EngineExample().run();
+	}
 	
-	public static EngineTest getInstance() {
+	private static EngineExample instance;
+	private EngineExample() { instance = this; }
+	
+	public static EngineExample getInstance() {
 		return instance;
 	}
 	
@@ -42,9 +57,6 @@ public class EngineTest {
 	private ShaderLoader<ResourceLocation, ResourceFolders> shaderLoader;
 	private TextureLoader<ResourceLocation, ResourceFolders> textureLoader;
 	private OBJLoader<ResourceLocation, ResourceFolders> modelLoader;
-	
-	private Camera mainCamera;
-	private RigidPhysicSolver<WorldObject> physicWorld;
 	
 	private Window mainWindow;
 	private long timeMillis;
@@ -69,15 +81,12 @@ public class EngineTest {
 		mainWindow.makeContextCurrent();
 		GLStateManager.clearColor(1, 0, 1, 1);
 		GLStateManager.blendFunc(GL33.GL_SRC_ALPHA, GL33.GL_ONE_MINUS_SRC_ALPHA);
-		mainCamera = new Camera();
 		
 		// Load shader, textures and models
 		shaderLoader.loadShadersIn(WORLD_SHADER_LOCATION, SHADER_LIB_LOCATION);
 		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS, false, false);
 		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS_INTERPOLATED, false, true);
 		modelLoader.loadModelsIn(OBJECT_MODEL_LOCATION, OBJECT_TEXTURE_LOCATION);
-		
-		physicWorld = new RigidPhysicSolver<WorldObject>(new Vec3f(-1000F, -1000F, -1000F), new Vec3f(1000F, 1000F, 1000F), BroadphaseAlgorithm.SIMPLE);
 		
 		// Setup and start game loop
 		tickTime = 20; // 50 TPS
@@ -112,19 +121,19 @@ public class EngineTest {
 			
 			lastFrameTime = timeMillis;
 			timeMillis = System.currentTimeMillis();
-			deltaTick += (timeMillis - lastFrameTime) / tickTime;
-			deltaFrame += (timeMillis - lastFrameTime) / frameTime;
+			deltaTick += (timeMillis - lastFrameTime) / (float) tickTime;
+			deltaFrame += (timeMillis - lastFrameTime) / (float) frameTime;
 			
 			if (deltaTick > 1) {
 				deltaTick--;
 				tickCount++;
-				tick(0F); // TODO Partial tick
+				tick();
 			}
 			
 			if (deltaFrame > 1) {
 				deltaFrame--;
 				frameCount++;
-				frame(0); // TODO Frame time
+				frame();
 			}
 			
 			if (timeMillis - secondTimer > 1000) {
@@ -141,21 +150,19 @@ public class EngineTest {
 		
 	}
 	
-	private void frame(float partialTick) {
+	private void frame() {
 		
-		System.out.println(partialTick);
+		// Render code
 		
 		mainWindow.glSwapFrames();
 		
 	}
 	
-	private void tick(float millisSinceLastFrame) {
-		
-		//System.out.println(millisSinceLastFrame);
+	private void tick() {
 		
 		mainWindow.pollEvents();
 		
-		physicWorld.stepPhysic(millisSinceLastFrame, tickTime * 2, 1);
+		// Logic code
 		
 	}
 	

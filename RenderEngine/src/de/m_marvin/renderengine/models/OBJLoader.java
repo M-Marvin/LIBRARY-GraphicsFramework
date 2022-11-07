@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.m_marvin.renderengine.resources.IClearableLoader;
 import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.resources.ResourceLoader;
@@ -19,13 +20,13 @@ import de.m_marvin.univec.impl.Vec3i;
 
 /**
  * Handles model loading from OBJ files.
- *  * 
+ * 
  * @author Marvin Köhler
  *
  * @param <R>
  * @param <FE>
  */
-public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder> {
+public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder> implements IClearableLoader {
 	
 	public static final String MODEL_FILE_FORMAT = "obj";
 	public static final String MATERIAL_FILE_FORMAT = "mtl";
@@ -44,6 +45,11 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 		super();
 		this.sourceFolder = sourceFolder;
 		this.resourceLoader = resourceLoader;
+	}
+	
+	@Override
+	public void clearCached() {
+		this.modelCache.clear();
 	}
 	
 	/**
@@ -182,8 +188,6 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 				if (textureName != null) {
 					String[] tns = textureName.split("\\.");
 					textureName = textureName.substring(0, textureName.length() - tns[tns.length - 1].length() - 1);
-				} else {
-					textureName = "none";
 				}
 				faces.add(new RawModel.ModelFace<R>(textureFolderLocation.locationOfFile(textureName), indexes));
 				break;

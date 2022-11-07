@@ -192,6 +192,16 @@ public class ShaderInstance {
 	}
 	
 	/**
+	 * Deletes the shader from the GPU memory.
+	 */
+	public void delete() {
+		GLStateManager.deleteShader(vertexShader);
+		GLStateManager.deleteShader(fragmentShader);
+		GLStateManager.deleteProgram(program);
+		this.uniforms.clear();
+	}
+	
+	/**
 	 * Binds the shader ready for drawing.
 	 */
 	public void useShader() {

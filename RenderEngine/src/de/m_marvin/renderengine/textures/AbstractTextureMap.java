@@ -77,6 +77,13 @@ public abstract class AbstractTextureMap<R extends IResourceProvider<R>> impleme
 	}
 	
 	/**
+	 * Deletes the texture map from the GPU memory.
+	 */
+	public void delete() {
+		GLStateManager.deleteTexture(this.textureId);
+	}
+	
+	/**
 	 * If this texture map implementation supports multiple textures, this method is used to select one for other operations.
 	 * @param textureLoc The texture name of the texture to select
 	 */

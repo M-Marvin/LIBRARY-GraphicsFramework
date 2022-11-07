@@ -26,7 +26,7 @@ public class ResourceLoader<R extends IResourceProvider<R>, FE extends ISourceFo
 	}
 	
 	/**
-	 * Returns the full path to the fiven source folder with namespace.
+	 * Returns the full path to the given source folder with namespace.
 	 * @implNote Should only be used if a {@link IResourceProvider} implementation is used which requires a namespace.
 	 * 
 	 * @param folder The resource folder

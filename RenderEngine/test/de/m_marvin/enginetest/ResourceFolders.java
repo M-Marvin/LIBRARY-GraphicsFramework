@@ -1,25 +1,25 @@
-package de.m_marvin.renderengine;
+package de.m_marvin.enginetest;
 
 import java.io.File;
 
 import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.resources.ResourceLoader;
 
-public enum TestSourceFolders implements ISourceFolder {
+public enum ResourceFolders implements ISourceFolder {
 	
-	TEXTURES((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/textures/")),
 	SHADERS((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/shaders/")),
+	TEXTURES((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/textures/")),
 	MODELS((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/models/"));
 	
-	private final ISourceFolder resolver;
+	private ISourceFolder pathSource;
 	
-	TestSourceFolders(ISourceFolder resolver) {
-		this.resolver = resolver;
+	private ResourceFolders(ISourceFolder pathSource) {
+		this.pathSource = pathSource;
 	}
 	
 	@Override
 	public File getPath(ResourceLoader<?, ?> loader, String namespace) {
-		return this.resolver.getPath(loader, namespace);
+		return this.pathSource.getPath(loader, namespace);
 	}
 
 }

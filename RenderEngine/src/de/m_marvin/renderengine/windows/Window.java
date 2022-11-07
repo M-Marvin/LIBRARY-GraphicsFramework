@@ -95,6 +95,14 @@ public class Window {
 	}
 	
 	/**
+	 * Sets the title of the GLFW window.
+	 * @param title The new title
+	 */
+	public void setTitle(String title) {
+		GLFW.glfwSetWindowTitle(glWindow, title);
+	}
+	
+	/**
 	 * Swaps the frame buffers of this window and move the drawn content visible on the window.
 	 * Also clears the previous visible frame buffer and makes is ready for new draw calls.
 	 */

@@ -60,7 +60,6 @@ public class MultiFrameAtlasLayoutBuilder<T> {
 		// Calculate required frame time for atlas
 		List<List<Integer>> divs = this.atlasImages
 			.stream()
-			.filter((image) -> image.frames().length > 1)
 			.map((image) -> 
 				IntStream.range(1, image.frametime() + 1)
 				.filter((div) -> image.frametime() % div == 0)
