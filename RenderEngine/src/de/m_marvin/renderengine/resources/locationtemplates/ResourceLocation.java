@@ -53,7 +53,7 @@ public class ResourceLocation implements IResourceProvider<ResourceLocation> {
 	@Override
 	public ResourceLocation locationOfFile(String fileName) {
 		if (fileName == null) return null;
-		return new ResourceLocation(this.namespace, (this.path.isEmpty() ? this.path : this.path + "/") + fileName);
+		return new ResourceLocation(this.namespace, (this.path.isEmpty() ? this.path : (this.path + "/") + fileName));
 	}
 	
 	@Override
