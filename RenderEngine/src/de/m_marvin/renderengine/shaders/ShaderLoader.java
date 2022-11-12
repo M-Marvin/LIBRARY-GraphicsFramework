@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -156,6 +157,14 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 		return this.shaderCache.get(shaderName);
 	}
 	
+	/**
+	 * Returns a set containing the resource locations of all loaded shaders.
+	 * 
+	 * @return A set containing the resource locations of all loaded shaders
+	 */
+	public Set<R> getCachedShaders() {
+		return this.shaderCache.keySet();
+	}
 	/**
 	 * Loads the shader under the given path with the given vertex format.
 	 * If no vertex format is specified the default from the shader JSON is applied.

@@ -339,6 +339,6 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 			this.textureCache.put(resourceLocation, (AbstractTextureMap<R>) INVALID_TEXTURE_FALLBACK.get());
 		}
 		return this.textureCache.get(resourceLocation);
-	}	
+	}
 	
 }

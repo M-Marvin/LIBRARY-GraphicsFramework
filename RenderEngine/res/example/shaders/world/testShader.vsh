@@ -6,6 +6,7 @@ uniform mat4 ModelViewMat;
 uniform mat4 ProjMat;
 uniform mat3 AnimMat;
 uniform mat3 AnimMatLast;
+uniform mat4 ObjectMat;
 
 in vec3 position;
 in vec4 color;
@@ -19,7 +20,7 @@ out vec2 vertexUVLast;
 
 void main() {
 	
-	gl_Position = ProjMat *  ModelViewMat * vec4(position, 1.0);
+	gl_Position = ProjMat *  ModelViewMat * ObjectMat * vec4(position, 1.0);
 	
 	vertexUVLast = translate(uv, AnimMatLast);
 	vertexUV = translate(uv, AnimMat);

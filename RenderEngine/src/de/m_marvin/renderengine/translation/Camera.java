@@ -3,6 +3,7 @@ package de.m_marvin.renderengine.translation;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec3f;
+import de.m_marvin.univec.impl.Vec3i;
 
 /**
  * Represents a view-point on the rendered geometry.
@@ -15,25 +16,33 @@ public class Camera {
 	
 	protected Matrix4f viewMatrix = new Matrix4f();
 	protected Vec3f position;
-	protected Vec3f rotation;
+	protected Quaternion rotation;
 	
 	/**
 	 * Creates a new camera on the given position.
-	 * @param position
-	 * @param rotation
+	 * @param position The position of the camera
+	 * @param rotation The rotation as {@link Quaternion}
 	 */
-	public Camera(Vec3f position, Vec3f rotation) {
+	public Camera(Vec3f position, Quaternion rotation) {
 		this.position = position;
 		this.rotation = rotation;
+	}
+	
+	/**
+	 * Creates a new camera on th given position with the given rotation in euler angles.
+	 * @param position The position of the camera
+	 * @param eulerRotation The rotation as euler-angles
+	 */
+	public Camera(Vec3f position, Vec3f eulerRotation) {
+		this(position, Quaternion.fromXYZDegrees(eulerRotation));
 	}
 	
 	/**
 	 * Creates a new camera on the default position 0 0 0 with orientation 0 0 0.
 	 */
 	public Camera() {
-		this(new Vec3f(0F, 0F, 0F), new Vec3f(0F, 0F, 0F));
+		this(new Vec3f(0F, 0F, 0F), new Quaternion(new Vec3i(0, 0, 0), 0F));
 	}
-	
 	/**
 	 * Moves the camera by the specified xyz coordinates.
 	 * @param linearMotion The xyz offset to move the camera
@@ -47,20 +56,26 @@ public class Camera {
 	 * @param relativeMovement The xyz offset from the view of the camera
 	 */
 	public void move(Vec3f relativeMovement) {
-		Quaternion orientation = Quaternion.fromXYZDegrees(this.rotation);
-		Vec3f offsetMovement = relativeMovement.transform(orientation);
+		Vec3f offsetMovement = relativeMovement.transform(rotation);
 		offset(offsetMovement);
 	}
 	
 	/**
-	 * Rotates the camera by the given xyz euler angles.
-	 * @param axialMotion
+	 * Rotates the camera by the specified angle around the angle specified by the axis-vector (aligned on the camera view).
+	 * @param axisVec The axis to rotate the camera around from the view of the camera
+	 * @param ammount The angle to rotate in degrees
 	 */
-	public void rotate(Vec3f axialMotion) {
-		this.rotation.addI(axialMotion);
-		this.rotation.x %= 360;
-		this.rotation.y %= 360;
-		this.rotation.z %= 360;
+	public void rotate(Vec3i axisVec, float ammount) {
+		this.rotation.mulI(new Quaternion(axisVec, (float) Math.toRadians(ammount)));
+	}
+	
+	/**
+	 * Rotates the camera by the specified angle around the angle specified by the axis-vector (aligned on the coordinate axes).
+	 * @param axisVec The axis to rotate the camera around
+	 * @param ammount The angle to rotate in degrees
+	 */
+	public void orientate(Vec3i axisVec, float ammount) {
+		this.rotation = new Quaternion(axisVec, (float) Math.toRadians(ammount)).mul(this.rotation);
 	}
 	
 	/**
@@ -69,7 +84,7 @@ public class Camera {
 	 */
 	public void upadteViewMatrix() {
 		this.viewMatrix.identity();
-		this.viewMatrix.mulI(Quaternion.fromXYZDegrees(rotation).conj());
+		this.viewMatrix.mulI(rotation.conj());
 		this.viewMatrix.mulI(Matrix4f.translateMatrix(-this.position.x(), -this.position.y(), -this.position.z()));
 	}
 	
@@ -79,6 +94,22 @@ public class Camera {
 	 */
 	public Matrix4f getViewMatrix() {
 		return this.viewMatrix;
+	}
+	
+	/**
+	 * Returns the position of the camera.
+	 * @return The xyz position of the camera
+	 */
+	public Vec3f getPosition() {
+		return position;
+	}
+	
+	/**
+	 * Returns the rotation quaternion of the camera.
+	 * @return The rotation of the camera as quaternion
+	 */
+	public Quaternion getRotation() {
+		return rotation;
 	}
 	
 	@Override

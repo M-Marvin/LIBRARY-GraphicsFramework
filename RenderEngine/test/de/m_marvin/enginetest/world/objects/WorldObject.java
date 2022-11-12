@@ -1,29 +1,47 @@
 package de.m_marvin.enginetest.world.objects;
 
-import com.bulletphysics.dynamics.RigidBody;
+import com.bulletphysics.collision.shapes.CollisionShape;
+import com.bulletphysics.linearmath.Transform;
 
-import de.m_marvin.physicengine.d3.IRigidObject;
+import de.m_marvin.physicengine.d3.physic.IRigidObject;
+import de.m_marvin.physicengine.d3.univec.SimplifiedRigidBody;
+import de.m_marvin.physicengine.d3.univec.UniVecHelper;
+import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
+import de.m_marvin.unimat.impl.Matrix4f;
+import de.m_marvin.univec.impl.Vec3f;
 
-public class WorldObject implements IRigidObject {
+public abstract class WorldObject implements IRigidObject {
+	
+	Transform worldTransform = new Transform();
+	SimplifiedRigidBody rigidBody;
 
+	public abstract CollisionShape getShape();
+	
+	public abstract float getMass();
+	
+	public abstract ResourceLocation getModel();
+	
+	public abstract Vec3f getModelOffset();
+	
 	@Override
 	public void createRigidBody() {
-		// TODO Auto-generated method stub
-		
+		this.rigidBody = new SimplifiedRigidBody(getMass(), null, getShape(), UniVecHelper.calculateInertia(getShape(), getMass()));
+		this.rigidBody.setSleepingThresholds(8F, 1F);
 	}
 
 	@Override
 	public void clearRigidBody() {
-		// TODO Auto-generated method stub
-		
+		this.rigidBody.destroy();
+		this.rigidBody = null;
+	}
+	
+	@Override
+	public SimplifiedRigidBody getRigidBody() {
+		return this.rigidBody;
 	}
 
-	@Override
-	public RigidBody getRigidBody() {
-		// TODO Auto-generated method stub
-		return null;
+	public Matrix4f getModelTranslation() {
+		return this.rigidBody.getTranslation().mul(Matrix4f.translateMatrix(getModelOffset().x, getModelOffset().y, getModelOffset().z));
 	}
-	
-	
 	
 }

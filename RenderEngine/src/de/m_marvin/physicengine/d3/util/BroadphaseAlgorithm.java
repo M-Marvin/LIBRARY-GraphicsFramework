@@ -1,4 +1,4 @@
-package de.m_marvin.physicengine.d3;
+package de.m_marvin.physicengine.d3.util;
 
 import java.util.function.BiFunction;
 

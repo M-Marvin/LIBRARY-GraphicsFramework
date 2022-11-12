@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import de.m_marvin.renderengine.resources.IClearableLoader;
 import de.m_marvin.renderengine.resources.IResourceProvider;
@@ -116,6 +117,15 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 	 */
 	public RawModel<R> getModel(R modelLocation) {
 		return this.modelCache.get(modelLocation);
+	}
+	
+	/**
+	 * Returns a set containing the resource locations of all loaded models.
+	 * 
+	 * @return A set containing the resource locations of all loaded models
+	 */
+	public Set<R> getCachedModels() {
+		return this.modelCache.keySet();
 	}
 	
 	/**

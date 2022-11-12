@@ -1,4 +1,4 @@
-package de.m_marvin.physicengine.d3;
+package de.m_marvin.physicengine.d3.physic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +14,10 @@ import com.bulletphysics.dynamics.DynamicsWorld;
 import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSolver;
 
 import de.m_marvin.enginetest.world.objects.WorldObject;
+import de.m_marvin.physicengine.d3.util.BroadphaseAlgorithm;
 import de.m_marvin.univec.impl.Vec3f;
 
-public class RigidPhysicSolver<T extends IRigidObject> {
+public class RigidPhysicWorld<T extends IRigidObject> {
 
 	protected final DynamicsWorld dynamicWorld;
 	protected final Vec3f worldMin;
@@ -24,7 +25,7 @@ public class RigidPhysicSolver<T extends IRigidObject> {
 	
 	protected List<T> rigidBodies = new ArrayList<>();
 	
-	public RigidPhysicSolver(Vec3f worldMin, Vec3f worldMax, BroadphaseAlgorithm broadphaseAlgorithm) {
+	public RigidPhysicWorld(Vec3f worldMin, Vec3f worldMax, BroadphaseAlgorithm broadphaseAlgorithm) {
 		
 		this.worldMin = worldMin;
 		this.worldMax = worldMax;
@@ -36,6 +37,10 @@ public class RigidPhysicSolver<T extends IRigidObject> {
 		
 		this.dynamicWorld = new DiscreteDynamicsWorld(collisionDispatcher, broadphaseInterface, constrainSolver, collisionConfiguration);
 		
+	}
+	
+	public DynamicsWorld getDynamicWorld() {
+		return dynamicWorld;
 	}
 	
 	public void stepPhysic(float timeStep, int maxSubSteps, float fixedTimeStep) {
