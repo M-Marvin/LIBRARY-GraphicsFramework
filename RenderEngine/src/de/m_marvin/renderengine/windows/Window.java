@@ -124,7 +124,7 @@ public class Window {
 
 	/**
 	 * Register a even listener for the window event.
-	 * The event gets fired if the window gets called of the window gets or loses focus, get minimized or restored and if the window size changes.
+	 * The event gets fired if the window gets or loses focus, gets minimized or restored and if the window size changes.
 	 * 
 	 * @param eventListener The event listener
 	 */
@@ -212,10 +212,10 @@ public class Window {
 	}
 	
 	/**
-	 * Returns the wdith and height of window on the screen.
+	 * Returns the width and height of window on the screen.
 	 * @return An integer array of the length 2 containing the width and height values
 	 */
-	public int[] setSize() {
+	public int[] getSize() {
 		int[] width = new int[1];
 		int[] height = new int[1];
 		GLFW.glfwGetWindowSize(glWindow, width, height);

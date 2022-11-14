@@ -38,6 +38,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	
 	public static final String VERTEX_SHADER_FORMAT = "vsh";
 	public static final String FRAGMENT_SHADER_FORMAT = "fsh";
+	public static final String GEOMETRY_SHADER_FORMAT = "gsh";
 	public static final String SHADER_META_FORMAT = "json";
 	public static final String SHADER_LIB_FORMAT = "glsl";
 	protected static final String INCLUDE_LINE = "#include ";
@@ -184,8 +185,10 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 		
 		String vertexShaderFile = json.get("VertexShaderFile").getAsString();
 		String fragmentShaderFile = json.get("FragmentShaderFile").getAsString();
+		Optional<String> geometryShaderFile = json.has("GeometryShaderFile") ? Optional.of(json.get("GeometryShaderFile").getAsString()) : Optional.empty();
 		String vertexShaderSource = loadGLSLFile(sourceFolder, new File(shaderFile.getParentFile(), vertexShaderFile + "." + VERTEX_SHADER_FORMAT));
 		String fragmentShaderSource = loadGLSLFile(sourceFolder, new File(shaderFile.getParentFile(), fragmentShaderFile + "." + FRAGMENT_SHADER_FORMAT));
+		Optional<String> geometryShaderSource = geometryShaderFile.isPresent() ? Optional.of(loadGLSLFile(sourceFolder, new File(shaderFile.getParentFile(), geometryShaderFile.get() + "." + GEOMETRY_SHADER_FORMAT))) : Optional.empty();
 		
 		VertexFormat attributeFormat = vertexFormat.isPresent() ? vertexFormat.get() : null;
 		if (vertexFormat.isEmpty()) {
@@ -205,7 +208,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 			
 		}
 		
-		ShaderInstance shaderInstance = new ShaderInstance(vertexShaderSource, fragmentShaderSource, attributeFormat);
+		ShaderInstance shaderInstance = new ShaderInstance(vertexShaderSource, fragmentShaderSource, geometryShaderSource, attributeFormat);
 		
 		JsonArray uniformArray = json.get("Uniforms").getAsJsonArray();
 		for (int i = 0; i < uniformArray.size(); i++) {

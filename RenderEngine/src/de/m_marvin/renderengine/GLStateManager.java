@@ -17,6 +17,7 @@ public class GLStateManager {
 
 	/**
 	 * Initializes GLFW, must be called before any OpenGL or GLFW related methods can be used.
+	 * This function should be called on the thread used to process user input and game logic!
 	 * 
 	 * @param errorStream Error stream to print GLFW and OpenGL errors.
 	 * @return True if GLFW could be initialized, false if an error occurred
@@ -30,6 +31,7 @@ public class GLStateManager {
 	/**
 	 * Calls the GLFW terminate method.
 	 * Should be called to cleanup everything.
+	 * This function must be called on the same thread on which {@link #initialize(PrintStream)} was!
 	 */
 	public static void terminate() {
 		GLFW.glfwTerminate();

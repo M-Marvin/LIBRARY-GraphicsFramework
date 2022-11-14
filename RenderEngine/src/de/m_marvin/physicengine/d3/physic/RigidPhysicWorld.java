@@ -22,13 +22,21 @@ public class RigidPhysicWorld<T extends IRigidObject> {
 	protected final DynamicsWorld dynamicWorld;
 	protected final Vec3f worldMin;
 	protected final Vec3f worldMax;
+	protected final boolean hasBoarders;
 	
 	protected List<T> rigidBodies = new ArrayList<>();
 	
+	public RigidPhysicWorld(BroadphaseAlgorithm broadphaseAlgorithm) {
+		this(null, null, broadphaseAlgorithm);
+	}
+	
 	public RigidPhysicWorld(Vec3f worldMin, Vec3f worldMax, BroadphaseAlgorithm broadphaseAlgorithm) {
 		
+		this.hasBoarders = worldMax != null && worldMax != null;
 		this.worldMin = worldMin;
 		this.worldMax = worldMax;
+		
+		if (broadphaseAlgorithm.needsBoarders() && !this.hasBoarders) throw new IllegalArgumentException("The selected broadphase algorithm needs a specified maximum world size!");
 		
 		CollisionConfiguration collisionConfiguration = new DefaultCollisionConfiguration();
 		CollisionDispatcher collisionDispatcher = new CollisionDispatcher(collisionConfiguration);
@@ -49,6 +57,20 @@ public class RigidPhysicWorld<T extends IRigidObject> {
 	
 	public void setGravity(Vec3f gravityVec) {
 		this.dynamicWorld.setGravity(new Vector3f(gravityVec.x, gravityVec.y, gravityVec.z));
+	}
+	
+	public Vec3f getWorldMax() {
+		if (!this.hasBoarders) throw new UnsupportedOperationException("This world instance has no limits!");
+		return worldMax;
+	}
+	
+	public Vec3f getWorldMin() {
+		if (!this.hasBoarders) throw new UnsupportedOperationException("This world instance has no limits!");
+		return worldMin;
+	}
+	
+	public boolean hasBoarders() {
+		return hasBoarders;
 	}
 	
 	public Vec3f getGravity() {

@@ -2,6 +2,7 @@ package de.m_marvin.renderengine.shaders;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.lwjgl.opengl.GL33;
 
@@ -22,6 +23,7 @@ public class ShaderInstance {
 	
 	protected int vertexShader;
 	protected int fragmentShader;
+	protected int geometryShader;
 	protected int program;
 	protected VertexFormat format;
 	protected Map<String, Uniform<?>> uniforms = new HashMap<>();
@@ -148,16 +150,20 @@ public class ShaderInstance {
 	 * @param fragmentProgram The fragment shader source GLSL
 	 * @param arrayFormat The vertex array format
 	 */
-	public ShaderInstance(String vertexProgram, String fragmentProgram, VertexFormat arrayFormat) {
-
+	public ShaderInstance(String vertexProgram, String fragmentProgram, Optional<String> geometryProgram, VertexFormat arrayFormat) {
+		
 		GLStateManager.assertOnRenderThread();
 		
 		this.vertexShader = GLStateManager.createShader(GL33.GL_VERTEX_SHADER);
 		this.fragmentShader = GLStateManager.createShader(GL33.GL_FRAGMENT_SHADER);
+		if (geometryProgram.isPresent())
+			this.geometryShader = GLStateManager.createShader(GL33.GL_GEOMETRY_SHADER);
 		this.program =  GLStateManager.createProgram();
 		
 		GLStateManager.shaderSource(vertexShader, vertexProgram);
 		GLStateManager.shaderSource(fragmentShader, fragmentProgram);
+		if (geometryProgram.isPresent())
+			GLStateManager.shaderSource(geometryShader, geometryProgram.get());
 		
 		GLStateManager.compileShader(fragmentShader);
 		if (!GLStateManager.checkShaderCompile(fragmentShader)) {
@@ -171,8 +177,20 @@ public class ShaderInstance {
 			throw new IllegalArgumentException("Failed to compile the provoided vertex shader code:\n" + errorLog);
 		}
 		
+		if (geometryProgram.isPresent()) {
+
+			GLStateManager.compileShader(geometryShader);
+			if (!GLStateManager.checkShaderCompile(geometryShader)) {
+				String errorLog = GLStateManager.shaderInfoLog(geometryShader);
+				throw new IllegalArgumentException("Failed to compile the provoided geometry shader code:\n" + errorLog);
+			}
+			
+		}
+		
 		GLStateManager.attachShader(program, vertexShader);
 		GLStateManager.attachShader(program, fragmentShader);
+		if (geometryProgram.isPresent())
+			GLStateManager.attachShader(program, geometryShader);
 		
 		this.format = arrayFormat;
 		this.format.getElements().forEach((element) -> GLStateManager.bindVertexAttributeLocation(program, element.index(), element.name()));
@@ -197,6 +215,7 @@ public class ShaderInstance {
 	public void delete() {
 		GLStateManager.deleteShader(vertexShader);
 		GLStateManager.deleteShader(fragmentShader);
+		if (geometryShader != 0) GLStateManager.deleteProgram(geometryShader);
 		GLStateManager.deleteProgram(program);
 		this.uniforms.clear();
 	}
