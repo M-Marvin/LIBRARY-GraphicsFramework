@@ -8,10 +8,10 @@ import org.lwjgl.system.MemoryUtil;
 import com.google.common.collect.Queues;
 
 import de.m_marvin.renderengine.utility.NumberFormat;
-import de.m_marvin.renderengine.vertecies.IVertexConsumer;
-import de.m_marvin.renderengine.vertecies.RenderPrimitive;
-import de.m_marvin.renderengine.vertecies.VertexFormat;
-import de.m_marvin.renderengine.vertecies.VertexFormat.VertexElement;
+import de.m_marvin.renderengine.vertices.IVertexConsumer;
+import de.m_marvin.renderengine.vertices.RenderPrimitive;
+import de.m_marvin.renderengine.vertices.VertexFormat;
+import de.m_marvin.renderengine.vertices.VertexFormat.VertexElement;
 
 /**
  * The BufferBuilder is used to create VertexBuffers by calling the necessary draw methods like {@link #vertex(float, float, float)}.
@@ -57,7 +57,7 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 		if (this.drawStates.isEmpty()) throw new IllegalStateException("Nothing has ben drawn to the buffer!");
 		DrawState drawState = this.drawStates.poll();
 		this.buffer.position(uploadedBytes);
-		this.uploadedBytes += drawState.format().getSize() * drawState.vertecies() + drawState.indecies() * NumberFormat.UINT.size();
+		this.uploadedBytes += drawState.format().getSize() * drawState.vertices() + drawState.indecies() * NumberFormat.UINT.size();
 		this.buffer.limit(uploadedBytes);
 		ByteBuffer drawBuffer = this.buffer.slice();
 		drawBuffer.order(this.buffer.order());
@@ -217,7 +217,7 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 		if (this.currentElementIndex != this.format.getElementCount() - 1) {
 			throw new IllegalStateException("Not all elements filled!");
 		} else if (this.buildingIndecies) {
-			throw new IllegalStateException("Cant put vertecies after indecies!");
+			throw new IllegalStateException("Cant put vertices after indecies!");
 		} else {
 			this.currentElementIndex = -1;
 			this.vertexCount++;

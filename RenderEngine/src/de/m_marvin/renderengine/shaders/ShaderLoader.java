@@ -24,7 +24,7 @@ import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.resources.ResourceLoader;
 import de.m_marvin.renderengine.utility.NumberFormat;
-import de.m_marvin.renderengine.vertecies.VertexFormat;
+import de.m_marvin.renderengine.vertices.VertexFormat;
 
 /**
  * Handles the loading of shaders from files.

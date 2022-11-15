@@ -1,4 +1,4 @@
-package de.m_marvin.renderengine.vertecies;
+package de.m_marvin.renderengine.vertices;
 
 import java.util.ArrayList;
 import java.util.List;

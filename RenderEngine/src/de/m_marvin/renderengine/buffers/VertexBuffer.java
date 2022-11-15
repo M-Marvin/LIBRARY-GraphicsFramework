@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL33;
 
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.utility.NumberFormat;
-import de.m_marvin.renderengine.vertecies.RenderPrimitive;
+import de.m_marvin.renderengine.vertices.RenderPrimitive;
 
 /**
  * Represents a VAO on the GPUs memory.
@@ -24,7 +24,7 @@ public class VertexBuffer {
 	protected int vertexBufferId;
 	protected int indexBufferId;
 	protected int indecies;
-	protected int vertecies;
+	protected int vertices;
 	
 	/**
 	 * Returns true if the VAO is initialized (VAO and VBOs created on GPU).
@@ -78,13 +78,13 @@ public class VertexBuffer {
 		IBufferBuilder.BufferPair pair = bufferBuilder.popNext();
 		IBufferBuilder.DrawState drawState = pair.drawState();
 		this.indecies = drawState.indecies();
-		this.vertecies = drawState.vertecies();
+		this.vertices = drawState.vertices();
 		
 		bind();
 		
 		ByteBuffer buffer = pair.buffer();
 		buffer.clear();
-		buffer.limit(this.vertecies * drawState.format().getSize());
+		buffer.limit(this.vertices * drawState.format().getSize());
 		GLStateManager.bindBufferObject(GL33.GL_ARRAY_BUFFER, vertexBufferId);
 		GLStateManager.bufferData(GL33.GL_ARRAY_BUFFER, buffer, usage.gltype());
 		drawState.format().getElements().forEach((element) -> {

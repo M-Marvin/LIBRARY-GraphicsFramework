@@ -1,4 +1,4 @@
-package de.m_marvin.renderengine.vertecies;
+package de.m_marvin.renderengine.vertices;
 
 import java.util.function.BiConsumer;
 import java.util.function.IntConsumer;
@@ -16,17 +16,17 @@ import de.m_marvin.renderengine.buffers.VertexBuffer;
  */
 public enum RenderPrimitive {
 	
-	TRIANGLES(GL33.GL_TRIANGLES, (vertecies, indexconsumer) -> {
-		for (int i = 0; i < vertecies; i++) indexconsumer.accept(i);
+	TRIANGLES(GL33.GL_TRIANGLES, (vertices, indexconsumer) -> {
+		for (int i = 0; i < vertices; i++) indexconsumer.accept(i);
 	}),
-	TRIANGLES_STRIP(GL33.GL_TRIANGLE_STRIP, (vertecies, indexconsumer) -> {
-		for (int i = 0; i < vertecies; i++) indexconsumer.accept(i);
+	TRIANGLES_STRIP(GL33.GL_TRIANGLE_STRIP, (vertices, indexconsumer) -> {
+		for (int i = 0; i < vertices; i++) indexconsumer.accept(i);
 	}),
-	TRIANGLES_FAN(GL33.GL_TRIANGLE_FAN, (vertecies, indexconsumer) -> {
-		for (int i = 0; i < vertecies; i++) indexconsumer.accept(i);
+	TRIANGLES_FAN(GL33.GL_TRIANGLE_FAN, (vertices, indexconsumer) -> {
+		for (int i = 0; i < vertices; i++) indexconsumer.accept(i);
 	}),
-	QUADS(GL33.GL_TRIANGLES, (vertecies, indexconsumer) -> {
-		for (int i = 0; i < vertecies; i += 4) {
+	QUADS(GL33.GL_TRIANGLES, (vertices, indexconsumer) -> {
+		for (int i = 0; i < vertices; i += 4) {
 			indexconsumer.accept(i + 0);
 			indexconsumer.accept(i + 1);
 			indexconsumer.accept(i + 2);
@@ -52,7 +52,7 @@ public enum RenderPrimitive {
 	 * Builds the default indecies required for rendering geometry with this primitive type.
 	 * This method can be used to auto generate the indecies if the used vertex data is in the correct standard order for this primitive.
 	 * 
-	 * @param vertexCount The number of vertecies to draw
+	 * @param vertexCount The number of vertices to draw
 	 * @param indexconsumer An consumer to receive the index values
 	 */
 	public void buildDefaultIndecies(int vertexCount, IntConsumer indexconsumer) {

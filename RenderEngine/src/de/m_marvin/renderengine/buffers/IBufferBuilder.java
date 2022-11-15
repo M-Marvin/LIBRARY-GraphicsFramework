@@ -2,8 +2,8 @@ package de.m_marvin.renderengine.buffers;
 
 import java.nio.ByteBuffer;
 
-import de.m_marvin.renderengine.vertecies.RenderPrimitive;
-import de.m_marvin.renderengine.vertecies.VertexFormat;
+import de.m_marvin.renderengine.vertices.RenderPrimitive;
+import de.m_marvin.renderengine.vertices.VertexFormat;
 
 /**
  * Represents a BufferBuilder which accepts vertex-data via {@link #begin(RenderPrimitive, VertexFormat)} and {@link #end()} 
@@ -15,10 +15,10 @@ import de.m_marvin.renderengine.vertecies.VertexFormat;
 public interface IBufferBuilder {
 	
 	/**
-	 * Represents a call to {@link IBufferBuilder#begin()} and {@link IBufferBuilder#end()} and stores the amount of vertecies, indices and the format and primitive type provided to the begin-call.
+	 * Represents a call to {@link IBufferBuilder#begin()} and {@link IBufferBuilder#end()} and stores the amount of vertices, indices and the format and primitive type provided to the begin-call.
 	 * @author Marvin Köhler
 	 */
-	public static record DrawState(int vertecies, int indecies, VertexFormat format, RenderPrimitive type) {}
+	public static record DrawState(int vertices, int indecies, VertexFormat format, RenderPrimitive type) {}
 	/**
 	 * Packs the ByteBuffer and the DrawState returned by the {@link IBufferBuilder#popNext()} method into one item.
 	 * @author Marvin Köhler
@@ -29,7 +29,7 @@ public interface IBufferBuilder {
 	 * Starts a new vertex data-buffer to draw to.
 	 * The buffer is able to process draw calls like {@link #vertex(float, float, float)} until {@link #end()} is called.
 	 * 
-	 * @param type The primitive type of the vertecies.
+	 * @param type The primitive type of the vertices.
 	 * @param format The vertex/shader-attribute format used.
 	 * @throws IllegalStateException If {@link #begin(RenderPrimitive, VertexFormat) was already called and not finished via {@link #end()}
 	 **/

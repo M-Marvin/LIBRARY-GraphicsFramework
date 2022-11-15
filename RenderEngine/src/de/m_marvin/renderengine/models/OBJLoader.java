@@ -176,7 +176,7 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 				loadMtlLib(new File(modelFile.getParentFile(), parseString(line)), material2texture);
 				break;
 			case "v":
-				model.vertecies.add(parseVec3(line));
+				model.vertices.add(parseVec3(line));
 				break;
 			case "vn":
 				model.normals.add(parseVec3(line));

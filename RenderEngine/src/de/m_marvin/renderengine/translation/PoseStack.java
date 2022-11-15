@@ -3,7 +3,7 @@ package de.m_marvin.renderengine.translation;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.m_marvin.renderengine.vertecies.IVertexConsumer;
+import de.m_marvin.renderengine.vertices.IVertexConsumer;
 import de.m_marvin.unimat.impl.Matrix3f;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.unimat.impl.Quaternion;

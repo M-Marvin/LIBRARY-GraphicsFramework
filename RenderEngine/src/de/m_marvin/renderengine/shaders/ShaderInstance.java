@@ -8,7 +8,7 @@ import org.lwjgl.opengl.GL33;
 
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.textures.ITextureSampler;
-import de.m_marvin.renderengine.vertecies.VertexFormat;
+import de.m_marvin.renderengine.vertices.VertexFormat;
 import de.m_marvin.unimat.impl.Matrix3f;
 import de.m_marvin.unimat.impl.Matrix4f;
 

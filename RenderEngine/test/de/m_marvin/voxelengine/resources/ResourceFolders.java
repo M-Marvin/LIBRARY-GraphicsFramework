@@ -1,4 +1,4 @@
-package de.m_marvin.voxelengine;
+package de.m_marvin.voxelengine.resources;
 
 import java.io.File;
 

@@ -20,7 +20,7 @@ out VS_OUT {
 
 void main() {
 	
-	gl_Position = ProjMat *  ModelViewMat * ObjectMat * vec4(position, 1.0);
+	gl_Position = ProjMat *  ViewMat * TranMat * vec4(position, 1.0);
 	
 	vs_out.uvLast = translate(uv, AnimMatLast);
 	vs_out.uv = translate(uv, AnimMat);

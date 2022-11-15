@@ -90,7 +90,7 @@ public class Camera {
 	
 	/**
 	 * Returns the view matrix containg all translations of the camera.
-	 * @return A matrix that has to be applied to all vertecies in the shader
+	 * @return A matrix that has to be applied to all vertices in the shader
 	 */
 	public Matrix4f getViewMatrix() {
 		return this.viewMatrix;

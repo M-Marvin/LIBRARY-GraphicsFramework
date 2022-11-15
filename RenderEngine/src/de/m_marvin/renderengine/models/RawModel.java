@@ -21,7 +21,7 @@ import de.m_marvin.univec.impl.Vec3i;
  */
 public class RawModel<R extends IResourceProvider<R>> {
 
-	protected List<Vec3f> vertecies = new ArrayList<>();
+	protected List<Vec3f> vertices = new ArrayList<>();
 	protected List<Vec3f> normals = new ArrayList<>();
 	protected List<Vec2f> textureUVs = new ArrayList<>();
 	protected Map<String, List<ModelFace<R>>> modelObjects = new HashMap<>();
@@ -68,7 +68,7 @@ public class RawModel<R extends IResourceProvider<R>> {
 	 */
 	public void drawPartToBuffer(String partName, VertexPrinter<R> vertexConsumer) {
 		for (ModelFace<R> face : this.modelObjects.get(partName)) {
-			for (Vec3i indexVec : face.indexes) vertexConsumer.print(face.usedTexture, this.vertecies.get(indexVec.x()), this.normals.get(indexVec.z()), this.textureUVs.get(indexVec.y()));
+			for (Vec3i indexVec : face.indexes) vertexConsumer.print(face.usedTexture, this.vertices.get(indexVec.x()), this.normals.get(indexVec.z()), this.textureUVs.get(indexVec.y()));
 		}
 	}
 	

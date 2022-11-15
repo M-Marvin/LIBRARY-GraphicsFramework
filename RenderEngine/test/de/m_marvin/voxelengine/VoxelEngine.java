@@ -14,10 +14,10 @@ import de.m_marvin.renderengine.shaders.ShaderLoader;
 import de.m_marvin.renderengine.textures.utility.TextureLoader;
 import de.m_marvin.renderengine.translation.Camera;
 import de.m_marvin.renderengine.windows.Window;
-import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
 import de.m_marvin.voxelengine.rendering.LevelRenderer;
+import de.m_marvin.voxelengine.resources.ReloadState;
 import de.m_marvin.voxelengine.world.ClientLevel;
 
 public class VoxelEngine {
@@ -46,8 +46,9 @@ public class VoxelEngine {
 	protected ShaderLoader<ResourceLocation, ResourceFolders> shaderLoader;
 	protected TextureLoader<ResourceLocation, ResourceFolders> textureLoader;
 	protected OBJLoader<ResourceLocation, ResourceFolders> modelLoader;
+	protected ReloadState clientReloadState;
+	
 	protected UserInput inputHandler;
-
 	protected Window mainWindow;
 	protected long timeMillis;
 	protected long lastTick;
@@ -57,8 +58,6 @@ public class VoxelEngine {
 	protected int frameTime;
 	
 	protected Camera mainCamera;
-	protected float fov;
-	protected Matrix4f projectionMatrix;
 	protected Thread renderThread;
 	
 	protected ClientLevel level;
@@ -71,6 +70,7 @@ public class VoxelEngine {
 		shaderLoader = new ShaderLoader<ResourceLocation, ResourceFolders>(ResourceFolders.SHADERS, resourceLoader);
 		textureLoader = new TextureLoader<ResourceLocation, ResourceFolders>(ResourceFolders.TEXTURES, resourceLoader);
 		modelLoader = new OBJLoader<ResourceLocation, ResourceFolders>(ResourceFolders.MODELS, resourceLoader);
+		clientReloadState = ReloadState.RELOAD_RENDER_THREAD;
 		
 		// Setup and loop timings
 		tickTime = 20; // 50 TPS
@@ -206,16 +206,19 @@ public class VoxelEngine {
 		GLStateManager.clearColor(1, 0, 1, 1);
 		GLStateManager.blendFunc(GL33.GL_SRC_ALPHA, GL33.GL_ONE_MINUS_SRC_ALPHA);
 		
-		// Setup perspective matrix
-		fov = 70;
-		updatePerspective();
-		
+		// Setup renderer
 		this.levelRenderer = new LevelRenderer();
+		this.levelRenderer.fov = 70;
+		this.levelRenderer.updatePerspective();
+		this.levelRenderer.resetRenderCache();
 		
 	}
 	
 	protected void cleanupRenderThread() {
-
+		
+		// Clear render cache
+		levelRenderer.resetRenderCache();
+		
 		// Unload all shaders, textures and models from GPU and cache
 		shaderLoader.clearCached();
 		textureLoader.clearCached();
@@ -226,17 +229,12 @@ public class VoxelEngine {
 		
 	}
 	
-	public void updatePerspective() {
-		int[] windowSize = this.mainWindow.getSize();
-		this.projectionMatrix = Matrix4f.perspective(this.fov, windowSize[0] / (float) windowSize[1], 1, 1000);
-	}
-	
 	public void setupUpdateThread() {
 		
 		// Setup window resize callback
 		mainWindow.registerWindowListener((shouldClose, windowResize, focused, unfocused, maximized, restored) -> {
 			if (windowResize.isPresent()) {
-				VoxelEngine.getInstance().updatePerspective();
+				VoxelEngine.getInstance().getLevelRenderer().updatePerspective();
 			}
 		});
 		
@@ -260,30 +258,23 @@ public class VoxelEngine {
 	
 	private void frame(float partialTick) {
 		
-//		ShaderInstance shader = shaderLoader.getShader(new ResourceLocation("example:world/testShader"));
-//		
-//		Matrix4f viewMatrix = mainCamera.getViewMatrix();
-//		ITextureSampler texture = textureLoader.getTextureMap(OBJECT_TEXTURE_ATLAS);
-//		
-//		shader.useShader();
-//		shader.getUniform("ProjMat").setMatrix4f(projectionMatrix);
-//		shader.getUniform("ModelViewMat").setMatrix4f(viewMatrix);
-//		shader.getUniform("Texture").setTextureSampler(texture);
-//		
-//		GLStateManager.enable(GL33.GL_DEPTH_TEST);
-//		GLStateManager.enable(GL33.GL_BLEND);
-//		GLStateManager.enable(GL33.GL_CULL_FACE);
-//		
-//		this.physicWorld.getObjectList().forEach((worldObject) -> {
-//			
-//			shader.getUniform("ObjectMat").setMatrix4f(worldObject.getModelTranslation());
-//			
-//			VertexBuffer objectModel = name2vertexMap.get(worldObject.getModel());
-//			objectModel.bind();
-//			objectModel.drawAll(RenderPrimitive.TRIANGLES);
-//			objectModel.unbind();
-//			
-//		});
+		if (clientReloadState == ReloadState.RELOAD_RENDER_THREAD) {
+			
+			shaderLoader.clearCached();
+			textureLoader.clearCached();
+			modelLoader.clearCached();
+			
+			shaderLoader.loadShadersIn(WORLD_SHADER_LOCATION, SHADER_LIB_LOCATION);
+			// Textures
+			// Models
+			
+			levelRenderer.resetRenderCache();
+			
+			clientReloadState = ReloadState.COMPLETED;
+			
+		}
+		
+		this.levelRenderer.drawLevel(level);
 		
 		mainWindow.glSwapFrames();
 		
@@ -306,24 +297,7 @@ public class VoxelEngine {
 			if (inputHandler.isBindingActive("movement.left")) mainCamera.move(new Vec3f(-1F, 0F, 0F));
 			if (inputHandler.isBindingActive("movement.right")) mainCamera.move(new Vec3f(1F, 0F, 0F));
 		}
-		
-//		if (inputHandler.isBindingActive("spawn_object")) {
-//			
-//			WorldObject object = new Random().nextBoolean() ? new TestBlockObject() : new Random().nextBoolean() ? new MotorObject() : new KorbuvaObject();
-//			physicWorld.addObject(object);
-//			object.getRigidBody().setOrientation(new Quaternion(new Vec3i(1, 0, 0), 0));
-//			object.getRigidBody().setPosition(this.mainCamera.getPosition());
-//			
-//		}
-//		
-//		mainCamera.upadteViewMatrix();
-//
-//		physicWorld.stepPhysic(tickTime / 1000F, 0, 0);
-//		
-//		for (WorldObject object : physicWorld.getObjectList()) {
-//			if (object.getRigidBody().getPosition().y < -100) object.getRigidBody().setPosition(object.getRigidBody().getPosition().add(0F, 200F, 0F));
-//		}
-		
+				
 	}
 	
 	public ResourceLoader<ResourceLocation, ResourceFolders> getResourceLoader() {
@@ -364,6 +338,14 @@ public class VoxelEngine {
 	
 	public UserInput getInputHandler() {
 		return inputHandler;
+	}
+	
+	public LevelRenderer getLevelRenderer() {
+		return levelRenderer;
+	}
+	
+	public void reloadResources() {
+		this.clientReloadState = ReloadState.RELOAD_RENDER_THREAD;
 	}
 	
 }

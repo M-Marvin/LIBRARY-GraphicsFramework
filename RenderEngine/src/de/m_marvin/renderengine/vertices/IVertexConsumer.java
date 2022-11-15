@@ -1,4 +1,4 @@
-package de.m_marvin.renderengine.vertecies;
+package de.m_marvin.renderengine.vertices;
 
 import de.m_marvin.renderengine.textures.IUVModifyer;
 import de.m_marvin.renderengine.translation.PoseStack;
