@@ -14,7 +14,7 @@ import de.m_marvin.renderengine.vertices.VertexFormat;
 import de.m_marvin.renderengine.vertices.VertexFormat.VertexElement;
 
 /**
- * The BufferBuilder is used to create VertexBuffers by calling the necessary draw methods like {@link #vertex(float, float, float)}.
+ * The BufferBuilder is used to create {@link VertexBuffers} by calling necessary draw methods like {@link #vertex(float, float, float)}.
  * 
  * It can store multiple data-streams for multiple VertexBuffers at the same time.
  * It can be reused after building all VertexBuffers via {@link #popNext()} or by calling {@link #discardStored()}.
@@ -45,6 +45,29 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 	public BufferBuilder(int bufferSize) {
 		this.buffer = MemoryUtil.memAlloc(bufferSize);
 		this.drawStates = Queues.newArrayDeque();
+	}
+	
+	private void ensureCapacity(int size) {
+		if (writtenBytes + size > buffer.capacity()) {
+			int currentSize = this.buffer.capacity();
+			int addedSize = roundUp(size);
+			this.buffer = MemoryUtil.memRealloc(buffer, currentSize + addedSize);
+			this.buffer.rewind();
+		}
+	}
+	
+	private static int roundUp(int size) {
+		int i = 2097152;
+		if (size == 0) {
+			return i;
+		} else {
+			if (size < 0) {
+				i *= -1;
+			}
+			
+			int j = size % i;
+			return j == 0 ? size : size + i - j;
+		}
 	}
 	
 	@Override
@@ -222,6 +245,7 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 			this.currentElementIndex = -1;
 			this.vertexCount++;
 		}
+		ensureCapacity(this.format.getSize());
 	}
 
 	@Override

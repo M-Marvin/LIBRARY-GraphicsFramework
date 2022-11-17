@@ -60,5 +60,15 @@ public class SingleTextureMap<R extends IResourceProvider<R>> extends AbstractTe
 	public float mapV(float v) {
 		return v;
 	}
+
+	@Override
+	public int getWidth() {
+		return width;
+	}
+
+	@Override
+	public int getHeight() {
+		return frameHeight;
+	}
 	
 }

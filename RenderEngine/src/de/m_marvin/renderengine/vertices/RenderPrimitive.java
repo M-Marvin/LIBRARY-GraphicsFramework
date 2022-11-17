@@ -16,6 +16,18 @@ import de.m_marvin.renderengine.buffers.VertexBuffer;
  */
 public enum RenderPrimitive {
 	
+	POINTS(GL33.GL_POINTS, (vertices, indexconsumer) -> {
+		for (int i = 0; i < vertices; i++) indexconsumer.accept(i);
+	}),
+	LINES_LOOP(GL33.GL_LINE_LOOP, (vertices, indexconsumer) -> {
+		for (int i = 0; i < vertices; i++) indexconsumer.accept(i);
+	}),
+	LINES_STRIP(GL33.GL_LINE_STRIP, (vertices, indexconsumer) -> {
+		for (int i = 0; i < vertices; i++) indexconsumer.accept(i);
+	}),
+	LINES(GL33.GL_LINES, (vertices, indexconsumer) -> {
+		for (int i = 0; i < vertices; i++) indexconsumer.accept(i);
+	}),
 	TRIANGLES(GL33.GL_TRIANGLES, (vertices, indexconsumer) -> {
 		for (int i = 0; i < vertices; i++) indexconsumer.accept(i);
 	}),

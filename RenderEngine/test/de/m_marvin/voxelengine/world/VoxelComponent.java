@@ -27,7 +27,7 @@ public class VoxelComponent {
 	}
 	
 	public VoxelMaterial getMaterial(int id) {
-		return this.materials.get(id);
+		return this.materials.get(id - 1);
 	}
 	
 }

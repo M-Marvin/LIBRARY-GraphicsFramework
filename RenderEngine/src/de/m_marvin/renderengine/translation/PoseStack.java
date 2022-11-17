@@ -72,13 +72,12 @@ public class PoseStack {
 	}
 	
 	public void rotateRadians(float x, float y, float z) {
-		multiplyTransformation(Quaternion.fromXYZRadians(x, y, z));
+		rotate(Quaternion.fromXYZRadians(x, y, z));
 	}
 	public void rotateDegrees(float x, float y, float z) {
-		multiplyTransformation(Quaternion.fromXYZDegrees(x, y, z));
+		rotate(Quaternion.fromXYZDegrees(x, y, z));
 	}
-	
-	public void multiplyTransformation(Quaternion quat) {
+	public void rotate(Quaternion quat) {
 		Pose pose = last();
 		pose.normal().mulI(quat);
 		pose.pose().mulI(quat);

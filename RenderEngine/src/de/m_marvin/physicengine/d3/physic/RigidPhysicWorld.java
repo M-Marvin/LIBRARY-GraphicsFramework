@@ -13,7 +13,6 @@ import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
 import com.bulletphysics.dynamics.DynamicsWorld;
 import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSolver;
 
-import de.m_marvin.enginetest.world.objects.WorldObject;
 import de.m_marvin.physicengine.d3.util.BroadphaseAlgorithm;
 import de.m_marvin.univec.impl.Vec3f;
 
@@ -95,7 +94,7 @@ public class RigidPhysicWorld<T extends IRigidObject> {
 		}
 	}
 	
-	public boolean containsObject(WorldObject rigidBodyObject) {
+	public boolean containsObject(T rigidBodyObject) {
 		return this.rigidBodies.contains(rigidBodyObject);
 	}
 	

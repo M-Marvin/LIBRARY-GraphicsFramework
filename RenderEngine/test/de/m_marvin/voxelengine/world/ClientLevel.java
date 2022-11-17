@@ -22,4 +22,16 @@ public class ClientLevel {
 		return this.dynamicWorld.getObjectList();
 	}
 	
+	public boolean addStructure(VoxelStructure structure) {
+		if (structure.getRigidBody() != null) return false;
+		dynamicWorld.addObject(structure);
+		return true;
+	}
+	
+	public boolean removeStructure(VoxelStructure structure) {
+		if (!dynamicWorld.containsObject(structure)) return false;
+		dynamicWorld.removeObject(structure);
+		return true;
+	}
+	
 }

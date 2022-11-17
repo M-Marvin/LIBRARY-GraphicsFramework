@@ -1,11 +1,10 @@
 {
-	"VertexShaderFile": "voxelShader",
-	"FragmentShaderFile": "voxelShader",
-	"GeometryShaderFile": "voxelShader",
+	"VertexShaderFile": "voxelShader2",
+	"FragmentShaderFile": "voxelShader2",
 	"Uniforms": [	
-		{ "Name": "ViewMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0] },
-		{ "Name": "ProjMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0 ] },
-		{ "Name": "TranMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0] },
+		{ "Name": "ViewMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
+		{ "Name": "ProjMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
+		{ "Name": "TranMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
 		{ "Name": "AnimMat", "Type": "matrix3x3", "Value": [ 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0 ] },
 		{ "Name": "AnimMatLast", "Type": "matrix3x3", "Value": [ 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0 ] },
 		{ "Name": "Texture", "Type": "sampler2D", "Value": 0 },

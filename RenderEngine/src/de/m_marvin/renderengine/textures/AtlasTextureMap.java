@@ -175,5 +175,15 @@ public class AtlasTextureMap<R extends IResourceProvider<R>> extends AbstractTex
 		Vec4f texUV = location2uv.get(activeTexture);
 		return texUV.y() + texUV.w() * v;
 	}
+
+	@Override
+	public int getWidth() {
+		return (int) ((mapV(1) - mapV(0)) * frameHeight);
+	}
+
+	@Override
+	public int getHeight() {
+		return (int) ((mapU(1) - mapU(0)) * width);
+	}
 	
 }

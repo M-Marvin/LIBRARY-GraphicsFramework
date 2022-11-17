@@ -129,6 +129,9 @@ public abstract class AbstractTextureMap<R extends IResourceProvider<R>> impleme
 		if (this.animationMatrixLast == null) this.animationMatrixLast = this.animationMatrix;
 	}
 	
+	public abstract int getWidth();
+	public abstract int getHeight();
+	
 	@Override
 	public Matrix3f frameMatrix() {
 		return this.animationMatrix;

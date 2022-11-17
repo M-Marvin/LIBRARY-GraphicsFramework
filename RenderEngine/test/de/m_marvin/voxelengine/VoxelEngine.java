@@ -1,5 +1,8 @@
 package de.m_marvin.voxelengine;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL33;
 
@@ -14,11 +17,15 @@ import de.m_marvin.renderengine.shaders.ShaderLoader;
 import de.m_marvin.renderengine.textures.utility.TextureLoader;
 import de.m_marvin.renderengine.translation.Camera;
 import de.m_marvin.renderengine.windows.Window;
+import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
 import de.m_marvin.voxelengine.rendering.LevelRenderer;
 import de.m_marvin.voxelengine.resources.ReloadState;
 import de.m_marvin.voxelengine.world.ClientLevel;
+import de.m_marvin.voxelengine.world.VoxelComponent;
+import de.m_marvin.voxelengine.world.VoxelMaterial;
+import de.m_marvin.voxelengine.world.VoxelStructure;
 
 public class VoxelEngine {
 
@@ -81,7 +88,7 @@ public class VoxelEngine {
 
 		// Setup main window and camera
 		mainWindow = new Window(1000, 600, "Engine Test");
-		mainCamera = new Camera(new Vec3f(6F, 1F, 2F), new Vec3f(0F, 90F, 0F));
+		mainCamera = new Camera(new Vec3f(0F, 0F, 0F), new Vec3f(0F, 0F, 0F));
 		
 		// Start and initialize render thread
 		startRenderThread(() -> {
@@ -207,7 +214,7 @@ public class VoxelEngine {
 		GLStateManager.blendFunc(GL33.GL_SRC_ALPHA, GL33.GL_ONE_MINUS_SRC_ALPHA);
 		
 		// Setup renderer
-		this.levelRenderer = new LevelRenderer();
+		this.levelRenderer = new LevelRenderer(36000);
 		this.levelRenderer.fov = 70;
 		this.levelRenderer.updatePerspective();
 		this.levelRenderer.resetRenderCache();
@@ -252,6 +259,30 @@ public class VoxelEngine {
 		// Setup world
 		level = new ClientLevel();
 		
+		// Testing
+		VoxelStructure s = new VoxelStructure();
+		List<VoxelMaterial> materials = new ArrayList<>();
+		materials.add(new VoxelMaterial());
+		List<int[][][]> voxels = new ArrayList<>();
+		int[][][] vc = new int[4][4][4];
+		vc[0][0][0] = 1;
+		vc[1][0][0] = 1;
+		vc[2][0][0] = 1;
+		vc[3][0][0] = 1;
+		vc[2][1][1] = 1;
+		vc[3][1][1] = 1;
+		vc[2][2][1] = 1;
+		vc[3][2][1] = 1;
+		vc[2][1][2] = 1;
+		vc[3][1][2] = 1;
+		vc[2][2][2] = 1;
+		vc[3][2][2] = 1;
+		
+		voxels.add(vc);
+		VoxelComponent c = new VoxelComponent(voxels, materials);
+		s.addComponent(c, new Vec3f(0F, 0F, 0F), new Quaternion(new Vec3i(1, 0, 0), 0));
+		level.addStructure(s);
+		
 	}
 	
 	// https://learnopengl.com/Advanced-OpenGL/Geometry-Shader
@@ -274,7 +305,7 @@ public class VoxelEngine {
 			
 		}
 		
-		this.levelRenderer.drawLevel(level);
+		this.levelRenderer.renderLevel(level);
 		
 		mainWindow.glSwapFrames();
 		
@@ -297,7 +328,8 @@ public class VoxelEngine {
 			if (inputHandler.isBindingActive("movement.left")) mainCamera.move(new Vec3f(-1F, 0F, 0F));
 			if (inputHandler.isBindingActive("movement.right")) mainCamera.move(new Vec3f(1F, 0F, 0F));
 		}
-				
+		mainCamera.upadteViewMatrix();
+		
 	}
 	
 	public ResourceLoader<ResourceLocation, ResourceFolders> getResourceLoader() {

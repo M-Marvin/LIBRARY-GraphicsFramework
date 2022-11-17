@@ -57,6 +57,10 @@ public class GLStateManager {
 		GL33.glEnable(target);
 	}
 
+	public static void disable(int target) {
+		GL33.glDisable(target);
+	}
+
 	public static void resizeViewport(int lx, int ly, int hx, int hy) {
 		GL33.glViewport(lx, ly, hx, hy);
 	}
