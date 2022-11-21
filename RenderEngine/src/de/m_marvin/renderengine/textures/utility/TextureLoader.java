@@ -338,7 +338,9 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 			System.err.println("Texture " + resourceLocation + " does not exist!");
 			this.textureCache.put(resourceLocation, (AbstractTextureMap<R>) INVALID_TEXTURE_FALLBACK.get());
 		}
-		return this.textureCache.get(resourceLocation);
+		AbstractTextureMap<R> texture = this.textureCache.get(resourceLocation);
+		texture.activateTexture(null);
+		return texture;
 	}
 	
 }

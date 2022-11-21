@@ -11,6 +11,12 @@ import de.m_marvin.renderengine.textures.ITextureSampler;
 import de.m_marvin.renderengine.vertices.VertexFormat;
 import de.m_marvin.unimat.impl.Matrix3f;
 import de.m_marvin.unimat.impl.Matrix4f;
+import de.m_marvin.univec.impl.Vec2f;
+import de.m_marvin.univec.impl.Vec2i;
+import de.m_marvin.univec.impl.Vec3f;
+import de.m_marvin.univec.impl.Vec3i;
+import de.m_marvin.univec.impl.Vec4f;
+import de.m_marvin.univec.impl.Vec4i;
 
 /**
  * Represents a shader program on the GPU.
@@ -75,23 +81,7 @@ public class ShaderInstance {
 		}
 		
 		/* Type specific setter methods to avoid the instanceof check */
-		
-		/**
-		 * Type specific setter for the uniform value.
-		 * @param value The new value
-		 */
-		public void setFloatArr(float[] value) {
-			this.type.set(location, value);
-		}
-		
-		/**
-		 * Type specific setter for the uniform value.
-		 * @param value The new value
-		 */
-		public void setIntArr(int[] value) {
-			this.type.set(location, value);
-		}
-		
+
 		/**
 		 * Type specific setter for the uniform value.
 		 * @param value The new value
@@ -104,8 +94,56 @@ public class ShaderInstance {
 		 * Type specific setter for the uniform value.
 		 * @param value The new value
 		 */
+		public void setVec2f(Vec2f value) {
+			this.type.set(location, new float[] {value.x, value.y});
+		}
+		
+		/**
+		 * Type specific setter for the uniform value.
+		 * @param value The new value
+		 */
+		public void setVec3f(Vec3f value) {
+			this.type.set(location, new float[] {value.x, value.y, value.z});
+		}
+
+		/**
+		 * Type specific setter for the uniform value.
+		 * @param value The new value
+		 */
+		public void setVec4f(Vec4f value) {
+			this.type.set(location, new float[] {value.x, value.y, value.z, value.w});
+		}
+		
+		/**
+		 * Type specific setter for the uniform value.
+		 * @param value The new value
+		 */
 		public void setInt(int value) {
 			this.type.set(location, value);
+		}
+
+		/**
+		 * Type specific setter for the uniform value.
+		 * @param value The new value
+		 */
+		public void setVec2i(Vec2i value) {
+			this.type.set(location, new int[] {value.x, value.y});
+		}
+
+		/**
+		 * Type specific setter for the uniform value.
+		 * @param value The new value
+		 */
+		public void setVec3i(Vec3i value) {
+			this.type.set(location, new int[] {value.x, value.y, value.z});
+		}
+
+		/**
+		 * Type specific setter for the uniform value.
+		 * @param value The new value
+		 */
+		public void setVec4i(Vec4i value) {
+			this.type.set(location, new int[] {value.x, value.y, value.z, value.w});
 		}
 		
 		/**
@@ -114,6 +152,30 @@ public class ShaderInstance {
 		 */
 		public void setUnsignedInt(int value) {
 			this.type.set(location, value);
+		}
+
+		/**
+		 * Type specific setter for the uniform value.
+		 * @param value The new value
+		 */
+		public void setVec2ui(Vec2i value) {
+			this.type.set(location, new int[] {value.x, value.y});
+		}
+
+		/**
+		 * Type specific setter for the uniform value.
+		 * @param value The new value
+		 */
+		public void setVec3ui(Vec3i value) {
+			this.type.set(location, new int[] {value.x, value.y, value.z});
+		}
+
+		/**
+		 * Type specific setter for the uniform value.
+		 * @param value The new value
+		 */
+		public void setVec4ui(Vec4i value) {
+			this.type.set(location, new int[] {value.x, value.y, value.z, value.w});
 		}
 		
 		/**

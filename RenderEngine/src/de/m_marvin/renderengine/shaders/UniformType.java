@@ -1,7 +1,6 @@
 package de.m_marvin.renderengine.shaders;
 
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 import de.m_marvin.renderengine.GLStateManager;
 
@@ -14,56 +13,71 @@ import de.m_marvin.renderengine.GLStateManager;
  */
 public enum UniformType {
 	
-	SAMPLER_2D("sampler2D", (array) -> int.class, (location, value) -> {
-		GLStateManager.setUniformInt1(location, (int) value);
+	SAMPLER_2D("sampler2D", int.class, (location, value) -> {
+		GLStateManager.setUniformInt(location, (int) value);
 	}),
-	MATRIX_3x3("matrix3x3", (array) -> float[].class, (location, value) -> {
+	MATRIX_3x3("matrix3x3", float[].class, (location, value) -> {
 		GLStateManager.setUniformMatrix3(location, false, (float[]) value);
 	}),
-	MATRIX_4x4("matrix4x4", (array) -> float[].class, (location, value) -> {
+	MATRIX_4x4("matrix4x4", float[].class, (location, value) -> {
 		GLStateManager.setUniformMatrix4(location, false, (float[]) value);
 	}),
-	INT("int", (array) -> array ? int[].class : int.class, (location, value) -> {
-		if (value instanceof int[]) {
-			GLStateManager.setUniformIntN(location, (int[]) value);
-		} else {
-			GLStateManager.setUniformInt1(location, (int) value);
-		}
+	INT("int", int.class, (location, value) -> {
+		GLStateManager.setUniformInt(location, (int) value);
 	}),
-	UINT("uint", (array) -> array ? int[].class : int.class, (location, value) -> {
-		if (value instanceof int[]) {
-			GLStateManager.setUniformUnsignedIntN(location, (int[]) value);
-		} else {
-			GLStateManager.setUniformUnsignedInt1(location, (int) value);
-		}
+	VEC_2I("vec2i", int[].class, (location, value) -> {
+		GLStateManager.setUniformIntVec2(location, ((int[]) value)[0], ((int[]) value)[1]);
 	}),
-	FLOAT("float", (array) -> array ? float[].class : float.class, (location, value) -> {
-		if (value instanceof float[]) {
-			GLStateManager.setUniformFloatN(location, (float[]) value);
-		} else {
-			GLStateManager.setUniformFloat1(location, (float) value);
-		}
+	VEC_3I("vec3i", int[].class, (location, value) -> {
+		GLStateManager.setUniformIntVec3(location, ((int[]) value)[0], ((int[]) value)[1], ((int[]) value)[2]);
+	}),
+	VEC_4I("vec4i", int[].class, (location, value) -> {
+		GLStateManager.setUniformIntVec4(location, ((int[]) value)[0], ((int[]) value)[1], ((int[]) value)[2], ((int[]) value)[3]);
+	}),
+	
+	UINT("uint", int.class, (location, value) -> {
+		GLStateManager.setUniformUnsignedInt(location, (int) value);
+	}),
+	VEC_2UI("vec2ui", int[].class, (location, value) -> {
+		GLStateManager.setUniformUnsignedIntVec2(location, ((int[]) value)[0], ((int[]) value)[1]);
+	}),
+	VEC_3UI("vec3ui", int[].class, (location, value) -> {
+		GLStateManager.setUniformUnsignedIntVec3(location, ((int[]) value)[0], ((int[]) value)[1], ((int[]) value)[2]);
+	}),
+	VEC_4UI("vec4ui", int[].class, (location, value) -> {
+		GLStateManager.setUniformUnsignedIntVec4(location, ((int[]) value)[0], ((int[]) value)[1], ((int[]) value)[2], ((int[]) value)[3]);
+	}),
+	
+	FLOAT("float", float.class, (location, value) -> {
+		GLStateManager.setUniformFloat(location, (float) value);
+	}),
+	VEC_2F("vec2f", float[].class, (location, value) -> {
+		GLStateManager.setUniformFloatVec2(location, ((float[]) value)[0], ((float[]) value)[1]);
+	}),
+	VEC_3F("vec3f", float[].class, (location, value) -> {
+		GLStateManager.setUniformFloatVec3(location, ((float[]) value)[0], ((float[]) value)[1], ((float[]) value)[2]);
+	}),
+	VEC_4F("vec4f", float[].class, (location, value) -> {
+		GLStateManager.setUniformFloatVec4(location, ((float[]) value)[0], ((float[]) value)[1], ((float[]) value)[2], ((float[]) value)[3]);
 	});
-		
+	
 	private final String codeName;
 	private final BiConsumer<Integer, Object> glSetter;
-	private final Function<Boolean, Class<?>> valueTypeSupplier;
+	private final Class<?> valueType;
 	
-	private UniformType(String codeName, Function<Boolean, Class<?>> valueTypeSupplier, BiConsumer<Integer, Object> glSetter) {
+	private UniformType(String codeName, Class<?> valueType, BiConsumer<Integer, Object> glSetter) {
 		this.codeName = codeName;
 		this.glSetter = glSetter;
-		this.valueTypeSupplier = valueTypeSupplier;
+		this.valueType = valueType;
 	}
 	
 	/**
 	 * Returns the value type of the uniform type.
-	 * Depending on the argument it returns the array version of the value.
-	 * @param definedAsArray If the method should return the array version
 	 * 
 	 * @return The value type class
 	 */
-	public Class<?> getValueType(boolean definedAsArray) {
-		return valueTypeSupplier.apply(definedAsArray);
+	public Class<?> getValueType() {
+		return valueType;
 	}
 	
 	/**

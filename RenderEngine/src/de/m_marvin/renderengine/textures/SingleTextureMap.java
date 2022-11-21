@@ -62,13 +62,23 @@ public class SingleTextureMap<R extends IResourceProvider<R>> extends AbstractTe
 	}
 
 	@Override
-	public int getWidth() {
+	public int getImageWidth() {
 		return width;
 	}
 
 	@Override
-	public int getHeight() {
+	public int getImageHeight() {
 		return frameHeight;
+	}
+	
+	@Override
+	public int getMapWidth() {
+		return getImageWidth();
+	}
+
+	@Override
+	public int getMapHeight() {
+		return getImageHeight();
 	}
 	
 }

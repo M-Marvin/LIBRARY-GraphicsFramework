@@ -177,13 +177,23 @@ public class AtlasTextureMap<R extends IResourceProvider<R>> extends AbstractTex
 	}
 
 	@Override
-	public int getWidth() {
-		return (int) ((mapV(1) - mapV(0)) * frameHeight);
+	public int getImageWidth() {
+		return Math.round((mapV(1) - mapV(0)) * frameHeight);
 	}
 
 	@Override
-	public int getHeight() {
-		return (int) ((mapU(1) - mapU(0)) * width);
+	public int getImageHeight() {
+		return Math.round((mapU(1) - mapU(0)) * width);
+	}
+	
+	@Override
+	public int getMapWidth() {
+		return width;
+	}
+
+	@Override
+	public int getMapHeight() {
+		return frameHeight;
 	}
 	
 }

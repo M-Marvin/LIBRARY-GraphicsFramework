@@ -6,7 +6,7 @@ import de.m_marvin.voxelengine.rendering.RenderType;
 public class VoxelMaterial {
 
 	public ResourceLocation texture() {
-		return null;
+		return new ResourceLocation("example:materials/ground2");
 	}
 
 	public RenderType renderLayer() {

@@ -216,8 +216,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 			String uniformName = uniformJson.get("Name").getAsString();
 			UniformType type = UniformType.byName(uniformJson.get("Type").getAsString());
 			JsonElement defaultValueJson = uniformJson.get("Value");
-			boolean definedAsArray = defaultValueJson.isJsonArray();
-			Object defaultValue = gson.fromJson(defaultValueJson, type.getValueType(definedAsArray));
+			Object defaultValue = gson.fromJson(defaultValueJson, type.getValueType());
 			shaderInstance.createUniform(uniformName, type, defaultValue);
 		}
 		

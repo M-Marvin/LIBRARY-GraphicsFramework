@@ -7,6 +7,10 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL33;
 
+import de.m_marvin.univec.impl.Vec2f;
+import de.m_marvin.univec.impl.Vec3f;
+import de.m_marvin.univec.impl.Vec4f;
+
 /**
  * This class contains all used OpenGL methods.
  * Contains the {@link GLStateManager#initialize(PrintStream)} method that must be called before any OpenGL or GLFW methods can be used.
@@ -223,25 +227,43 @@ public class GLStateManager {
 		return GL33.glGetUniformLocation(program, name);
 	}
 
-	public static void setUniformInt1(int location, int value) {
+	public static void setUniformInt(int location, int value) {
 		GL33.glUniform1i(location, value);
 	}
-	public static void setUniformIntN(int location, int... arr) {
-		GL33.glUniform1iv(location, arr);
+	public static void setUniformIntVec2(int location, float valueX, float valueY) {
+		GL33.glUniform2f(location, valueX, valueY);
+	}
+	public static void setUniformIntVec3(int location, float valueX, float valueY, float valueZ) {
+		GL33.glUniform3f(location, valueX, valueY, valueZ);
+	}
+	public static void setUniformIntVec4(int location, float valueX, float valueY, float valueZ, float valueW) {
+		GL33.glUniform4f(location, valueX, valueY, valueZ, valueW);
 	}
 
-	public static void setUniformUnsignedInt1(int location, int value) {
+	public static void setUniformUnsignedInt(int location, int value) {
 		GL33.glUniform1ui(location, value);
 	}
-	public static void setUniformUnsignedIntN(int location, int... arr) {
-		GL33.glUniform1uiv(location, arr);
+	public static void setUniformUnsignedIntVec2(int location, int valueX, int valueY) {
+		GL33.glUniform2ui(location, valueX, valueY);
+	}
+	public static void setUniformUnsignedIntVec3(int location, int valueX, int valueY, int valueZ) {
+		GL33.glUniform3ui(location, valueX, valueY, valueZ);
+	}
+	public static void setUniformUnsignedIntVec4(int location, int valueX, int valueY, int valueZ, int valueW) {
+		GL33.glUniform4ui(location, valueX, valueY, valueZ, valueW);
 	}
 
-	public static void setUniformFloat1(int location, float value) {
+	public static void setUniformFloat(int location, float value) {
 		GL33.glUniform1f(location, value);
 	}
-	public static void setUniformFloatN(int location, float... arr) {
-		GL33.glUniform1fv(location, arr);
+	public static void setUniformFloatVec2(int location, float valueX, float valueY) {
+		GL33.glUniform2f(location, valueX, valueY);
+	}
+	public static void setUniformFloatVec3(int location, float valueX, float valueY, float valueZ) {
+		GL33.glUniform3f(location, valueX, valueY, valueZ);
+	}
+	public static void setUniformFloatVec4(int location, float valueX, float valueY, float valueZ, float valueW) {
+		GL33.glUniform4f(location, valueX, valueY, valueZ, valueW);
 	}
 
 	public static void setUniformMatrix3(int location, boolean transpose, float[] value) {

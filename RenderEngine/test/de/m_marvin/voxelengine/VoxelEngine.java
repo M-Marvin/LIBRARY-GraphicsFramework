@@ -42,13 +42,10 @@ public class VoxelEngine {
 	
 	public static final String NAMESPACE = "example";
 	
-	public static final ResourceLocation OBJECT_MODEL_LOCATION = new ResourceLocation(NAMESPACE, "objects");
-	public static final ResourceLocation OBJECT_TEXTURE_LOCATION = new ResourceLocation(NAMESPACE, "objects");
-	public static final ResourceLocation OBJECT_TEXTURE_ATLAS = new ResourceLocation(NAMESPACE, "object_atlas");
-	public static final ResourceLocation OBJECT_TEXTURE_ATLAS_INTERPOLATED = new ResourceLocation(NAMESPACE, "object_atlas_interpolated");
 	public static final ResourceLocation SHADER_LIB_LOCATION = new ResourceLocation(NAMESPACE, "glsl");
 	public static final ResourceLocation WORLD_SHADER_LOCATION = new ResourceLocation(NAMESPACE, "world");
-		
+	public static final ResourceLocation MATERIAL_ATLAS = new ResourceLocation(NAMESPACE, "materials");
+	
 	protected ResourceLoader<ResourceLocation, ResourceFolders> resourceLoader;
 	protected ShaderLoader<ResourceLocation, ResourceFolders> shaderLoader;
 	protected TextureLoader<ResourceLocation, ResourceFolders> textureLoader;
@@ -210,7 +207,7 @@ public class VoxelEngine {
 	protected void setupRenderThread() {
 		
 		// Setup OpenGL
-		GLStateManager.clearColor(1, 0, 1, 1);
+		GLStateManager.clearColor(1, 0, 0, 1);
 		GLStateManager.blendFunc(GL33.GL_SRC_ALPHA, GL33.GL_ONE_MINUS_SRC_ALPHA);
 		
 		// Setup renderer
@@ -296,7 +293,7 @@ public class VoxelEngine {
 			modelLoader.clearCached();
 			
 			shaderLoader.loadShadersIn(WORLD_SHADER_LOCATION, SHADER_LIB_LOCATION);
-			// Textures
+			textureLoader.buildAtlasMapFromTextures(MATERIAL_ATLAS, MATERIAL_ATLAS, false, false);
 			// Models
 			
 			levelRenderer.resetRenderCache();

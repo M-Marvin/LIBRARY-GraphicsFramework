@@ -13,6 +13,8 @@ import de.m_marvin.renderengine.shaders.ShaderInstance;
 import de.m_marvin.renderengine.textures.AbstractTextureMap;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.unimat.impl.Matrix4f;
+import de.m_marvin.univec.impl.Vec2f;
+import de.m_marvin.univec.impl.Vec2i;
 import de.m_marvin.voxelengine.VoxelEngine;
 import de.m_marvin.voxelengine.rendering.LevelRender.StructureRender;
 import de.m_marvin.voxelengine.world.ClientLevel;
@@ -50,9 +52,14 @@ public class LevelRenderer {
 		
 		Matrix4f viewMatrix = VoxelEngine.getInstance().getMainCamera().getViewMatrix();
 		
+		AbstractTextureMap<ResourceLocation> materialAtlas = VoxelEngine.getInstance().getTextureLoader().getTextureMap(VoxelEngine.MATERIAL_ATLAS);
+		
 		shader.useShader();
 		shader.getUniform("ProjMat").setMatrix4f(projectionMatrix);
 		shader.getUniform("ViewMat").setMatrix4f(viewMatrix);
+		shader.getUniform("HalfVoxelSize").setFloat(0.5F);
+		shader.getUniform("HalfVoxelUVSize").setVec2f(new Vec2f(1F / materialAtlas.getMapWidth(), 1F / materialAtlas.getMapHeight())); // TODO
+		shader.getUniform("Texture").setTextureSampler(materialAtlas);
 		
 		PoseStack poseStack = new PoseStack();
 		
@@ -77,9 +84,6 @@ public class LevelRenderer {
 		for (RenderType renderLayer : RenderType.voxelRenderLayers()) {
 			
 			renderLayer.setState();
-			GL33.glLineWidth(10);
-			GL33.glEnable(GL33.GL_LINE_WIDTH);
-			
 			GL33.glPointSize(10);
 			GL33.glEnable(GL33.GL_POINT_SIZE);
 			
@@ -90,6 +94,8 @@ public class LevelRenderer {
 				if (!compiledStructure.isDirty()) {
 					
 					VertexBuffer buffer = compiledStructure.getBuffer(renderLayer);
+					
+					//shader.getUniform("TranMat").setMatrix4f(Matrix4f.translateMatrix(0, 0, 0));
 					
 					buffer.bind();
 					buffer.drawAll(renderLayer.primitive());
@@ -159,10 +165,17 @@ public class LevelRenderer {
 								
 								ResourceLocation textureName = material.texture();
 								AbstractTextureMap<ResourceLocation> texture = VoxelEngine.getInstance().getTextureLoader().getTexture(textureName);
-								int tWidth = texture.getWidth();
-								int tHeight = texture.getHeight();
+								int tWidth = texture.getImageWidth();
+								int tHeight = texture.getImageHeight();
 								
-								buffer.vertex(x, y, z).color(r, g, b, a).nextElement().putFloat((x % tWidth) / (float) tWidth).putFloat((y % tHeight) / (float) tHeight).putFloat((z % tWidth) / (float) tWidth).putFloat((z % tHeight) / (float) tWidth).endVertex();
+								float fw = 0.5F / texture.getMapWidth();
+								float fh = 0.5F / texture.getMapHeight();
+								float uXW = texture.mapU((x % tWidth) / (float) tWidth) + fw;
+								float vYH = texture.mapU((y % tHeight) / (float) tHeight) + fh;
+								float uZW = texture.mapU((z % tWidth) / (float) tWidth) + fw;
+								float vZH = texture.mapU((z % tHeight) / (float) tHeight) + fh;
+								
+								buffer.vertex(poseStack, x, y, z).color(r, g, b, a).nextElement().putFloat(uXW).putFloat(vYH).putFloat(uZW).putFloat(vZH).endVertex();
 								
 							}
 						}
