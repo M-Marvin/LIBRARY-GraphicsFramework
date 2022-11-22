@@ -71,18 +71,18 @@ void makeQuadWest() {
 }
 
 void makeQuadUp() {
-	makeQuadVertex(gs_in[0].uvEW, gs_in[0].uvEWLast, vec2(1, -1), vec3(1, 1, -1));
-	makeQuadVertex(gs_in[0].uvEW, gs_in[0].uvEWLast, vec2(-1, -1), vec3(-1, 1, -1));
-	makeQuadVertex(gs_in[0].uvEW, gs_in[0].uvEWLast, vec2(1, 1), vec3(1, 1, 1));
-	makeQuadVertex(gs_in[0].uvEW, gs_in[0].uvEWLast, vec2(-1, 1), vec3(-1, 1, 1));
+	makeQuadVertex(gs_in[0].uvUD, gs_in[0].uvUDLast, vec2(1, -1), vec3(1, 1, -1));
+	makeQuadVertex(gs_in[0].uvUD, gs_in[0].uvUDLast, vec2(-1, -1), vec3(-1, 1, -1));
+	makeQuadVertex(gs_in[0].uvUD, gs_in[0].uvUDLast, vec2(1, 1), vec3(1, 1, 1));
+	makeQuadVertex(gs_in[0].uvUD, gs_in[0].uvUDLast, vec2(-1, 1), vec3(-1, 1, 1));
 	EndPrimitive();
 }
 
 void makeQuadDown() {
-	makeQuadVertex(gs_in[0].uvEW, gs_in[0].uvEWLast, vec2(1, -1), vec3(1, -1, -1));
-	makeQuadVertex(gs_in[0].uvEW, gs_in[0].uvEWLast, vec2(-1, -1), vec3(-1, -1, -1));
-	makeQuadVertex(gs_in[0].uvEW, gs_in[0].uvEWLast, vec2(1, 1), vec3(1, -1, 1));
-	makeQuadVertex(gs_in[0].uvEW, gs_in[0].uvEWLast, vec2(-1, 1), vec3(-1, -1, 1));
+	makeQuadVertex(gs_in[0].uvUD, gs_in[0].uvUDLast, vec2(1, -1), vec3(1, -1, -1));
+	makeQuadVertex(gs_in[0].uvUD, gs_in[0].uvUDLast, vec2(-1, -1), vec3(-1, -1, -1));
+	makeQuadVertex(gs_in[0].uvUD, gs_in[0].uvUDLast, vec2(1, 1), vec3(1, -1, 1));
+	makeQuadVertex(gs_in[0].uvUD, gs_in[0].uvUDLast, vec2(-1, 1), vec3(-1, -1, 1));
 	EndPrimitive();
 }
 

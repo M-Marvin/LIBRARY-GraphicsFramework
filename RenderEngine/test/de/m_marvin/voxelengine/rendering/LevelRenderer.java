@@ -58,7 +58,7 @@ public class LevelRenderer {
 		shader.getUniform("ProjMat").setMatrix4f(projectionMatrix);
 		shader.getUniform("ViewMat").setMatrix4f(viewMatrix);
 		shader.getUniform("HalfVoxelSize").setFloat(0.5F);
-		shader.getUniform("HalfVoxelUVSize").setVec2f(new Vec2f(1F / materialAtlas.getMapWidth(), 1F / materialAtlas.getMapHeight())); // TODO
+		shader.getUniform("HalfVoxelUVSize").setVec2f(new Vec2f(0.5F / materialAtlas.getMapWidth(), 0.5F / materialAtlas.getMapHeight())); // TODO
 		shader.getUniform("Texture").setTextureSampler(materialAtlas);
 		
 		PoseStack poseStack = new PoseStack();
@@ -171,10 +171,12 @@ public class LevelRenderer {
 								float fw = 0.5F / texture.getMapWidth();
 								float fh = 0.5F / texture.getMapHeight();
 								float uXW = texture.mapU((x % tWidth) / (float) tWidth) + fw;
-								float vYH = texture.mapU((y % tHeight) / (float) tHeight) + fh;
+								float vYH = texture.mapV((y % tHeight) / (float) tHeight) + fh;
 								float uZW = texture.mapU((z % tWidth) / (float) tWidth) + fw;
-								float vZH = texture.mapU((z % tHeight) / (float) tHeight) + fh;
+								float vZH = texture.mapV((z % tHeight) / (float) tHeight) + fh;
 								
+								System.out.println("Voxel XY: " + x + " " + y);
+								System.out.println("Voxel UV: " + uXW + " " + vYH);
 								buffer.vertex(poseStack, x, y, z).color(r, g, b, a).nextElement().putFloat(uXW).putFloat(vYH).putFloat(uZW).putFloat(vZH).endVertex();
 								
 							}

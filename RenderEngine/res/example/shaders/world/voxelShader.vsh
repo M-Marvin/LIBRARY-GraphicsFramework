@@ -26,10 +26,10 @@ void main() {
 	
 	gl_Position = vec4(position, 1.0);
 	
-	vs_out.uvEWLast = translate(uv.xy, AnimMatLast);
-	vs_out.uvEW = translate(uv.xy, AnimMat);
-	vs_out.uvNSLast = translate(uv.yz, AnimMatLast);
-	vs_out.uvNS = translate(uv.yz, AnimMat);
+	vs_out.uvEWLast = translate(uv.zy, AnimMatLast);
+	vs_out.uvEW = translate(uv.zy, AnimMat);
+	vs_out.uvNSLast = translate(uv.xy, AnimMatLast);
+	vs_out.uvNS = translate(uv.xy, AnimMat);
 	vs_out.uvUDLast = translate(uv.xw, AnimMatLast);
 	vs_out.uvUD = translate(uv.xw, AnimMat);
 	
