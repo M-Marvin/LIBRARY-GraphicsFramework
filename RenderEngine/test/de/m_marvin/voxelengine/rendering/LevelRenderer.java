@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL33;
 
-import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.BufferUsage;
 import de.m_marvin.renderengine.buffers.VertexBuffer;
@@ -13,8 +12,9 @@ import de.m_marvin.renderengine.shaders.ShaderInstance;
 import de.m_marvin.renderengine.textures.AbstractTextureMap;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.unimat.impl.Matrix4f;
-import de.m_marvin.univec.impl.Vec2f;
-import de.m_marvin.univec.impl.Vec2i;
+import de.m_marvin.unimat.impl.Quaternion;
+import de.m_marvin.univec.impl.Vec3f;
+import de.m_marvin.univec.impl.Vec4f;
 import de.m_marvin.voxelengine.VoxelEngine;
 import de.m_marvin.voxelengine.rendering.LevelRender.StructureRender;
 import de.m_marvin.voxelengine.world.ClientLevel;
@@ -58,13 +58,12 @@ public class LevelRenderer {
 		shader.getUniform("ProjMat").setMatrix4f(projectionMatrix);
 		shader.getUniform("ViewMat").setMatrix4f(viewMatrix);
 		shader.getUniform("HalfVoxelSize").setFloat(0.5F);
-		shader.getUniform("HalfVoxelUVSize").setVec2f(new Vec2f(0.5F / materialAtlas.getMapWidth(), 0.5F / materialAtlas.getMapHeight())); // TODO
 		shader.getUniform("Texture").setTextureSampler(materialAtlas);
 		
 		PoseStack poseStack = new PoseStack();
 		
 		for (VoxelStructure structure : level.getStructures()) {
-
+			
 			StructureRender compiledStructure = levelRender.getOrCreateRender(structure);
 			
 			if (compiledStructure.isDirty()) {
@@ -95,7 +94,10 @@ public class LevelRenderer {
 					
 					VertexBuffer buffer = compiledStructure.getBuffer(renderLayer);
 					
-					//shader.getUniform("TranMat").setMatrix4f(Matrix4f.translateMatrix(0, 0, 0));
+					Vec3f position = structure.getRigidBody().getPosition();
+					Quaternion rotation = structure.getRigidBody().getRotation();
+					Matrix4f translationMatrix = Matrix4f.translateMatrix(position.x, position.y, position.z).mul(rotation);
+					shader.getUniform("TranMat").setMatrix4f(translationMatrix);
 					
 					buffer.bind();
 					buffer.drawAll(renderLayer.primitive());
@@ -165,19 +167,11 @@ public class LevelRenderer {
 								
 								ResourceLocation textureName = material.texture();
 								AbstractTextureMap<ResourceLocation> texture = VoxelEngine.getInstance().getTextureLoader().getTexture(textureName);
-								int tWidth = texture.getImageWidth();
-								int tHeight = texture.getImageHeight();
+								Vec4f texUV = texture.getUV();
+								int texWidth = (int) (texture.getImageWidth() * material.pixelScale());
+								int texHeight = (int) (texture.getImageHeight() * material.pixelScale());
 								
-								float fw = 0.5F / texture.getMapWidth();
-								float fh = 0.5F / texture.getMapHeight();
-								float uXW = texture.mapU((x % tWidth) / (float) tWidth) + fw;
-								float vYH = texture.mapV((y % tHeight) / (float) tHeight) + fh;
-								float uZW = texture.mapU((z % tWidth) / (float) tWidth) + fw;
-								float vZH = texture.mapV((z % tHeight) / (float) tHeight) + fh;
-								
-								System.out.println("Voxel XY: " + x + " " + y);
-								System.out.println("Voxel UV: " + uXW + " " + vYH);
-								buffer.vertex(poseStack, x, y, z).color(r, g, b, a).nextElement().putFloat(uXW).putFloat(vYH).putFloat(uZW).putFloat(vZH).endVertex();
+								buffer.vertex(poseStack, x, y, z).nextElement().putInt(x).putInt(y).putInt(z).color(r, g, b, a).nextElement().putFloat(texUV.x).putFloat(texUV.y).putFloat(texUV.z).putFloat(texUV.w).nextElement().putInt(texWidth).putInt(texHeight).endVertex();
 								
 							}
 						}

@@ -6,11 +6,11 @@ import de.m_marvin.voxelengine.rendering.RenderType;
 public class VoxelMaterial {
 
 	public ResourceLocation texture() {
-		return new ResourceLocation("example:materials/test");
+		return new ResourceLocation("example:materials/ground");
 	}
 	
 	public float pixelScale() {
-		return 1.0F;
+		return 0.5F;
 	}
 
 	public RenderType renderLayer() {

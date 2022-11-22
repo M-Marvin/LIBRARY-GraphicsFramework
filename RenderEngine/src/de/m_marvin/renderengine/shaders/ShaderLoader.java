@@ -208,21 +208,28 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 			
 		}
 		
-		ShaderInstance shaderInstance = new ShaderInstance(vertexShaderSource, fragmentShaderSource, geometryShaderSource, attributeFormat);
-		
-		JsonArray uniformArray = json.get("Uniforms").getAsJsonArray();
-		for (int i = 0; i < uniformArray.size(); i++) {
-			JsonObject uniformJson = uniformArray.get(i).getAsJsonObject();
-			String uniformName = uniformJson.get("Name").getAsString();
-			UniformType type = UniformType.byName(uniformJson.get("Type").getAsString());
-			JsonElement defaultValueJson = uniformJson.get("Value");
-			Object defaultValue = gson.fromJson(defaultValueJson, type.getValueType());
-			shaderInstance.createUniform(uniformName, type, defaultValue);
+		try {
+			
+			ShaderInstance shaderInstance = new ShaderInstance(vertexShaderSource, fragmentShaderSource, geometryShaderSource, attributeFormat);
+			
+			JsonArray uniformArray = json.get("Uniforms").getAsJsonArray();
+			for (int i = 0; i < uniformArray.size(); i++) {
+				JsonObject uniformJson = uniformArray.get(i).getAsJsonObject();
+				String uniformName = uniformJson.get("Name").getAsString();
+				UniformType type = UniformType.byName(uniformJson.get("Type").getAsString());
+				JsonElement defaultValueJson = uniformJson.get("Value");
+				Object defaultValue = gson.fromJson(defaultValueJson, type.getValueType());
+				shaderInstance.createUniform(uniformName, type, defaultValue);
+			}
+			
+			inputStream.close();
+			
+			return shaderInstance;
+			
+		} catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException("Failed to load shader " + shaderFile.getName() + " with exception:\n" + e.getMessage());
 		}
 		
-		inputStream.close();
-		
-		return shaderInstance;
 	}
 	
 	/**

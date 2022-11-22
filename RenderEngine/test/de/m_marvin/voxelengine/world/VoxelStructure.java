@@ -11,6 +11,7 @@ import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.linearmath.DefaultMotionState;
 
 import de.m_marvin.physicengine.d3.physic.IRigidObject;
+import de.m_marvin.physicengine.d3.univec.SimplifiedRigidBody;
 import de.m_marvin.physicengine.d3.univec.UniVecHelper;
 import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec3f;
@@ -33,7 +34,7 @@ public class VoxelStructure implements IRigidObject {
 	
 	protected List<StructureComponent> components = new ArrayList<>();
 	protected CollisionShape collisionShape;
-	protected RigidBody rigidBody;
+	protected SimplifiedRigidBody rigidBody;
 	
 	public void addComponent(VoxelComponent component, Vec3f position, Quaternion orientation) {
 		this.components.add(new StructureComponent(component, position, orientation));
@@ -65,8 +66,8 @@ public class VoxelStructure implements IRigidObject {
 	}
 
 	@Override
-	public RigidBody getRigidBody() {
+	public SimplifiedRigidBody getRigidBody() {
 		return this.rigidBody;
 	}
-
+	
 }

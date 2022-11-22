@@ -257,28 +257,32 @@ public class VoxelEngine {
 		level = new ClientLevel();
 		
 		// Testing
-		VoxelStructure s = new VoxelStructure();
 		List<VoxelMaterial> materials = new ArrayList<>();
 		materials.add(new VoxelMaterial());
 		List<int[][][]> voxels = new ArrayList<>();
-		int[][][] vc = new int[4][4][4];
-		vc[0][0][0] = 1;
-		vc[1][0][0] = 1;
-		vc[2][0][0] = 1;
-		vc[3][0][0] = 1;
-		vc[2][1][1] = 1;
-		vc[3][1][1] = 1;
-		vc[2][2][1] = 1;
-		vc[3][2][1] = 1;
-		vc[2][1][2] = 1;
-		vc[3][1][2] = 1;
-		vc[2][2][2] = 1;
-		vc[3][2][2] = 1;
+		int[][][] vc = new int[32][32][32];
+		
+		for (int i0 = 0; i0 < 32; i0++) {
+			for (int i1 = 0; i1 < 32; i1++) {
+				for (int i2 = 0; i2 < 32; i2++) {
+					vc[i0][i1][i2] = 1;
+				}
+			}
+		}
 		
 		voxels.add(vc);
 		VoxelComponent c = new VoxelComponent(voxels, materials);
+		VoxelStructure s = new VoxelStructure();
 		s.addComponent(c, new Vec3f(0F, 0F, 0F), new Quaternion(new Vec3i(1, 0, 0), 0));
 		level.addStructure(s);
+		
+		VoxelStructure s2 = new VoxelStructure();
+		s2.addComponent(c, new Vec3f(-20F, 0F, 20F), new Quaternion(new Vec3i(1, 0, 0), 0));
+		level.addStructure(s2);
+		
+		VoxelStructure s3 = new VoxelStructure();
+		s3.addComponent(c, new Vec3f(0F, 10F, -20F), new Quaternion(new Vec3i(1, 0, 0), 0));
+		level.addStructure(s3);
 		
 	}
 	

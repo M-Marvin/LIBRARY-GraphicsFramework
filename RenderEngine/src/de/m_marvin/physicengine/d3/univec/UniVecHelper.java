@@ -16,8 +16,8 @@ public class UniVecHelper {
 		return new Vec3f(v.x, v.y, v.z);
 	}
 	
-	public static RigidBody rigidBody(float mass, MotionState motionState, CollisionShape shape, Vec3f inertia) {
-		return new RigidBody(mass, motionState, shape, new Vector3f(inertia.x, inertia.y, inertia.z));
+	public static SimplifiedRigidBody rigidBody(float mass, MotionState motionState, CollisionShape shape, Vec3f inertia) {
+		return new SimplifiedRigidBody(mass, motionState, shape, inertia);
 	}
 	
 }

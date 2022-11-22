@@ -48,11 +48,10 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 	}
 	
 	private void ensureCapacity(int size) {
-		if (writtenBytes + size > buffer.capacity()) {
+		if (buffer.position() + size > buffer.capacity()) {
 			int currentSize = this.buffer.capacity();
 			int addedSize = roundUp(size);
 			this.buffer = MemoryUtil.memRealloc(buffer, currentSize + addedSize);
-			this.buffer.rewind();
 		}
 	}
 	

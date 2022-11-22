@@ -15,7 +15,7 @@ void main() {
 
 	vec4 textureColorLast = texture2D(Texture, vertexuvLast);
 	vec4 textureColor = texture2D(Texture, vertexuv);
-	vec4 textureColorFinal = lerp(textureColorLast, textureColor, Interpolation);
+	vec4 textureColorFinal = lerpVec4(textureColorLast, textureColor, Interpolation);
 	
 	FragColor = vertexcolor * textureColorFinal;
 	

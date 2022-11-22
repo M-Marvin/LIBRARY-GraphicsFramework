@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.util.stream.IntStream;
 
 import de.m_marvin.renderengine.resources.IResourceProvider;
+import de.m_marvin.univec.impl.Vec4f;
 
 /**
  * The single texture implementation of the {@link AbstractTextureMap}.
@@ -59,6 +60,11 @@ public class SingleTextureMap<R extends IResourceProvider<R>> extends AbstractTe
 	@Override
 	public float mapV(float v) {
 		return v;
+	}
+	
+	@Override
+	public Vec4f getUV() {
+		return new Vec4f(0F, 0F, 1F, 1F);
 	}
 
 	@Override

@@ -1,38 +1,28 @@
 #version 150
 
-#include math
-
-uniform mat4 ViewMat;
-uniform mat4 ProjMat;
-uniform mat4 TranMat;
-uniform mat3 AnimMat;
-uniform mat3 AnimMatLast;
-
 in vec3 position;
+in ivec3 voxel;
 in vec4 color;
-in vec4 uv;
+in vec4 texuv;
+in ivec2 texsize;
 
 out VS_OUT {
+	ivec3 voxel;
 	vec4 color;
-	vec2 uvNS;
-	vec2 uvNSLast;
-	vec2 uvEW;
-	vec2 uvEWLast;
-	vec2 uvUD;
-	vec2 uvUDLast;
+	vec2 textureUVatlasSize;
+	vec2 voxelUVatlasSize;
+	ivec2 textureSize;
+	vec2 textureUVatlas;
 } vs_out;
 
 void main() {
 	
 	gl_Position = vec4(position, 1.0);
-	
-	vs_out.uvEWLast = translate(uv.zy, AnimMatLast);
-	vs_out.uvEW = translate(uv.zy, AnimMat);
-	vs_out.uvNSLast = translate(uv.xy, AnimMatLast);
-	vs_out.uvNS = translate(uv.xy, AnimMat);
-	vs_out.uvUDLast = translate(uv.xw, AnimMatLast);
-	vs_out.uvUD = translate(uv.xw, AnimMat);
-	
+	vs_out.voxel = voxel;
 	vs_out.color = color;
+	vs_out.textureUVatlasSize = texuv.zw;
+	vs_out.voxelUVatlasSize = vs_out.textureUVatlasSize / texsize;
+	vs_out.textureSize = texsize;
+	vs_out.textureUVatlas = texuv.xy;
 	
 }
