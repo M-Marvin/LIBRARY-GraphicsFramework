@@ -13,6 +13,7 @@ layout (points) in;
 
 in VS_OUT {
 	ivec3 voxel;
+	uint sides;
 	vec4 color;
 	vec2 textureUVatlasSize;
 	vec2 voxelUVatlasSize;
@@ -28,17 +29,21 @@ out GS_OUT {
 	vec2 uvLast;
 } gs_out;
 
+// Creating a single vertex of a voxel-side
+
 vec4 transform(vec4 vector) {
 	return (ProjMat * ViewMat * TranMat) * vector;
 }
 
 void makeQuadVertex(vec2 textureUV, vec3 offset) {
 	gl_Position = transform(gl_in[0].gl_Position + vec4(offset.x * HalfVoxelSize, offset.y * HalfVoxelSize, offset.z * HalfVoxelSize, 0));
-	gs_out.uv = translate(textureUV, AnimMat);
-	gs_out.uvLast = translate(textureUV, AnimMatLast);
+	gs_out.uv = translateVec2(textureUV, AnimMat);
+	gs_out.uvLast = translateVec2(textureUV, AnimMatLast);
 	gs_out.color = gs_in[0].color;
     EmitVertex();
 }
+
+// Creating the verteices of the voxel-sides
 
 void makeQuadNorth() {
 	vec2 v = mod(vec2(gs_in[0].textureSize.x - (gs_in[0].voxel.x + 1), gs_in[0].voxel.y), gs_in[0].textureSize) / gs_in[0].textureSize;
@@ -97,12 +102,15 @@ void makeQuadDown() {
 	EndPrimitive();
 }
 
+// Create all sides depending on the sides attribute
+
 void main() {
 	
-	makeQuadNorth();
-	makeQuadSouth();
-	makeQuadEast();
-	makeQuadWest();
-	makeQuadUp();
-	makeQuadDown();
+	if ((gs_in[0].sides & 1u) > 0u) makeQuadNorth();
+	if ((gs_in[0].sides & 2u) > 0u) makeQuadSouth();
+	if ((gs_in[0].sides & 4u) > 0u) makeQuadEast();
+	if ((gs_in[0].sides & 8u) > 0u) makeQuadWest();
+	if ((gs_in[0].sides & 16u) > 0u) makeQuadUp();
+	if ((gs_in[0].sides & 32u) > 0u) makeQuadDown();
+	
 }

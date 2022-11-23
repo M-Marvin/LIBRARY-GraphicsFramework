@@ -7,7 +7,7 @@ import javax.vecmath.Vector3f;
 
 import com.bulletphysics.collision.shapes.BoxShape;
 import com.bulletphysics.collision.shapes.CollisionShape;
-import com.bulletphysics.dynamics.RigidBody;
+import com.bulletphysics.collision.shapes.CompoundShape;
 import com.bulletphysics.linearmath.DefaultMotionState;
 
 import de.m_marvin.physicengine.d3.physic.IRigidObject;
@@ -30,10 +30,14 @@ public class VoxelStructure implements IRigidObject {
 			this.orientation = orientation;
 		}
 		
+		public void buildShape(CompoundShape shape) {
+			shape.addChildShape(UniVecHelper.transform(position, orientation), component.buildShape());
+		}
+		
 	}
 	
 	protected List<StructureComponent> components = new ArrayList<>();
-	protected CollisionShape collisionShape;
+	protected CompoundShape collisionShape;
 	protected SimplifiedRigidBody rigidBody;
 	
 	public void addComponent(VoxelComponent component, Vec3f position, Quaternion orientation) {
@@ -46,17 +50,14 @@ public class VoxelStructure implements IRigidObject {
 	}
 	
 	public void rebuildShape() {
-		
-		this.collisionShape = new BoxShape(new Vector3f(1, 1, 1));
-		
+		this.collisionShape = new CompoundShape();
+		this.components.forEach((component) -> component.buildShape(this.collisionShape));
 	}
 	
 	@Override
 	public void createRigidBody() {
-		
 		Vec3f inertia = UniVecHelper.calculateInertia(collisionShape, 1);
 		this.rigidBody = UniVecHelper.rigidBody(1, new DefaultMotionState(), collisionShape, inertia);
-		
 	}
 	
 	@Override

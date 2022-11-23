@@ -21,6 +21,7 @@ import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
 import de.m_marvin.voxelengine.rendering.LevelRenderer;
+import de.m_marvin.voxelengine.rendering.RenderType;
 import de.m_marvin.voxelengine.resources.ReloadState;
 import de.m_marvin.voxelengine.world.ClientLevel;
 import de.m_marvin.voxelengine.world.VoxelComponent;
@@ -54,12 +55,20 @@ public class VoxelEngine {
 	
 	protected UserInput inputHandler;
 	protected Window mainWindow;
+	// Time in milliseconds
 	protected long timeMillis;
-	protected long lastTick;
+	// Frames per second
 	protected int framesPerSecond;
+	// Ticks per second
 	protected int ticksPerSecond;
+	// Target time for one tick in milliseconds
 	protected int tickTime;
+	// Target time for one frame in milliseconds
 	protected int frameTime;
+	// Time in ticks
+	protected long ticks;
+	// Partial tick time
+	protected float deltaTick;
 	
 	protected Camera mainCamera;
 	protected Thread renderThread;
@@ -68,6 +77,8 @@ public class VoxelEngine {
 	protected LevelRenderer levelRenderer;
 	
 	public void run() {
+		
+		System.out.println("Start!");
 		
 		// Setup resource loaders
 		resourceLoader = new ResourceLoader<>();
@@ -86,6 +97,8 @@ public class VoxelEngine {
 		// Setup main window and camera
 		mainWindow = new Window(1000, 600, "Engine Test");
 		mainCamera = new Camera(new Vec3f(0F, 0F, 0F), new Vec3f(0F, 0F, 0F));
+		
+		System.out.println("Start Render-Thread");
 		
 		// Start and initialize render thread
 		startRenderThread(() -> {
@@ -116,8 +129,12 @@ public class VoxelEngine {
 		// Setup main thread
 		setupUpdateThread();
 		
+		System.out.println("Start game loop");
+		
 		// Start game loop
 		startUpdateLoop();
+
+		System.out.println("Stop, wait for Render-Thread to shutdown");
 		
 		// Wait for render thread to terminate
 		synchronized (renderThread) {
@@ -131,6 +148,8 @@ public class VoxelEngine {
 		
 		// Terminate GLFW
 		GLStateManager.terminate();
+		
+		System.out.println("Exit");
 		
 	}
 	
@@ -156,9 +175,8 @@ public class VoxelEngine {
 			
 			if (deltaFrame >= 1) {
 				deltaFrame--;
-				
 				frameCount++;
-				frame((tickTime - lastTick) / (float) tickTime);
+				frame(deltaTick);
 			}
 			
 			if (frameTimeMillis - secondTimer > 1000) {
@@ -175,9 +193,9 @@ public class VoxelEngine {
 
 	private void startUpdateLoop() {
 		
-		timeMillis = System.currentTimeMillis();
-		lastTick = 0;
-		float deltaTick = 0;
+		long timeMillis = System.currentTimeMillis();
+		long lastTick = 0;
+		deltaTick = 0;
 		
 		int tickCount = 0;
 		long secondTimer = timeMillis;
@@ -191,7 +209,10 @@ public class VoxelEngine {
 			if (deltaTick >= 1) {
 				deltaTick--;
 				tickCount++;
+				ticks++;
 				tick();
+				
+				if (!this.renderThread.isAlive()) throw new IllegalStateException("Render-Thread terminated unexpeted!");
 			}
 			
 			if (timeMillis - secondTimer > 1000) {
@@ -258,10 +279,9 @@ public class VoxelEngine {
 		
 		// Testing
 		List<VoxelMaterial> materials = new ArrayList<>();
-		materials.add(new VoxelMaterial());
+		materials.add(new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/ground_anim"), 0.5F));
 		List<int[][][]> voxels = new ArrayList<>();
 		int[][][] vc = new int[32][32][32];
-		
 		for (int i0 = 0; i0 < 32; i0++) {
 			for (int i1 = 0; i1 < 32; i1++) {
 				for (int i2 = 0; i2 < 32; i2++) {
@@ -276,13 +296,33 @@ public class VoxelEngine {
 		s.addComponent(c, new Vec3f(0F, 0F, 0F), new Quaternion(new Vec3i(1, 0, 0), 0));
 		level.addStructure(s);
 		
-		VoxelStructure s2 = new VoxelStructure();
-		s2.addComponent(c, new Vec3f(-20F, 0F, 20F), new Quaternion(new Vec3i(1, 0, 0), 0));
-		level.addStructure(s2);
+//		VoxelStructure s2 = new VoxelStructure();
+//		s2.addComponent(c, new Vec3f(-20F, 0F, 20F), new Quaternion(new Vec3i(1, 0, 0), 0));
+//		level.addStructure(s2);
+//		
+//		VoxelStructure s3 = new VoxelStructure();
+//		s3.addComponent(c, new Vec3f(0F, 10F, -20F), new Quaternion(new Vec3i(1, 0, 0), 0));
+//		level.addStructure(s3);
 		
-		VoxelStructure s3 = new VoxelStructure();
-		s3.addComponent(c, new Vec3f(0F, 10F, -20F), new Quaternion(new Vec3i(1, 0, 0), 0));
-		level.addStructure(s3);
+		List<VoxelMaterial> materials2 = new ArrayList<>();
+		materials2.add(new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/metal"), 1F));
+		List<int[][][]> voxels2 = new ArrayList<>();
+		int[][][] vc2 = new int[32][32][32];
+		for (int i0 = 0; i0 < 20; i0++) {
+			for (int i1 = 0; i1 < 20; i1++) {
+				for (int i2 = 0; i2 < 32; i2++) {
+					vc2[i0][i1][i2] = 1;
+				}
+			}
+		}
+		
+		voxels2.add(vc2);
+		VoxelComponent c2 = new VoxelComponent(voxels2, materials2);
+		VoxelStructure s4 = new VoxelStructure();
+		s4.addComponent(c2, new Vec3f(0F, -20F, -30F), new Quaternion(new Vec3i(1, 0, 0), 0));
+		level.addStructure(s4);
+		
+		level.setGravity(new Vec3f(0F, -1.81F, 0F));
 		
 	}
 	
@@ -292,21 +332,28 @@ public class VoxelEngine {
 		
 		if (clientReloadState == ReloadState.RELOAD_RENDER_THREAD) {
 			
-			shaderLoader.clearCached();
-			textureLoader.clearCached();
-			modelLoader.clearCached();
-			
-			shaderLoader.loadShadersIn(WORLD_SHADER_LOCATION, SHADER_LIB_LOCATION);
-			textureLoader.buildAtlasMapFromTextures(MATERIAL_ATLAS, MATERIAL_ATLAS, false, false);
-			// Models
-			
-			levelRenderer.resetRenderCache();
-			
-			clientReloadState = ReloadState.COMPLETED;
+			try {
+				
+				shaderLoader.clearCached();
+				textureLoader.clearCached();
+				modelLoader.clearCached();
+				
+				shaderLoader.loadShadersIn(WORLD_SHADER_LOCATION, SHADER_LIB_LOCATION);
+				textureLoader.buildAtlasMapFromTextures(MATERIAL_ATLAS, MATERIAL_ATLAS, false, false);
+				// Models
+
+				levelRenderer.resetRenderCache();
+
+				clientReloadState = ReloadState.COMPLETED;
+				
+			} catch (Exception e) {
+				System.err.println("Failed to reload resources! " + e.getMessage());
+				clientReloadState = ReloadState.FAILED;
+			}
 			
 		}
 		
-		this.levelRenderer.renderLevel(level);
+		this.levelRenderer.renderLevel(level, partialTick);
 		
 		mainWindow.glSwapFrames();
 		
@@ -315,6 +362,10 @@ public class VoxelEngine {
 	private void tick() {
 		
 		mainWindow.pollEvents();
+		
+		this.textureLoader.getTextureMaps().forEach((texture) -> {
+			if (this.getTickTime() % texture.getFrametime() == 0) texture.nextFrame();
+		});
 		
 		if (inputHandler.isBindingActive("movement.orientate")) {
 			if (inputHandler.isBindingActive("movement.forward")) mainCamera.rotate(new Vec3i(-1, 0, 0), 1);
@@ -330,6 +381,8 @@ public class VoxelEngine {
 			if (inputHandler.isBindingActive("movement.right")) mainCamera.move(new Vec3f(1F, 0F, 0F));
 		}
 		mainCamera.upadteViewMatrix();
+		
+		level.tick();
 		
 	}
 	
@@ -353,8 +406,8 @@ public class VoxelEngine {
 		return mainWindow;
 	}
 	
-	public int getTickTime() {
-		return tickTime;
+	public long getTickTime() {
+		return ticks;
 	}
 	
 	public int getFramesPerSecond() {

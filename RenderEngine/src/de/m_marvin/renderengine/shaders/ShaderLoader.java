@@ -166,6 +166,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	public Set<R> getCachedShaders() {
 		return this.shaderCache.keySet();
 	}
+	
 	/**
 	 * Loads the shader under the given path with the given vertex format.
 	 * If no vertex format is specified the default from the shader JSON is applied.

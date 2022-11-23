@@ -4,7 +4,6 @@ import org.lwjgl.opengl.GL33;
 
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
-import de.m_marvin.renderengine.textures.AbstractTextureMap;
 import de.m_marvin.renderengine.vertices.RenderPrimitive;
 import de.m_marvin.renderengine.vertices.VertexFormat;
 

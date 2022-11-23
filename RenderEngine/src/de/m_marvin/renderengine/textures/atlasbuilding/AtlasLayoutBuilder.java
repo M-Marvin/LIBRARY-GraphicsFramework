@@ -101,7 +101,7 @@ public class AtlasLayoutBuilder<T> {
 				
 				// Calculate maximum height of the image for that point
 				int maxY = nextPoint.y();
-				for (; maxY <= minHeight; maxY++) {
+				for (; maxY < minHeight; maxY++) {
 					boolean occupied = false;
 					for (AtlasImageLayout<T> layout : this.atlasLayout) {
 						
@@ -130,7 +130,7 @@ public class AtlasLayoutBuilder<T> {
 				
 				// Calculate maximum width of the image for that point
 				int maxX = nextPoint.x();
-				for (; maxX <= minWidth; maxX++) {
+				for (; maxX < minWidth; maxX++) {
 					boolean occupied = false;
 					for (AtlasImageLayout<T> layout : this.atlasLayout) {
 						

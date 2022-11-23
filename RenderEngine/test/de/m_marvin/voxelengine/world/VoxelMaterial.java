@@ -4,19 +4,27 @@ import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
 import de.m_marvin.voxelengine.rendering.RenderType;
 
 public class VoxelMaterial {
-
+	
+	protected ResourceLocation texture;
+	protected float pixelScale;
+	protected RenderType renderLayer;
+	
+	public VoxelMaterial(RenderType renderLayer, ResourceLocation texture, float pixelScale) {
+		this.texture = texture;
+		this.pixelScale = pixelScale;
+		this.renderLayer = renderLayer;
+	}
+	
 	public ResourceLocation texture() {
-		return new ResourceLocation("example:materials/ground");
+		return this.texture;
 	}
 	
 	public float pixelScale() {
-		return 0.5F;
+		return this.pixelScale;
 	}
 
 	public RenderType renderLayer() {
-		return RenderType.voxelSolid();
+		return this.renderLayer;
 	}
-	
-	
 	
 }

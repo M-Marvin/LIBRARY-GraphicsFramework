@@ -7,10 +7,6 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL33;
 
-import de.m_marvin.univec.impl.Vec2f;
-import de.m_marvin.univec.impl.Vec3f;
-import de.m_marvin.univec.impl.Vec4f;
-
 /**
  * This class contains all used OpenGL methods.
  * Contains the {@link GLStateManager#initialize(PrintStream)} method that must be called before any OpenGL or GLFW methods can be used.
@@ -53,6 +49,14 @@ public class GLStateManager {
 		if (!isOnRenderThread()) throw new IllegalStateException("GL operations have to be performed on the render thread!");
 	}
 	
+	public static void clear(int bufferBitMask) {
+		GL33.glClear(bufferBitMask);
+	}
+	
+	public static void flush() {
+		GL33.glFlush();
+	}
+	
 	public static void drawElements(int mode, int count, int indecieFormat) {
 		GL33.glDrawElements(mode, count, indecieFormat, 0);
 	}
@@ -65,8 +69,8 @@ public class GLStateManager {
 		GL33.glDisable(target);
 	}
 
-	public static void resizeViewport(int lx, int ly, int hx, int hy) {
-		GL33.glViewport(lx, ly, hx, hy);
+	public static void resizeViewport(int x, int y, int w, int h) {
+		GL33.glViewport(x, y, w, h);
 	}
 
 	public static void clearColor(float r, float g, float b, float a) {

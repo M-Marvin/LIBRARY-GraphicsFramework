@@ -11,8 +11,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
@@ -66,6 +69,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	protected final ResourceLoader<R, FE> resourceLoader;
 	
 	protected LinkedHashMap<R, AbstractTextureMap<R>> textureCache = new LinkedHashMap<>();
+	protected Set<R> textureMapNames = new HashSet<>();
 	
 	/**
 	 * Creates a new texture loader.
@@ -81,6 +85,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	public void clearCached() {
 		this.textureCache.values().forEach(AbstractTextureMap::delete);
 		this.textureCache.clear();
+		this.textureMapNames.clear();
 	}
 	
 	/**
@@ -141,6 +146,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 				
 				SingleTextureMap<R> map = new SingleTextureMap<R>(textureData.texture(), textureData.metaData().frames(), textureData.metaData().frametime(), textureData.metaData().interpolate());
 				this.textureCache.put(locationName, map);
+				this.textureMapNames.add(locationName);
 				
 			} catch (FileNotFoundException e) {
 				System.err.println("Warning: A texture could not be loaded!");
@@ -219,6 +225,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 
 			map.buildAtlas(prioritizeAtlasHeight, selectInterpolatedTextures);
 			this.textureCache.put(atlasName, map);
+			this.textureMapNames.add(atlasName);
 			for (R location : locationsToLink) this.textureCache.put(location, map);
 			
 		}
@@ -341,6 +348,25 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		AbstractTextureMap<R> texture = this.textureCache.get(resourceLocation);
 		texture.activateTexture(null);
 		return texture;
+	}
+	
+	/**
+	 * Returns all textures currently cached in the texture loader.
+	 * 
+	 * @return A Collection of all textures currently cached
+	 */
+	public Collection<AbstractTextureMap<R>> getTextureMaps() {
+		return this.textureMapNames.stream().map(this::getTextureMap).toList();
+	}
+
+	/**
+	 * Returns the names of all texture-maps currently cached in the texture loader.
+	 * A texture map can consist of multiple textures packed into an atlas.
+	 * 
+	 * @return A Collection of the names of all texture-maps currently cached
+	 */
+	public Collection<R> getTextureMapNames() {
+		return this.textureMapNames;
 	}
 	
 }

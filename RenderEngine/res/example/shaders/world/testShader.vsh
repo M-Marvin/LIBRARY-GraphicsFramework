@@ -22,8 +22,8 @@ void main() {
 	
 	gl_Position = ProjMat *  ModelViewMat * ObjectMat * vec4(position, 1.0);
 	
-	vertexUVLast = translate(uv, AnimMatLast);
-	vertexUV = translate(uv, AnimMat);
+	vertexUVLast = translateVec2(uv, AnimMatLast);
+	vertexUV = translateVec2(uv, AnimMat);
 	vertexColor = color;
 		
 }

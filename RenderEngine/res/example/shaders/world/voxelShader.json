@@ -15,6 +15,7 @@
 	"Attributes": [
 		{ "Name": "position", "Type": "float", "Count": 3, "Normalize": false },
 		{ "Name": "voxel", "Type": "int", "Count": 3, "Normalize": false },
+		{ "Name": "sides", "Type": "uint", "Count": 1, "Normalize": false },
 		{ "Name": "color", "Type": "float", "Count": 4, "Normalize": false },
 		{ "Name": "texuv", "Type": "float", "Count": 4, "Normalize": false },
 		{ "Name": "texsize", "Type": "int", "Count": 2, "Normalize": false }

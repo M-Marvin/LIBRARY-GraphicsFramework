@@ -5,6 +5,7 @@ import java.util.List;
 import de.m_marvin.physicengine.d3.physic.RigidPhysicWorld;
 import de.m_marvin.physicengine.d3.util.BroadphaseAlgorithm;
 import de.m_marvin.univec.impl.Vec3f;
+import de.m_marvin.voxelengine.VoxelEngine;
 
 public class ClientLevel {
 	
@@ -32,6 +33,12 @@ public class ClientLevel {
 		if (!dynamicWorld.containsObject(structure)) return false;
 		dynamicWorld.removeObject(structure);
 		return true;
+	}
+	
+	public void tick() {
+		
+		this.dynamicWorld.stepPhysic(VoxelEngine.getInstance().getTickTime() / 1000F, 0, 0);
+		
 	}
 	
 }
