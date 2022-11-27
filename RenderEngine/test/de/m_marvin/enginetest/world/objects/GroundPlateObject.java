@@ -13,7 +13,7 @@ public class GroundPlateObject extends WorldObject {
 
 	@Override
 	public CollisionShape getShape() {
-		return new BoxShape(new Vector3f(15, 0.5F, 15));
+		return new BoxShape(new Vector3f(35, 0.5F, 35));
 	}
 	
 	@Override

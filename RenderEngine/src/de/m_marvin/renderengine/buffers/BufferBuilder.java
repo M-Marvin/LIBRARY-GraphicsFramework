@@ -164,11 +164,6 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 		return this;
 	}
 	@Override
-	public IVertexConsumer putShort(short s) {
-		this.buffer.putShort(s);
-		return this;
-	}
-	@Override
 	public IVertexConsumer putByte(byte b) {
 		this.buffer.put(b);
 		return this;
@@ -184,18 +179,22 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 		return this;
 	}
 	@Override
-	public IVertexConsumer putShortArr(short... shortArr) {
-		for (short s : shortArr) this.buffer.putShort(s);
-		return this;
-	}
-	@Override
 	public IVertexConsumer putByteArr(byte... floatArr) {
 		for (byte b : floatArr) this.buffer.put(b);
 		return this;
 	}
+
+	@Override
+	public IVertexConsumer vec2f(float x, float y) {
+		nextElement();
+		if (getCurrentElement().format() != NumberFormat.FLOAT) throw new IllegalStateException("VertexFormat requires diffrent number format!");
+		putFloat(x);
+		putFloat(y);
+		return this;
+	}
 	
 	@Override
-	public IVertexConsumer vertex(float x, float y, float z) {
+	public IVertexConsumer vec3f(float x, float y, float z) {
 		nextElement();
 		if (getCurrentElement().format() != NumberFormat.FLOAT) throw new IllegalStateException("VertexFormat requires diffrent number format!");
 		putFloat(x);
@@ -203,37 +202,78 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 		putFloat(z);
 		return this;
 	}
-
+	
 	@Override
-	public IVertexConsumer normal(float x, float y, float z) {
+	public IVertexConsumer vec4f(float x, float y, float z, float w) {
 		nextElement();
 		if (getCurrentElement().format() != NumberFormat.FLOAT) throw new IllegalStateException("VertexFormat requires diffrent number format!");
 		putFloat(x);
 		putFloat(y);
 		putFloat(z);
+		putFloat(w);
 		return this;
 	}
 
 	@Override
-	public IVertexConsumer color(float r, float g, float b, float a) {
+	public IVertexConsumer vec2i(int x, int y) {
 		nextElement();
-		if (getCurrentElement().format() != NumberFormat.FLOAT) throw new IllegalStateException("VertexFormat requires diffrent number format!");
-		putFloat(r);
-		putFloat(g);
-		putFloat(b);
-		putFloat(a);
-		return this;
-	}
-
-	@Override
-	public IVertexConsumer uv(float u, float v) {
-		nextElement();
-		if (getCurrentElement().format() != NumberFormat.FLOAT) throw new IllegalStateException("VertexFormat requires diffrent number format!");
-		putFloat(u);
-		putFloat(v);
+		if (getCurrentElement().format() != NumberFormat.INT && getCurrentElement().format() != NumberFormat.UINT) throw new IllegalStateException("VertexFormat requires diffrent number format!");
+		putInt(x);
+		putInt(y);
 		return this;
 	}
 	
+	@Override
+	public IVertexConsumer vec3i(int x, int y, int z) {
+		nextElement();
+		if (getCurrentElement().format() != NumberFormat.INT && getCurrentElement().format() != NumberFormat.UINT) throw new IllegalStateException("VertexFormat requires diffrent number format!");
+		putInt(x);
+		putInt(y);
+		putInt(z);
+		return this;
+	}
+	
+	@Override
+	public IVertexConsumer vec4i(int x, int y, int z, int w) {
+		nextElement();
+		if (getCurrentElement().format() != NumberFormat.INT && getCurrentElement().format() != NumberFormat.UINT) throw new IllegalStateException("VertexFormat requires diffrent number format!");
+		putInt(x);
+		putInt(y);
+		putInt(z);
+		putInt(w);
+		return this;
+	}
+
+	@Override
+	public IVertexConsumer vec2b(byte x, byte y) {
+		nextElement();
+		if (getCurrentElement().format() != NumberFormat.BYTE && getCurrentElement().format() != NumberFormat.UBYTE) throw new IllegalStateException("VertexFormat requires diffrent number format!");
+		putByte(x);
+		putByte(y);
+		return this;
+	}
+	
+	@Override
+	public IVertexConsumer vec3b(byte x, byte y, byte z) {
+		nextElement();
+		if (getCurrentElement().format() != NumberFormat.BYTE && getCurrentElement().format() != NumberFormat.UBYTE) throw new IllegalStateException("VertexFormat requires diffrent number format!");
+		putByte(x);
+		putByte(y);
+		putByte(z);
+		return this;
+	}
+	
+	@Override
+	public IVertexConsumer vec4b(byte x, byte y, byte z, byte w) {
+		nextElement();
+		if (getCurrentElement().format() != NumberFormat.BYTE && getCurrentElement().format() != NumberFormat.UBYTE) throw new IllegalStateException("VertexFormat requires diffrent number format!");
+		putByte(x);
+		putByte(y);
+		putByte(z);
+		putByte(w);
+		return this;
+	}
+
 	@Override
 	public void endVertex() {
 		if (this.currentElementIndex != this.format.getElementCount() - 1) {

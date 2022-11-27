@@ -40,7 +40,7 @@ public class VertexBuffer {
 	/**
 	 * Discards all VBOs and VAO from the GPU.
 	 * This resets all data stored in the VertexBuffer.
-	 * Reinitialization with {@link #initialize()} is possible
+	 * Reinitialization with {@link #upload()} is possible
 	 **/
 	public void discard() {
 		GLStateManager.assertOnRenderThread();
@@ -74,7 +74,7 @@ public class VertexBuffer {
 	public void upload(IBufferBuilder bufferBuilder, BufferUsage usage) {
 		GLStateManager.assertOnRenderThread();
 		
-		initialize();
+		if (!initialized()) initialize();
 		IBufferBuilder.BufferPair pair = bufferBuilder.popNext();
 		IBufferBuilder.DrawState drawState = pair.drawState();
 		this.indecies = drawState.indecies();

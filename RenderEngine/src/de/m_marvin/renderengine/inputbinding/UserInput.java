@@ -27,6 +27,8 @@ import de.m_marvin.univec.impl.Vec2d;
 public class UserInput {
 	
 	protected Map<String, InputSet> bindings = new HashMap<>();
+	protected Map<String, Boolean> bindingsState = new HashMap<>();
+	protected Map<String, Boolean> bindingsStateLast = new HashMap<>();
 	protected List<Long> attachedWindows = new ArrayList<>();
 	protected List<KeyEventConsumer> keyboardListeners = new ArrayList<>();
 	protected List<MouseEventConsumer> mouseListeners = new ArrayList<>();
@@ -40,6 +42,24 @@ public class UserInput {
 		addKeyboardListener((key, scancode, pressed, repeated) -> {
 			Optional<FunctionalKey> fkey = Optional.ofNullable(FunctionalKey.getKey(key));
 			if (fkey.isPresent() && (pressed || repeated)) this.textInputListeners.forEach((listener) -> listener.input((char) -1, fkey));
+		});
+	}
+	
+	/**
+	 * Updates the input states of the key-bindings.
+	 */
+	public void update() {
+		this.bindings.forEach((name, input) -> {
+			InputSet binding = getBinding(name).get();
+			boolean state = false;
+			for (long window : this.attachedWindows) {
+				if (binding.isActive(window)) {
+					state = true;
+					break;
+				}
+			}
+			this.bindingsStateLast.put(name, this.bindingsState.get(name));
+			this.bindingsState.put(name, state);
 		});
 	}
 	
@@ -230,9 +250,20 @@ public class UserInput {
 	public boolean isBindingActive(String name) {
 		Optional<InputSet> binding = getBinding(name);
 		if (binding.isPresent()) {
-			for (long window : this.attachedWindows) {
-				if (binding.get().isActive(window)) return true;
-			}
+			return this.bindingsState.get(name);
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns true if the {@link InputSet#isActive(long)} method of the specified binding returns true for at least one of the attached windows and it was not active the last tick (only returns true for one tick).
+	 * @param name The name of the binding
+	 * @return True if the binding is activated trough user input
+	 */
+	public boolean isBindingTyped(String name) {
+		Optional<InputSet> binding = getBinding(name);
+		if (binding.isPresent()) {
+			if (this.bindingsState.get(name) && !this.bindingsStateLast.get(name)) return true;
 		}
 		return false;
 	}

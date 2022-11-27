@@ -7,9 +7,11 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL33;
 
 import de.m_marvin.enginetest.ResourceFolders;
+import de.m_marvin.openui.ScreenUI;
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.inputbinding.UserInput;
 import de.m_marvin.renderengine.inputbinding.bindingsource.KeySource;
+import de.m_marvin.renderengine.inputbinding.bindingsource.MouseSource;
 import de.m_marvin.renderengine.models.OBJLoader;
 import de.m_marvin.renderengine.resources.ResourceLoader;
 import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
@@ -20,9 +22,10 @@ import de.m_marvin.renderengine.windows.Window;
 import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
-import de.m_marvin.voxelengine.rendering.LevelRenderer;
+import de.m_marvin.voxelengine.rendering.GameRenderer;
 import de.m_marvin.voxelengine.rendering.RenderType;
 import de.m_marvin.voxelengine.resources.ReloadState;
+import de.m_marvin.voxelengine.screens.MainMenuScreen;
 import de.m_marvin.voxelengine.world.ClientLevel;
 import de.m_marvin.voxelengine.world.VoxelComponent;
 import de.m_marvin.voxelengine.world.VoxelMaterial;
@@ -42,10 +45,6 @@ public class VoxelEngine {
 	}
 	
 	public static final String NAMESPACE = "example";
-	
-	public static final ResourceLocation SHADER_LIB_LOCATION = new ResourceLocation(NAMESPACE, "glsl");
-	public static final ResourceLocation WORLD_SHADER_LOCATION = new ResourceLocation(NAMESPACE, "world");
-	public static final ResourceLocation MATERIAL_ATLAS = new ResourceLocation(NAMESPACE, "materials");
 	
 	protected ResourceLoader<ResourceLocation, ResourceFolders> resourceLoader;
 	protected ShaderLoader<ResourceLocation, ResourceFolders> shaderLoader;
@@ -73,8 +72,9 @@ public class VoxelEngine {
 	protected Camera mainCamera;
 	protected Thread renderThread;
 	
+	protected ScreenUI screen;
 	protected ClientLevel level;
-	protected LevelRenderer levelRenderer;
+	protected GameRenderer gameRenderer;
 	
 	public void run() {
 		
@@ -232,17 +232,17 @@ public class VoxelEngine {
 		GLStateManager.blendFunc(GL33.GL_SRC_ALPHA, GL33.GL_ONE_MINUS_SRC_ALPHA);
 		
 		// Setup renderer
-		this.levelRenderer = new LevelRenderer(36000);
-		this.levelRenderer.fov = 70;
-		this.levelRenderer.updatePerspective();
-		this.levelRenderer.resetRenderCache();
+		this.gameRenderer = new GameRenderer(36000);
+		this.gameRenderer.fov = 70;
+		this.gameRenderer.updatePerspective();
+		this.gameRenderer.resetRenderCache();
 		
 	}
 	
 	protected void cleanupRenderThread() {
 		
 		// Clear render cache
-		levelRenderer.resetRenderCache();
+		gameRenderer.resetRenderCache();
 		
 		// Unload all shaders, textures and models from GPU and cache
 		shaderLoader.clearCached();
@@ -259,7 +259,7 @@ public class VoxelEngine {
 		// Setup window resize callback
 		mainWindow.registerWindowListener((shouldClose, windowResize, focused, unfocused, maximized, restored) -> {
 			if (windowResize.isPresent()) {
-				VoxelEngine.getInstance().getLevelRenderer().updatePerspective();
+				VoxelEngine.getInstance().getGameRenderer().updatePerspective();
 			}
 		});
 		
@@ -272,7 +272,7 @@ public class VoxelEngine {
 		inputHandler.registerBinding("movement.rollright").addBinding(KeySource.getKey(GLFW.GLFW_KEY_E));
 		inputHandler.registerBinding("movement.orientate").addBinding(KeySource.getKey(GLFW.GLFW_KEY_LEFT_ALT));
 		inputHandler.registerBinding("physic.activate").addBinding(KeySource.getKey(GLFW.GLFW_KEY_P));
-		inputHandler.registerBinding("spawn_object").addBinding(KeySource.getKey(GLFW.GLFW_KEY_O));
+		inputHandler.registerBinding("misc.click.primary").addBinding(MouseSource.getKey(GLFW.GLFW_MOUSE_BUTTON_1));
 		
 		// Setup world
 		level = new ClientLevel();
@@ -295,14 +295,8 @@ public class VoxelEngine {
 		VoxelStructure s = new VoxelStructure();
 		s.addComponent(c, new Vec3f(0F, 0F, 0F), new Quaternion(new Vec3i(1, 0, 0), 0));
 		level.addStructure(s);
-		
-//		VoxelStructure s2 = new VoxelStructure();
-//		s2.addComponent(c, new Vec3f(-20F, 0F, 20F), new Quaternion(new Vec3i(1, 0, 0), 0));
-//		level.addStructure(s2);
-//		
-//		VoxelStructure s3 = new VoxelStructure();
-//		s3.addComponent(c, new Vec3f(0F, 10F, -20F), new Quaternion(new Vec3i(1, 0, 0), 0));
-//		level.addStructure(s3);
+		s.setPosition(new Vec3f(-20F, 0F, 0F));
+		s.setOrientation(new Quaternion(new Vec3i(1, 0, 0), (float) Math.toRadians(45)));
 		
 		List<VoxelMaterial> materials2 = new ArrayList<>();
 		materials2.add(new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/metal"), 1F));
@@ -319,10 +313,34 @@ public class VoxelEngine {
 		voxels2.add(vc2);
 		VoxelComponent c2 = new VoxelComponent(voxels2, materials2);
 		VoxelStructure s4 = new VoxelStructure();
-		s4.addComponent(c2, new Vec3f(0F, -20F, -30F), new Quaternion(new Vec3i(1, 0, 0), 0));
+		s4.addComponent(c2, new Vec3f(0F, 0F, 0F), new Quaternion(new Vec3i(1, 0, 0), 0));
 		level.addStructure(s4);
+		s4.setPosition(new Vec3f(0F, 40F, 0F));
 		
-		level.setGravity(new Vec3f(0F, -1.81F, 0F));
+
+		List<VoxelMaterial> materials3 = new ArrayList<>();
+		materials3.add(new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/dirt"), 1F));
+		List<int[][][]> voxels3 = new ArrayList<>();
+		int[][][] vc3 = new int[100][8][100];
+		for (int i0 = 0; i0 < 100; i0++) {
+			for (int i1 = 0; i1 < 8; i1++) {
+				for (int i2 = 0; i2 < 100; i2++) {
+					vc3[i0][i1][i2] = 1;
+				}
+			}
+		}
+		
+		voxels3.add(vc3);
+		VoxelComponent c3 = new VoxelComponent(voxels3, materials3);
+		VoxelStructure s5 = new VoxelStructure();
+		s5.addComponent(c3, new Vec3f(0F, 0F, 0F), new Quaternion(new Vec3i(1, 0, 0), 0));
+		level.addStructure(s5);
+		s5.setStatic(true);
+		s5.setPosition(new Vec3f(0F, -80F, 0F));
+		
+		level.setGravity(new Vec3f(0F, -9.81F, 0F));
+		
+		openScreen(new MainMenuScreen());
 		
 	}
 	
@@ -338,22 +356,35 @@ public class VoxelEngine {
 				textureLoader.clearCached();
 				modelLoader.clearCached();
 				
-				shaderLoader.loadShadersIn(WORLD_SHADER_LOCATION, SHADER_LIB_LOCATION);
-				textureLoader.buildAtlasMapFromTextures(MATERIAL_ATLAS, MATERIAL_ATLAS, false, false);
-				// Models
-
-				levelRenderer.resetRenderCache();
-
+				// Load shaders
+				ResourceLocation shaderLibLocation = new ResourceLocation(NAMESPACE, "glsl");
+				Utility.executeForEachFolder(resourceLoader.getResourceFolderPath(ResourceFolders.SHADERS, NAMESPACE), 
+						(folder) -> shaderLoader.loadShadersIn(new ResourceLocation(NAMESPACE, folder), shaderLibLocation));
+				
+				// Load textures
+				Utility.executeForEachFolder(resourceLoader.getResourceFolderPath(ResourceFolders.TEXTURES, NAMESPACE),
+						(folder) -> {
+							textureLoader.buildAtlasMapFromTextures(new ResourceLocation(NAMESPACE, folder), new ResourceLocation(NAMESPACE, folder), false, false);
+							textureLoader.buildAtlasMapFromTextures(new ResourceLocation(NAMESPACE, folder), new ResourceLocation(NAMESPACE, folder + "_interpolated"), false, true);
+						});
+				
+				gameRenderer.resetRenderCache();
+				
 				clientReloadState = ReloadState.COMPLETED;
 				
 			} catch (Exception e) {
 				System.err.println("Failed to reload resources! " + e.getMessage());
+				e.printStackTrace();
 				clientReloadState = ReloadState.FAILED;
 			}
 			
 		}
+
+		this.gameRenderer.frameStart();
 		
-		this.levelRenderer.renderLevel(level, partialTick);
+		if (this.level != null) this.gameRenderer.renderLevel(level, partialTick);
+		
+		if (this.screen != null) this.gameRenderer.renderScreen(this.screen, partialTick);
 		
 		mainWindow.glSwapFrames();
 		
@@ -362,18 +393,19 @@ public class VoxelEngine {
 	private void tick() {
 		
 		mainWindow.pollEvents();
+		inputHandler.update();
 		
 		this.textureLoader.getTextureMaps().forEach((texture) -> {
-			if (this.getTickTime() % texture.getFrametime() == 0) texture.nextFrame();
+			if (this.getTicksElapsed() % texture.getFrametime() == 0) texture.nextFrame();
 		});
 		
 		if (inputHandler.isBindingActive("movement.orientate")) {
-			if (inputHandler.isBindingActive("movement.forward")) mainCamera.rotate(new Vec3i(-1, 0, 0), 1);
-			if (inputHandler.isBindingActive("movement.backward")) mainCamera.rotate(new Vec3i(1, 0, 0), 1);
-			if (inputHandler.isBindingActive("movement.left")) mainCamera.rotate(new Vec3i(0, -1, 0), 1);
-			if (inputHandler.isBindingActive("movement.right")) mainCamera.rotate(new Vec3i(0, 1, 0), 1);
-			if (inputHandler.isBindingActive("movement.rollleft")) mainCamera.rotate(new Vec3i(0, 0, -1), 1);
-			if (inputHandler.isBindingActive("movement.rollright")) mainCamera.rotate(new Vec3i(0, 0, 1), 1);
+			if (inputHandler.isBindingActive("movement.forward")) mainCamera.rotate(new Vec3i(1, 0, 0), 1);
+			if (inputHandler.isBindingActive("movement.backward")) mainCamera.rotate(new Vec3i(-1, 0, 0), 1);
+			if (inputHandler.isBindingActive("movement.left")) mainCamera.rotate(new Vec3i(0, 1, 0), 1);
+			if (inputHandler.isBindingActive("movement.right")) mainCamera.rotate(new Vec3i(0, -1, 0), 1);
+			if (inputHandler.isBindingActive("movement.rollleft")) mainCamera.rotate(new Vec3i(0, 0, 1), 1);
+			if (inputHandler.isBindingActive("movement.rollright")) mainCamera.rotate(new Vec3i(0, 0, -1), 1);
 		} else {
 			if (inputHandler.isBindingActive("movement.forward")) mainCamera.move(new Vec3f(0F, 0F, -1F));
 			if (inputHandler.isBindingActive("movement.backward")) mainCamera.move(new Vec3f(0F, 0F, 1F));
@@ -382,8 +414,21 @@ public class VoxelEngine {
 		}
 		mainCamera.upadteViewMatrix();
 		
-		level.tick();
+		if (GLFW.glfwGetKey(mainWindow.windowId(), GLFW.GLFW_KEY_P) == GLFW.GLFW_PRESS) level.tick();
 		
+	}
+	
+	public void openScreen(ScreenUI screen) {
+		closeScreen();
+		this.screen = screen;
+		this.screen.onOpen();
+	}
+	
+	public void closeScreen() {
+		if (this.screen != null) {
+			this.screen.onClose();
+			this.screen = null;
+		}
 	}
 	
 	public ResourceLoader<ResourceLocation, ResourceFolders> getResourceLoader() {
@@ -406,8 +451,16 @@ public class VoxelEngine {
 		return mainWindow;
 	}
 	
-	public long getTickTime() {
+	public long getTicksElapsed() {
 		return ticks;
+	}
+	
+	public long getTickTime() {
+		return tickTime;
+	}
+
+	public long getFrameTime() {
+		return frameTime;
 	}
 	
 	public int getFramesPerSecond() {
@@ -426,8 +479,8 @@ public class VoxelEngine {
 		return inputHandler;
 	}
 	
-	public LevelRenderer getLevelRenderer() {
-		return levelRenderer;
+	public GameRenderer getGameRenderer() {
+		return gameRenderer;
 	}
 	
 	public void reloadResources() {

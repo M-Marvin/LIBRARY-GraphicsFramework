@@ -9,12 +9,13 @@ import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
 import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.Transform;
 
+import de.m_marvin.physicengine.d3.physic.PropertyFlag;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec3f;
 
 public class SimplifiedRigidBody extends RigidBody {
-
+	
 	public SimplifiedRigidBody(float mass, MotionState motionState, CollisionShape collisionShape, Vec3f localInertia) {
 		super(mass, motionState, collisionShape, new Vector3f(localInertia.x, localInertia.y, localInertia.z));
 	}
@@ -32,7 +33,14 @@ public class SimplifiedRigidBody extends RigidBody {
 		Vector3f vec = this.getCenterOfMassPosition(new Vector3f());
 		return new Vec3f(vec.x, vec.y, vec.z);
 	}
-
+	
+	public Vec3f getGraphicalPosition() {
+		Vector3f minVec = new Vector3f();
+		Vector3f maxVec = new Vector3f();
+		this.getAabb(minVec, maxVec);
+		return new Vec3f(minVec.x, minVec.y, minVec.z);
+	}
+	
 	public void setPosition(Vec3f position) {
 		Transform t = this.getCenterOfMassTransform(new Transform());
 		t.origin.set(position.x, position.y, position.z);
@@ -54,6 +62,15 @@ public class SimplifiedRigidBody extends RigidBody {
 				m.m20, m.m21, m.m22, m.m23,
 				m.m30, m.m31, m.m32, m.m33
 		);
+	}
+	
+	public void addFlag(PropertyFlag flag) {
+		setCollisionFlags(getCollisionFlags() | flag.getFlag());
+		flag.getConfigurator().accept(this);
+	}
+	
+	public void removeFlag(PropertyFlag flag) {
+		setCollisionFlags(getCollisionFlags() & ~flag.getFlag());
 	}
 	
 }

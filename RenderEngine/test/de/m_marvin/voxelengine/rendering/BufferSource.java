@@ -2,10 +2,12 @@ package de.m_marvin.voxelengine.rendering;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import de.m_marvin.renderengine.buffers.BufferBuilder;
+import de.m_marvin.renderengine.buffers.IBufferSource;
 
-public class BufferSource {
+public class BufferSource implements IBufferSource<RenderType> {
 	
 	protected final int initialBufferSize;
 	protected Map<RenderType, BufferBuilder> buffers;
@@ -15,6 +17,7 @@ public class BufferSource {
 		this.buffers = new HashMap<>();
 	}
 	
+	@Override
 	public BufferBuilder getBuffer(RenderType renderLayer) {
 		BufferBuilder buffer = buffers.get(renderLayer);
 		if (buffer == null) {
@@ -24,11 +27,25 @@ public class BufferSource {
 		return buffer;
 	}
 	
-	public void freeMemory() {
-		this.buffers.forEach((renderLayer, buffer) -> buffer.freeMemory());
+	@Override
+	public BufferBuilder startBuffer(RenderType renderLayer) {
+		BufferBuilder buffer = getBuffer(renderLayer);
+		buffer.begin(renderLayer.primitive(), renderLayer.vertexFormat());
+		return buffer;
 	}
 	
-	public void discard() {
+	@Override
+	public Set<RenderType> getBufferTypes() {
+		return this.buffers.keySet();
+	}
+	
+	@Override
+	public void freeAllMemory() {
+		this.buffers.forEach((renderLayer, buffer) -> buffer.freeMemory());
+	}
+
+	@Override
+	public void discardAll() {
 		this.buffers.forEach((renderLayer, buffer) -> buffer.discardStored());
 	}
 	

@@ -1,9 +1,13 @@
 package de.m_marvin.voxelengine.rendering;
 
 import java.util.List;
+import java.util.Queue;
 
 import org.lwjgl.opengl.GL33;
 
+import com.google.common.collect.Queues;
+
+import de.m_marvin.openui.ScreenUI;
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.BufferUsage;
@@ -15,6 +19,7 @@ import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec3f;
+import de.m_marvin.univec.impl.Vec3i;
 import de.m_marvin.univec.impl.Vec4f;
 import de.m_marvin.voxelengine.VoxelEngine;
 import de.m_marvin.voxelengine.rendering.LevelRender.StructureRender;
@@ -23,47 +28,105 @@ import de.m_marvin.voxelengine.world.VoxelComponent;
 import de.m_marvin.voxelengine.world.VoxelMaterial;
 import de.m_marvin.voxelengine.world.VoxelStructure;
 
-public class LevelRenderer {
+public class GameRenderer {
 
 	public static final ResourceLocation VOXEL_SHADER = new ResourceLocation("example:world/voxelShader");
 	
 	public float fov;
 	protected Matrix4f projectionMatrix;
-	protected boolean resized;
-	
 	protected BufferSource bufferSource;
+	protected Queue<Runnable> renderCallQueue;
+	
 	protected LevelRender levelRender;
 	
-	public LevelRenderer(int initialBufferSize) {
+	public GameRenderer(int initialBufferSize) {
+		this.renderCallQueue = Queues.newArrayDeque();
 		this.bufferSource = new BufferSource(initialBufferSize);
 		this.levelRender = new LevelRender();
+	}
+
+	public BufferSource getBufferSource() {
+		return this.bufferSource;
 	}
 	
 	public void updatePerspective() {
 		int[] windowSize = VoxelEngine.getInstance().getMainWindow().getSize();
 		this.projectionMatrix = Matrix4f.perspective(this.fov, windowSize[0] / (float) windowSize[1], 1, 1000);
-		this.resized = true;
+		executeOnRenderThread(() -> GLStateManager.resizeViewport(0, 0, windowSize[0], windowSize[1]));
 	}
 	
 	public void resetRenderCache() {
 		this.levelRender.discard();
+		this.shaderStreamBuffer.discard();
 	}
+	
+	public void executeOnRenderThread(Runnable runnable) {
+		this.renderCallQueue.add(runnable);
+	}
+	
+	public void frameStart() {
+		while (this.renderCallQueue.size() > 0) this.renderCallQueue.poll().run();
+	}
+	
+	public ResourceLocation getScreenShader() {
+		return new ResourceLocation("example:misc/screen");
+	}
+	
+	protected VertexBuffer shaderStreamBuffer = new VertexBuffer();
+	
+	public void renderScreen(ScreenUI screen, float partialTick) {
+		
+		ShaderInstance shader = VoxelEngine.getInstance().getShaderLoader().getShader(getScreenShader());
+		
+		if (shader != null) {
+			
+			int[] size = VoxelEngine.getInstance().getMainWindow().getSize();
+			screen.drawScreen(new PoseStack(), size[0], size[1]);
+			
+			shader.useShader();
+			shader.getUniform("Interpolation").setFloat(partialTick);
+			shader.getUniform("ProjMat").setMatrix3f(screen.getScreenTransformation(size[0], size[1]));
+			
+			bufferSource.getBufferTypes().forEach((type) -> {
+				
+				BufferBuilder buffer = bufferSource.getBuffer(type);
+				for (int i = 0; i < buffer.completedBuffers(); i++) {
+					shaderStreamBuffer.upload(buffer, BufferUsage.DYNAMIC);
+					shaderStreamBuffer.bind();
+					
+					AbstractTextureMap<ResourceLocation> textureMap = VoxelEngine.getInstance().getTextureLoader().getTexture(type.textureMap());
+					shader.getUniform("Texture").setTextureSampler(textureMap);
+					shader.getUniform("AnimMat").setMatrix3f(textureMap.frameMatrix());
+					shader.getUniform("AnimMatLast").setMatrix3f(textureMap.lastFrameMatrix());
+					
+					shaderStreamBuffer.drawAll(type.primitive());
+				}
+				
+			});
+			
+			shaderStreamBuffer.unbind();
+			
+			shader.unbindShader();
+			
+		}
+		
+	}
+	
+	public ResourceLocation getLevelShader() {
+		return new ResourceLocation(VoxelEngine.NAMESPACE, "world/voxel");
+	}
+	
+	public static final ResourceLocation MATERIAL_ATLAS = new ResourceLocation(VoxelEngine.NAMESPACE, "materials");
 	
 	public void renderLevel(ClientLevel level, float partialTick) {
 		
-		if (resized) {
-			int[] windowSize = VoxelEngine.getInstance().getMainWindow().getSize();
-			GLStateManager.resizeViewport(0, 0, windowSize[0], windowSize[1]);
-			this.resized = false;
-		}
-		
-		ShaderInstance shader = VoxelEngine.getInstance().getShaderLoader().getShader(new ResourceLocation("example:world/voxelShader"));
+		ShaderInstance shader = VoxelEngine.getInstance().getShaderLoader().getShader(getLevelShader());
 		
 		if (shader != null) {
 
 			Matrix4f viewMatrix = VoxelEngine.getInstance().getMainCamera().getViewMatrix();
 			
-			AbstractTextureMap<ResourceLocation> materialAtlas = VoxelEngine.getInstance().getTextureLoader().getTextureMap(VoxelEngine.MATERIAL_ATLAS);
+			AbstractTextureMap<ResourceLocation> materialAtlas = VoxelEngine.getInstance().getTextureLoader().getTextureMap(MATERIAL_ATLAS);
 			
 			shader.useShader();
 			shader.getUniform("ProjMat").setMatrix4f(projectionMatrix);
@@ -108,10 +171,9 @@ public class LevelRenderer {
 						
 						VertexBuffer buffer = compiledStructure.getBuffer(renderLayer);
 						
-						Vec3f position = structure.getRigidBody().getPosition();
+						Vec3f position = structure.getPosition();
 						Quaternion rotation = structure.getRigidBody().getRotation();
 						Matrix4f translationMatrix = Matrix4f.translateMatrix(position.x, position.y, position.z).mul(rotation);
-						System.out.println(position);
 						shader.getUniform("TranMat").setMatrix4f(translationMatrix);
 						
 						buffer.bind();
@@ -159,6 +221,12 @@ public class LevelRenderer {
 	
 	public static void drawComponent(BufferBuilder buffer, RenderType renderLayer, PoseStack poseStack, VoxelComponent component, float r, float g, float b, float a) {
 		
+		poseStack.push();
+		Vec3i[] aabb = component.getAabb();
+		Vec3i offset = aabb[1].sub(aabb[0]).div(2).add(aabb[0]).mul(-1);
+		poseStack.translate(offset);
+		
+		AbstractTextureMap<ResourceLocation> texture = VoxelEngine.getInstance().getTextureLoader().getTextureMap(MATERIAL_ATLAS);
 		List<int[][][]> voxelGroups = component.getVoxels();
 		
 		for (int[][][] voxels : voxelGroups) {
@@ -184,7 +252,7 @@ public class LevelRenderer {
 							if (sideState > 0 && material.renderLayer().equals(renderLayer)) {
 								
 								ResourceLocation textureName = material.texture();
-								AbstractTextureMap<ResourceLocation> texture = VoxelEngine.getInstance().getTextureLoader().getTexture(textureName);
+								texture.activateTexture(textureName);
 								Vec4f texUV = texture.getUV();
 								int texWidth = (int) (texture.getImageWidth() * material.pixelScale());
 								int texHeight = (int) (texture.getImageHeight() * material.pixelScale());
@@ -198,6 +266,8 @@ public class LevelRenderer {
 				}
 			}
 		}
+		
+		poseStack.pop();
 		
 	}
 	

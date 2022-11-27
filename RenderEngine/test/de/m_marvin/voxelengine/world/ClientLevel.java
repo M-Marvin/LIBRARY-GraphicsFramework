@@ -1,18 +1,24 @@
 package de.m_marvin.voxelengine.world;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import de.m_marvin.enginetest.world.objects.GroundPlateObject;
+import de.m_marvin.enginetest.world.objects.WorldObject;
+import de.m_marvin.physicengine.d3.physic.IRigidObject;
 import de.m_marvin.physicengine.d3.physic.RigidPhysicWorld;
 import de.m_marvin.physicengine.d3.util.BroadphaseAlgorithm;
+import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec3f;
+import de.m_marvin.univec.impl.Vec3i;
 import de.m_marvin.voxelengine.VoxelEngine;
 
 public class ClientLevel {
 	
-	protected RigidPhysicWorld<VoxelStructure> dynamicWorld;
+	protected RigidPhysicWorld<IRigidObject> dynamicWorld;
 	
 	public ClientLevel() {
-		this.dynamicWorld = new RigidPhysicWorld<VoxelStructure>(BroadphaseAlgorithm.DBVT);
+		this.dynamicWorld = new RigidPhysicWorld<IRigidObject>(BroadphaseAlgorithm.SIMPLE);
 	}
 	
 	public void setGravity(Vec3f gravityVec) {
@@ -20,7 +26,11 @@ public class ClientLevel {
 	}
 	
 	public List<VoxelStructure> getStructures() {
-		return this.dynamicWorld.getObjectList();
+		List<VoxelStructure> s = new ArrayList<>();
+		for (IRigidObject o : this.dynamicWorld.getObjectList()) {
+			if (o instanceof VoxelStructure i) s.add(i);
+		}
+		return s;
 	}
 	
 	public boolean addStructure(VoxelStructure structure) {
@@ -39,6 +49,14 @@ public class ClientLevel {
 		
 		this.dynamicWorld.stepPhysic(VoxelEngine.getInstance().getTickTime() / 1000F, 0, 0);
 		
+	}
+
+	public void debug() {
+
+		WorldObject plate = new GroundPlateObject();
+		dynamicWorld.addObject(plate);
+		plate.getRigidBody().setOrientation(new Quaternion(new Vec3i(1, 0, 0), 0));
+		plate.getRigidBody().setPosition(new Vec3f(0F, -30F, 0F));
 	}
 	
 }

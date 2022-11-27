@@ -92,9 +92,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 		for (String shaderName : listShaderNames(path)) {
 			
 			R locationName = shaderFolderLocation.locationOfFile(shaderName);
-			if (loadShader(locationName, libFolderLocation, locationName, Optional.empty()) == null) {
-				System.err.println("Failed to load shader '" + shaderName + "'!");
-			}
+			loadShader(locationName, libFolderLocation, locationName, Optional.empty());
 			
 		}
 		
@@ -179,56 +177,62 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	 */
 	public static ShaderInstance load(File shaderFile, File sourceFolder, Optional<VertexFormat> vertexFormat) throws IOException {
 		
-		Gson gson = new GsonBuilder().create();
-		InputStreamReader inputStream = new InputStreamReader(new FileInputStream(new File(shaderFile + "." + SHADER_META_FORMAT)));
-		
-		JsonObject json = gson.fromJson(inputStream, JsonObject.class);
-		
-		String vertexShaderFile = json.get("VertexShaderFile").getAsString();
-		String fragmentShaderFile = json.get("FragmentShaderFile").getAsString();
-		Optional<String> geometryShaderFile = json.has("GeometryShaderFile") ? Optional.of(json.get("GeometryShaderFile").getAsString()) : Optional.empty();
-		String vertexShaderSource = loadGLSLFile(sourceFolder, new File(shaderFile.getParentFile(), vertexShaderFile + "." + VERTEX_SHADER_FORMAT));
-		String fragmentShaderSource = loadGLSLFile(sourceFolder, new File(shaderFile.getParentFile(), fragmentShaderFile + "." + FRAGMENT_SHADER_FORMAT));
-		Optional<String> geometryShaderSource = geometryShaderFile.isPresent() ? Optional.of(loadGLSLFile(sourceFolder, new File(shaderFile.getParentFile(), geometryShaderFile.get() + "." + GEOMETRY_SHADER_FORMAT))) : Optional.empty();
-		
-		VertexFormat attributeFormat = vertexFormat.isPresent() ? vertexFormat.get() : null;
-		if (vertexFormat.isEmpty()) {
-
-			JsonArray defaultFormatArray = json.get("Attributes").getAsJsonArray();
-			attributeFormat = new VertexFormat();
-			
-			for (int i = 0; i < defaultFormatArray.size(); i++) {
-				JsonObject elementJson = defaultFormatArray.get(i).getAsJsonObject();
-				String name = elementJson.get("Name").getAsString();
-				NumberFormat format = NumberFormat.byName(elementJson.get("Type").getAsString());
-				int count = elementJson.get("Count").getAsInt();
-				boolean normalize = elementJson.get("Normalize").getAsBoolean();
-				
-				attributeFormat.appand(name, format, count, normalize);
-			}
-			
-		}
-		
 		try {
+
+			Gson gson = new GsonBuilder().create();
+			InputStreamReader inputStream = new InputStreamReader(new FileInputStream(new File(shaderFile + "." + SHADER_META_FORMAT)));
 			
-			ShaderInstance shaderInstance = new ShaderInstance(vertexShaderSource, fragmentShaderSource, geometryShaderSource, attributeFormat);
+			JsonObject json = gson.fromJson(inputStream, JsonObject.class);
 			
-			JsonArray uniformArray = json.get("Uniforms").getAsJsonArray();
-			for (int i = 0; i < uniformArray.size(); i++) {
-				JsonObject uniformJson = uniformArray.get(i).getAsJsonObject();
-				String uniformName = uniformJson.get("Name").getAsString();
-				UniformType type = UniformType.byName(uniformJson.get("Type").getAsString());
-				JsonElement defaultValueJson = uniformJson.get("Value");
-				Object defaultValue = gson.fromJson(defaultValueJson, type.getValueType());
-				shaderInstance.createUniform(uniformName, type, defaultValue);
+			String vertexShaderFile = json.get("VertexShaderFile").getAsString();
+			String fragmentShaderFile = json.get("FragmentShaderFile").getAsString();
+			Optional<String> geometryShaderFile = json.has("GeometryShaderFile") ? Optional.of(json.get("GeometryShaderFile").getAsString()) : Optional.empty();
+			String vertexShaderSource = loadGLSLFile(sourceFolder, new File(shaderFile.getParentFile(), vertexShaderFile + "." + VERTEX_SHADER_FORMAT));
+			String fragmentShaderSource = loadGLSLFile(sourceFolder, new File(shaderFile.getParentFile(), fragmentShaderFile + "." + FRAGMENT_SHADER_FORMAT));
+			Optional<String> geometryShaderSource = geometryShaderFile.isPresent() ? Optional.of(loadGLSLFile(sourceFolder, new File(shaderFile.getParentFile(), geometryShaderFile.get() + "." + GEOMETRY_SHADER_FORMAT))) : Optional.empty();
+			
+			VertexFormat attributeFormat = vertexFormat.isPresent() ? vertexFormat.get() : null;
+			if (vertexFormat.isEmpty()) {
+
+				JsonArray defaultFormatArray = json.get("Attributes").getAsJsonArray();
+				attributeFormat = new VertexFormat();
+				
+				for (int i = 0; i < defaultFormatArray.size(); i++) {
+					JsonObject elementJson = defaultFormatArray.get(i).getAsJsonObject();
+					String name = elementJson.get("Name").getAsString();
+					NumberFormat format = NumberFormat.byName(elementJson.get("Type").getAsString());
+					int count = elementJson.get("Count").getAsInt();
+					boolean normalize = elementJson.get("Normalize").getAsBoolean();
+					
+					attributeFormat.appand(name, format, count, normalize);
+				}
+				
 			}
 			
-			inputStream.close();
+			try {
+				
+				ShaderInstance shaderInstance = new ShaderInstance(vertexShaderSource, fragmentShaderSource, geometryShaderSource, attributeFormat);
+				
+				JsonArray uniformArray = json.get("Uniforms").getAsJsonArray();
+				for (int i = 0; i < uniformArray.size(); i++) {
+					JsonObject uniformJson = uniformArray.get(i).getAsJsonObject();
+					String uniformName = uniformJson.get("Name").getAsString();
+					UniformType type = UniformType.byName(uniformJson.get("Type").getAsString());
+					JsonElement defaultValueJson = uniformJson.get("Value");
+					Object defaultValue = gson.fromJson(defaultValueJson, type.getValueType());
+					shaderInstance.createUniform(uniformName, type, defaultValue);
+				}
+				
+				inputStream.close();
+				
+				return shaderInstance;
+				
+			} catch (IllegalArgumentException e) {
+				throw new IOException("Failed to load shader '" + shaderFile.getName() + "' with exception:\n" + e.getMessage());
+			}
 			
-			return shaderInstance;
-			
-		} catch (IllegalArgumentException e) {
-			throw new IllegalArgumentException("Failed to load shader " + shaderFile.getName() + " with exception:\n" + e.getMessage());
+		} catch (NullPointerException e) {
+			throw new IOException("Failed to load shader definition file '" + shaderFile.getName() + "'! Maleformed JSON!");
 		}
 		
 	}
