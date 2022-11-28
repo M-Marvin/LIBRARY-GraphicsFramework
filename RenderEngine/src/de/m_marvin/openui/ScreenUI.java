@@ -48,26 +48,31 @@ public abstract class ScreenUI {
 		
 		poseStack.push();
 		
-		float screenRatio = this.size.x / (float) this.size.y;
-		float windowRatio = windowWidth / (float) windowHeight;
-		float offset = windowRatio - screenRatio;
-		float offsetY = offset < 0 ? -offset : 0;
-		float offsetX = offset > 0 ? offset : 0;
+		float screenRatioX = this.size.x / (float) this.size.y;
+		float screenRatioY = this.size.y / (float) this.size.x;
+		float windowRatioX = windowWidth / (float) windowHeight;
+		float windowRatioY = windowHeight / (float) windowWidth;
+		
+		float uiXscale = Math.max(1F, screenRatioX);
+		float uiYscale = Math.max(1F, screenRatioY);
+		float screenXscale = Math.min(1F * (1F / uiXscale), 1F / (windowRatioX * uiYscale));
+		float screenYscale = Math.min(1F * (1F / uiYscale), 1F / (windowRatioY * uiXscale));
+		
+		float scaleX = screenXscale * (uiXscale / (this.size.x));
+		float scaleY = screenYscale * (uiYscale / (this.size.y));
+		
+		float offsetX = -Math.min(0, windowRatioY - screenRatioY); // offset > 0 ? offset : 0;
+		float offsetY = -Math.min(0, windowRatioX - screenRatioX); // offset < 0 ? -offset : 0;
 		
 		//Matrix3f.createTranslationMatrix(windowRatio, offset)
 		//return Matrix3f.createScaleMatrix(1 / this.size.x, 1 / this.size.y);
 		
-		System.out.println(windowRatio);
-		poseStack.scale(2F / (this.size.x * windowRatio), 2F / (this.size.y), 1);
-		//poseStack.scale(0.25F, this.size.y / (float) windowHeight, 1);
-		//poseStack.translate(-1 + offsetX / 2, -1 + offsetY / 2, 0);
-		//poseStack.scale(1F / offsetX, 1, 1);
+		System.out.println(windowRatioY + " " + screenRatioY);
 		
-		// 0 -> 1.0
-		// 1 -> 0.5
-		// 1.5 -> 0.25
+		poseStack.scale(scaleX * 2, scaleY * 2, 1);
+		poseStack.translate(-1 + offsetX * 0.5F, -1 + offsetY * 0.5F, 0);
 		
-		//System.out.println(offsetX);
+		System.out.println((scaleX * offsetX * size.x));
 		
 		this.uiElements.forEach((element) -> {
 			poseStack.push();

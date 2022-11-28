@@ -12,8 +12,8 @@ public class MainMenuScreen extends ScreenUI {
 	protected UIButtonElement buttonTest;
 	
 	public MainMenuScreen() {
-		super(new Vec2i(100, 100));
-		this.buttonTest = addElement(new UIButton(new Vec2i(0, 0), new Vec2i(100, 100), "TEST", new Color(128, 128, 128, 128), new Color(255, 255, 255, 255)));
+		super(new Vec2i(200, 100));
+		this.buttonTest = addElement(new UIButton(new Vec2i(0, 0), new Vec2i(200, 100), "TEST", new Color(128, 128, 128, 128), new Color(255, 255, 255, 255)));
 		
 	}
 	
