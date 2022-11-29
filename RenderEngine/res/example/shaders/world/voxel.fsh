@@ -11,7 +11,7 @@ in GS_OUT {
 	vec2 uvLast;
 } fs_in;
 
-out vec4 gl_Color;
+out vec4 glColor;
 
 void main() {
 
@@ -19,6 +19,6 @@ void main() {
 	vec4 textureColor = texture2D(Texture, fs_in.uv);
 	vec4 textureColorFinal = lerpVec4(textureColorLast, textureColor, Interpolation);
 	
-	gl_Color = fs_in.color * textureColorFinal;
+	glColor = fs_in.color * textureColorFinal;
 	
 }

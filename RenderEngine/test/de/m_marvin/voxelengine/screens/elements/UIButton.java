@@ -13,17 +13,13 @@ import de.m_marvin.voxelengine.rendering.BufferSource;
 import de.m_marvin.voxelengine.rendering.RenderType;
 
 public class UIButton extends UIButtonElement {
-
+	
+	public static final Color TEXT_COLOR_WHITE = new Color(255, 255, 255, 255);
+	public static final Color BUTTON_COLOR_BLACK = new Color(0, 0, 0, 200);
+	public static final Color BUTTON_COLOR_RED = new Color(0, 0, 0, 200);
+		
 	public UIButton(Vec2i position, Vec2i size, String title, Color colorBack, Color colorFront) {
 		super(position, size, title, colorBack, colorFront);
-	}
-	
-	@Override
-	public boolean isOverElement(Vec2i coursorPosition) {
-		return	coursorPosition.x >= this.position.x &&
-				coursorPosition.y >= this.position.y &&
-				coursorPosition.x < this.position.x + this.size.x &&
-				coursorPosition.y < this.position.y + this.size.y;
 	}
 	
 	@Override
@@ -55,7 +51,7 @@ public class UIButton extends UIButtonElement {
 		AbstractTextureMap<ResourceLocation> texture = VoxelEngine.getInstance().getTextureLoader().getTexture(textureLoc);
 		
 		BufferBuilder buffer = bufferSource.startBuffer(RenderType.screenTextured(textureLoc));
-				
+		
 		buffer.vertex(poseStack, xl, yl).color(r, g, b, a).uv(texture, 0, 0).endVertex();
 		buffer.vertex(poseStack, xh, yl).color(r, g, b, a).uv(texture, 1, 0).endVertex();
 		buffer.vertex(poseStack, xh, yh).color(r, g, b, a).uv(texture, 1, 1).endVertex();

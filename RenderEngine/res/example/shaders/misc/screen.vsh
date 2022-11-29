@@ -16,7 +16,7 @@ out vec2 vs_uvLast;
 
 void main() {
 	
-	gl_Position = vec4(ProjMat * vec3(position, 0), 1);
+	gl_Position = vec4(ProjMat * vec3(position, 1), 1);
 	vs_color = color;
 	vs_uv = translateVec2(uv, AnimMat);
 	vs_uvLast = translateVec2(uv, AnimMatLast);

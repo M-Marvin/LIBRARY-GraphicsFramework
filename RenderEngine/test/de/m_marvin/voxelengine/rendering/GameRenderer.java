@@ -89,6 +89,7 @@ public class GameRenderer {
 			
 			bufferSource.getBufferTypes().forEach((type) -> {
 				
+				type.setState();
 				BufferBuilder buffer = bufferSource.getBuffer(type);
 				for (int i = 0; i < buffer.completedBuffers(); i++) {
 					shaderStreamBuffer.upload(buffer, BufferUsage.DYNAMIC);
@@ -101,6 +102,7 @@ public class GameRenderer {
 					
 					shaderStreamBuffer.drawAll(type.primitive());
 				}
+				type.resetState();
 				
 			});
 			
