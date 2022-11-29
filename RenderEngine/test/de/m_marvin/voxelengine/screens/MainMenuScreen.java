@@ -5,7 +5,11 @@ import java.awt.Color;
 import de.m_marvin.openui.ScreenAligment;
 import de.m_marvin.openui.ScreenUI;
 import de.m_marvin.openui.elements.UIButtonElement;
+import de.m_marvin.renderengine.buffers.BufferBuilder;
+import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.univec.impl.Vec2i;
+import de.m_marvin.voxelengine.VoxelEngine;
+import de.m_marvin.voxelengine.rendering.RenderType;
 import de.m_marvin.voxelengine.screens.elements.UIButton;
 import de.m_marvin.voxelengine.screens.elements.UISquarePlane;
 
@@ -14,12 +18,33 @@ public class MainMenuScreen extends ScreenUI {
 	protected UIButtonElement buttonTest;
 	
 	public MainMenuScreen() {
-		super(new Vec2i(300, 200), ScreenAligment.LEFT);
+		super(new Vec2i(100, 200), ScreenAligment.TOP_LEFT);
 		
-		addElement(new UISquarePlane(new Vec2i(0, 0), new Vec2i(300, 200), new Color(128, 128, 128, 150)));
+		//this.buttonTest = addElement(new UIButton(new Vec2i(0, 0), new Vec2i(100, 100), "TEST", UIButton.BUTTON_COLOR_BLACK, UIButton.TEXT_COLOR_WHITE));
 		
-		this.buttonTest = addElement(new UIButton(new Vec2i(0, 0), new Vec2i(100, 200), "TEST", UIButton.BUTTON_COLOR_BLACK, UIButton.TEXT_COLOR_WHITE));
+	}
+	
+	@Override
+	public void drawScreen(PoseStack poseStack, int windowWidth, int windowHeight) {
+		super.drawScreen(poseStack, windowWidth, windowHeight);
 		
+		float lx = 0;
+		float by = -this.windowSize.y + this.size.y;
+		float rx1 = 80;
+		float rx2 = 100;
+		float ty = size.y;
+		
+		BufferBuilder buffer = VoxelEngine.getInstance().getGameRenderer().getBufferSource().startBuffer(RenderType.screen());
+		buffer.vertex(lx, by).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
+		buffer.vertex(rx1, by).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
+		buffer.vertex(rx1, ty).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
+		buffer.vertex(lx, ty).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
+		
+		buffer.vertex(rx1, by).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
+		buffer.vertex(rx2, by).color(0, 0, 0, 0.0F).uv(0, 0).endVertex();
+		buffer.vertex(rx2, ty).color(0, 0, 0, 0.0F).uv(0, 0).endVertex();
+		buffer.vertex(rx1, ty).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
+		buffer.end();
 	}
 	
 	@Override
@@ -27,11 +52,11 @@ public class MainMenuScreen extends ScreenUI {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 	@Override
 	public void onClose() {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 }

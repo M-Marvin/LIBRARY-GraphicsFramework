@@ -95,10 +95,14 @@ public class GameRenderer {
 					shaderStreamBuffer.upload(buffer, BufferUsage.DYNAMIC);
 					shaderStreamBuffer.bind();
 					
-					AbstractTextureMap<ResourceLocation> textureMap = VoxelEngine.getInstance().getTextureLoader().getTexture(type.textureMap());
-					shader.getUniform("Texture").setTextureSampler(textureMap);
-					shader.getUniform("AnimMat").setMatrix3f(textureMap.frameMatrix());
-					shader.getUniform("AnimMatLast").setMatrix3f(textureMap.lastFrameMatrix());
+					if (type.textureMap() != null) {
+						AbstractTextureMap<ResourceLocation> textureMap = VoxelEngine.getInstance().getTextureLoader().getTexture(type.textureMap());
+						shader.getUniform("AnimMat").setMatrix3f(textureMap.frameMatrix());
+						shader.getUniform("AnimMatLast").setMatrix3f(textureMap.lastFrameMatrix());
+						shader.getUniform("Texture").setTextureSampler(textureMap);
+					} else {
+						shader.getUniform("Texture").setTextureSampler(null);
+					}
 					
 					shaderStreamBuffer.drawAll(type.primitive());
 				}

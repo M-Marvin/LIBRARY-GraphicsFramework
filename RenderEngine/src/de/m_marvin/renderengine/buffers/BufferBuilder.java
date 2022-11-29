@@ -84,6 +84,10 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 		ByteBuffer drawBuffer = this.buffer.slice();
 		drawBuffer.order(this.buffer.order());
 		this.buffer.clear();
+		if (this.drawStates.isEmpty()) {
+			this.writtenBytes = 0;
+			this.uploadedBytes = 0;
+		}
 		return new BufferPair(drawBuffer, drawState);	
 	}
 	

@@ -1,5 +1,7 @@
 package de.m_marvin.voxelengine.rendering;
 
+import java.util.Objects;
+
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL33;
 
@@ -30,7 +32,7 @@ public abstract class RenderType {
 	
 	@Override
 	public int hashCode() {
-		return this.getName().hashCode();
+		return Objects.hash(this.getName(), this.textureMap());
 	}
 	
 	public static RenderType[] voxelRenderLayers() {
@@ -143,7 +145,7 @@ public abstract class RenderType {
 			
 			@Override
 			public String getName() {
-				return "screenTextured[" + this.textureMap() + "]";
+				return "screenTextured";
 			}
 		};
 	});

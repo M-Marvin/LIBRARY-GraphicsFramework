@@ -28,6 +28,10 @@ public abstract class ScreenUI {
 		return size;
 	}
 	
+	public Vec2f getWindowSize() {
+		return windowSize;
+	}
+	
 	public IScreenAligner getAligment() {
 		return aligment;
 	}
@@ -37,7 +41,7 @@ public abstract class ScreenUI {
 	}
 	
 	public Matrix3f getScreenTransformation(int windowWidth, int windowHeight) {
-
+		
 		float screenRatioX = this.size.x / (float) this.size.y;
 		float screenRatioY = this.size.y / (float) this.size.x;
 		float windowRatioX = windowWidth / (float) windowHeight;
@@ -49,7 +53,7 @@ public abstract class ScreenUI {
 		float scaleX = screenXscale * (uiXscale / (this.size.x));
 		float scaleY = screenYscale * (uiYscale / (this.size.y));
 		
-		Vec2f aligningOffst = this.aligment.getOffset(this.size, new Vec2f(this.size).mul(windowRatioX / screenRatioX, windowRatioY / screenRatioY));
+		Vec2f aligningOffst = this.aligment.getOffset(this.size, this.windowSize);
 		
 		return	Matrix3f.createScaleMatrix(scaleX * 2, scaleY * 2).mul(
 				Matrix3f.createTranslationMatrix(- size.x / 2 + aligningOffst.x, - size.y / 2 + aligningOffst.y));
@@ -69,14 +73,18 @@ public abstract class ScreenUI {
 	public abstract void onOpen();
 	public abstract void onClose();
 	
-	/* Rendering related stuff that has to be executed on the render thread */
-	
 	public void drawScreen(PoseStack poseStack, int windowWidth, int windowHeight) {
+		
+		float windowSizeX = Math.max(1F, (windowWidth / (float) windowHeight) / (this.size.x / (float) this.size.y)) * this.size.x;
+		float windowSizeY = Math.max(1F, (windowHeight / (float) windowWidth) / (this.size.y / (float) this.size.x)) * this.size.y;
+		this.windowSize = new Vec2f(windowSizeX, windowSizeY);
+		
 		this.uiElements.forEach((element) -> {
 			poseStack.push();
 			element.draw(poseStack);
 			poseStack.pop();
 		});
+		
 	}
 	
 }

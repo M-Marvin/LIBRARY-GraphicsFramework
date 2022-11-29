@@ -199,8 +199,13 @@ public class ShaderInstance {
 		 * @param value The new value
 		 */
 		public void setTextureSampler(ITextureSampler texture) {
-			texture.bindTexture(index);
-			this.type.set(location, this.index);
+			if (texture != null) {
+				texture.bindTexture(index);
+				this.type.set(location, this.index);
+			} else {
+				GLStateManager.bindTexture(GL33.GL_TEXTURE_2D, 0);
+				this.type.set(location, 0);
+			}
 		}
 		
 	}
