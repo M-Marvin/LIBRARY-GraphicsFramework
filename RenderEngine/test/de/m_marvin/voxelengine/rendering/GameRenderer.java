@@ -222,7 +222,7 @@ public class GameRenderer {
 				poseStack.translate(structureComponent.position.x, structureComponent.position.y, structureComponent.position.z);
 				poseStack.rotate(structureComponent.orientation);
 				Vec3i[] aabb = structureComponent.component.getAabb();
-				Vec3i offset = aabb[1].sub(aabb[0]).div(2).add(aabb[0]);
+				Vec3i offset = aabb[0];//.sub(aabb[0]).div(2).add(aabb[0]);
 				poseStack.translate(offset);
 				
 				shader.getUniform("VoxelMat").setMatrix4f(poseStack.last().pose());

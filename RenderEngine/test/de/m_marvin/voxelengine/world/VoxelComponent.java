@@ -101,8 +101,8 @@ public class VoxelComponent {
 				}
 			}
 			
-			Vec3f halfBoxSize = new Vec3f(max.sub(min).add(1, 1, 1)).div(2F);
-			Vec3f centerOffset = new Vec3f(min).div(VoxelStructure.PHYSICS_2_VOXEL_FACTOR);
+			Vec3f halfBoxSize = new Vec3f(max.sub(min)).div(2F);
+			Vec3f centerOffset = new Vec3f(min).add(halfBoxSize).div(VoxelStructure.PHYSICS_2_VOXEL_FACTOR);
 			halfBoxSize.divI(VoxelStructure.PHYSICS_2_VOXEL_FACTOR);
 			BoxShape box = new BoxShape(new Vector3f(halfBoxSize.x, halfBoxSize.y, halfBoxSize.z));
 			Transform transform = UniVecHelper.transform(centerOffset);

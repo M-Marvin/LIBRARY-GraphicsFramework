@@ -336,7 +336,7 @@ public class VoxelEngine {
 		s5.addComponent(c3, new Vec3f(0F, 0F, 0F), new Quaternion(new Vec3i(1, 0, 0), 0));
 		level.addStructure(s5);
 		s5.setStatic(true);
-		s5.setPosition(new Vec3f(0F, -80F, 0F));
+		s5.setPosition(new Vec3f(-20F, -80F, -40F));
 		
 		level.setGravity(new Vec3f(0F, -9.81F, 0F));
 		
