@@ -55,13 +55,13 @@ public abstract class RenderType {
 		
 		@Override
 		public void setState() {
-			//GLStateManager.enable(GL33.GL_CULL_FACE);
+			GLStateManager.enable(GL33.GL_CULL_FACE);
 			GLStateManager.enable(GL33.GL_DEPTH_TEST);
 		}
 		
 		@Override
 		public void resetState() {
-			//GLStateManager.disable(GL33.GL_CULL_FACE);
+			GLStateManager.disable(GL33.GL_CULL_FACE);
 			GLStateManager.disable(GL33.GL_DEPTH_TEST);
 		}
 
@@ -151,6 +151,10 @@ public abstract class RenderType {
 	});
 	public static RenderType screenTextured(ResourceLocation texture) {
 		return screenTextured.apply(texture);
+	}
+	
+	public static RenderType[] screenLayers() {
+		return new RenderType[] { screen(), screenTextured(null) };
 	}
 	
 }

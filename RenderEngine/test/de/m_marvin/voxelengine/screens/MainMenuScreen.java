@@ -1,7 +1,5 @@
 package de.m_marvin.voxelengine.screens;
 
-import java.awt.Color;
-
 import de.m_marvin.openui.ScreenAligment;
 import de.m_marvin.openui.ScreenUI;
 import de.m_marvin.openui.elements.UIButtonElement;
@@ -10,8 +8,6 @@ import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.univec.impl.Vec2i;
 import de.m_marvin.voxelengine.VoxelEngine;
 import de.m_marvin.voxelengine.rendering.RenderType;
-import de.m_marvin.voxelengine.screens.elements.UIButton;
-import de.m_marvin.voxelengine.screens.elements.UISquarePlane;
 
 public class MainMenuScreen extends ScreenUI {
 	
@@ -25,8 +21,7 @@ public class MainMenuScreen extends ScreenUI {
 	}
 	
 	@Override
-	public void drawScreen(PoseStack poseStack, int windowWidth, int windowHeight) {
-		super.drawScreen(poseStack, windowWidth, windowHeight);
+	public void drawAdditionalContent(PoseStack poseStack, float partialTick) {
 		
 		float lx = 0;
 		float by = -this.windowSize.y + this.size.y;
@@ -34,27 +29,31 @@ public class MainMenuScreen extends ScreenUI {
 		float rx2 = 100;
 		float ty = size.y;
 		
-		BufferBuilder buffer = VoxelEngine.getInstance().getGameRenderer().getBufferSource().startBuffer(RenderType.screen());
-		buffer.vertex(lx, by).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
-		buffer.vertex(rx1, by).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
-		buffer.vertex(rx1, ty).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
-		buffer.vertex(lx, ty).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
+		System.out.println(poseStack.last().pose());
 		
-		buffer.vertex(rx1, by).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
-		buffer.vertex(rx2, by).color(0, 0, 0, 0.0F).uv(0, 0).endVertex();
-		buffer.vertex(rx2, ty).color(0, 0, 0, 0.0F).uv(0, 0).endVertex();
-		buffer.vertex(rx1, ty).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
+		BufferBuilder buffer = VoxelEngine.getInstance().getGameRenderer().getBufferSource().startBuffer(RenderType.screen());
+		buffer.vertex(poseStack, lx, by).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, rx1, by).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, rx1, ty).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, lx, ty).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
+		
+		buffer.vertex(poseStack, rx1, by).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, rx2, by).color(0, 0, 0, 0.0F).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, rx2, ty).color(0, 0, 0, 0.0F).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, rx1, ty).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
 		buffer.end();
 	}
 	
 	@Override
 	public void onOpen() {
+		super.onOpen();
 		// TODO Auto-generated method stub
 		
 	}
 	
 	@Override
 	public void onClose() {
+		super.onClose();
 		// TODO Auto-generated method stub
 		
 	}

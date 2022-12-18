@@ -7,13 +7,13 @@ public enum ScreenAligment implements IScreenAligner {
 	
 	LEFT((screenSize, windowSize) -> new Vec2f(-(windowSize.x - screenSize.x) / 2F, 0F)),
 	RIGHT((screenSize, windowSize) -> new Vec2f(+(windowSize.x - screenSize.x) / 2F, 0F)),
-	TOP((screenSize, windowSize) -> new Vec2f(0, +(windowSize.y - screenSize.y) / 2F)),
-	BOTTOM((screenSize, windowSize) -> new Vec2f(0, -(windowSize.y - screenSize.y) / 2F)),
+	BOTTOM((screenSize, windowSize) -> new Vec2f(0, +(windowSize.y - screenSize.y) / 2F)),
+	TOP((screenSize, windowSize) -> new Vec2f(0, -(windowSize.y - screenSize.y) / 2F)),
 	
-	TOP_LEFT((screenSize, windowSize) -> new Vec2f(-(windowSize.x - screenSize.x) / 2F, +(windowSize.y - screenSize.y) / 2F)),
-	TOP_RIGHT((screenSize, windowSize) -> new Vec2f(+(windowSize.x - screenSize.x) / 2F, +(windowSize.y - screenSize.y) / 2F)),
-	BOTTOM_LEFT((screenSize, windowSize) -> new Vec2f(-(windowSize.x - screenSize.x) / 2F, -(windowSize.y - screenSize.y) / 2F)),
-	BOTTOM_RIGHT((screenSize, windowSize) -> new Vec2f(+(windowSize.x - screenSize.x) / 2F, -(windowSize.y - screenSize.y) / 2F)),
+	BOTTOM_LEFT((screenSize, windowSize) -> new Vec2f(-(windowSize.x - screenSize.x) / 2F, +(windowSize.y - screenSize.y) / 2F)),
+	BOTTOM_RIGHT((screenSize, windowSize) -> new Vec2f(+(windowSize.x - screenSize.x) / 2F, +(windowSize.y - screenSize.y) / 2F)),
+	TOP_LEFT((screenSize, windowSize) -> new Vec2f(-(windowSize.x - screenSize.x) / 2F, -(windowSize.y - screenSize.y) / 2F)),
+	TOP_RIGHT((screenSize, windowSize) -> new Vec2f(+(windowSize.x - screenSize.x) / 2F, -(windowSize.y - screenSize.y) / 2F)),
 	
 	CENTERED((screenSize, windowSize) -> new Vec2f(0F, 0F));
 	

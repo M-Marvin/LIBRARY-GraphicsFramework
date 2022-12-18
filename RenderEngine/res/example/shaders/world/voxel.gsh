@@ -5,6 +5,7 @@
 uniform mat4 ViewMat;
 uniform mat4 ProjMat;
 uniform mat4 TranMat;
+uniform mat4 VoxelMat;
 uniform mat3 AnimMat;
 uniform mat3 AnimMatLast;
 uniform float HalfVoxelSize;
@@ -32,7 +33,7 @@ out GS_OUT {
 // Creating a single vertex of a voxel-side
 
 vec4 transform(vec4 vector) {
-	return (ProjMat * ViewMat * TranMat) * vector;
+	return (VoxelMat * ProjMat * ViewMat * TranMat) * vector;
 }
 
 void makeQuadVertex(vec2 textureUV, vec3 offset) {
@@ -57,19 +58,19 @@ void makeQuadNorth() {
 
 void makeQuadSouth() {
 	vec2 pixelUVposition = (mod(gs_in[0].voxel.xy, gs_in[0].textureSize) / gs_in[0].textureSize) * gs_in[0].textureUVatlasSize + gs_in[0].textureUVatlas;
-	makeQuadVertex(pixelUVposition + vec2(1, 0) * gs_in[0].voxelUVatlasSize, vec3(1, -1, 1));
-	makeQuadVertex(pixelUVposition + vec2(0, 0) * gs_in[0].voxelUVatlasSize, vec3(-1, -1, 1));
 	makeQuadVertex(pixelUVposition + vec2(1, 1) * gs_in[0].voxelUVatlasSize, vec3(1, 1, 1));
 	makeQuadVertex(pixelUVposition + vec2(0, 1) * gs_in[0].voxelUVatlasSize, vec3(-1, 1, 1));
+	makeQuadVertex(pixelUVposition + vec2(1, 0) * gs_in[0].voxelUVatlasSize, vec3(1, -1, 1));
+	makeQuadVertex(pixelUVposition + vec2(0, 0) * gs_in[0].voxelUVatlasSize, vec3(-1, -1, 1));
 	EndPrimitive();
 }
 
 void makeQuadEast() {
 	vec2 pixelUVposition = (mod(gs_in[0].voxel.zy, gs_in[0].textureSize) / gs_in[0].textureSize) * gs_in[0].textureUVatlasSize + gs_in[0].textureUVatlas;
-	makeQuadVertex(pixelUVposition + vec2(1, 0) * gs_in[0].voxelUVatlasSize, vec3(-1, -1, 1));
-	makeQuadVertex(pixelUVposition + vec2(0, 0) * gs_in[0].voxelUVatlasSize, vec3(-1, -1, -1));
 	makeQuadVertex(pixelUVposition + vec2(1, 1) * gs_in[0].voxelUVatlasSize, vec3(-1, 1, 1));
 	makeQuadVertex(pixelUVposition + vec2(0, 1) * gs_in[0].voxelUVatlasSize, vec3(-1, 1, -1));
+	makeQuadVertex(pixelUVposition + vec2(1, 0) * gs_in[0].voxelUVatlasSize, vec3(-1, -1, 1));
+	makeQuadVertex(pixelUVposition + vec2(0, 0) * gs_in[0].voxelUVatlasSize, vec3(-1, -1, -1));
 	EndPrimitive();
 }
 
@@ -86,10 +87,10 @@ void makeQuadWest() {
 void makeQuadUp() {
 	vec2 v = mod(vec2(gs_in[0].voxel.x, gs_in[0].textureSize.y - (gs_in[0].voxel.z + 1)), gs_in[0].textureSize) / gs_in[0].textureSize;
 	vec2 pixelUVposition = v * gs_in[0].textureUVatlasSize + gs_in[0].textureUVatlas;
-	makeQuadVertex(pixelUVposition + vec2(0, 0) * gs_in[0].voxelUVatlasSize, vec3(-1, 1, 1));
-	makeQuadVertex(pixelUVposition + vec2(0, 1) * gs_in[0].voxelUVatlasSize, vec3(-1, 1, -1));
 	makeQuadVertex(pixelUVposition + vec2(1, 0) * gs_in[0].voxelUVatlasSize, vec3(1, 1, 1));
 	makeQuadVertex(pixelUVposition + vec2(1, 1) * gs_in[0].voxelUVatlasSize, vec3(1, 1, -1));
+	makeQuadVertex(pixelUVposition + vec2(0, 0) * gs_in[0].voxelUVatlasSize, vec3(-1, 1, 1));
+	makeQuadVertex(pixelUVposition + vec2(0, 1) * gs_in[0].voxelUVatlasSize, vec3(-1, 1, -1));
 	EndPrimitive();
 }
 

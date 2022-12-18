@@ -1,9 +1,8 @@
 package de.m_marvin.voxelengine.rendering;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
-
-import org.lwjgl.opengl.GL33;
 
 import com.google.common.collect.Queues;
 
@@ -72,6 +71,10 @@ public class GameRenderer {
 		return new ResourceLocation("example:misc/screen");
 	}
 	
+	public Matrix4f getProjectionMatrix() {
+		return projectionMatrix;
+	}
+	
 	protected VertexBuffer shaderStreamBuffer = new VertexBuffer();
 	
 	public void renderScreen(ScreenUI screen, float partialTick) {
@@ -81,32 +84,36 @@ public class GameRenderer {
 		if (shader != null) {
 			
 			int[] size = VoxelEngine.getInstance().getMainWindow().getSize();
-			screen.drawScreen(new PoseStack(), size[0], size[1]);
+			PoseStack poseStack = new PoseStack();
+			screen.drawScreen(poseStack, size[0], size[1], partialTick);
 			
 			shader.useShader();
 			shader.getUniform("Interpolation").setFloat(partialTick);
-			shader.getUniform("ProjMat").setMatrix3f(screen.getScreenTransformation(size[0], size[1]));
 			
 			bufferSource.getBufferTypes().forEach((type) -> {
 				
-				type.setState();
-				BufferBuilder buffer = bufferSource.getBuffer(type);
-				for (int i = 0; i < buffer.completedBuffers(); i++) {
-					shaderStreamBuffer.upload(buffer, BufferUsage.DYNAMIC);
-					shaderStreamBuffer.bind();
+				if (Arrays.asList(RenderType.screenLayers()).contains(type)) {
 					
-					if (type.textureMap() != null) {
-						AbstractTextureMap<ResourceLocation> textureMap = VoxelEngine.getInstance().getTextureLoader().getTexture(type.textureMap());
-						shader.getUniform("AnimMat").setMatrix3f(textureMap.frameMatrix());
-						shader.getUniform("AnimMatLast").setMatrix3f(textureMap.lastFrameMatrix());
-						shader.getUniform("Texture").setTextureSampler(textureMap);
-					} else {
-						shader.getUniform("Texture").setTextureSampler(null);
+					type.setState();
+					BufferBuilder buffer = bufferSource.getBuffer(type);
+					for (int i = 0; i < buffer.completedBuffers(); i++) {
+						shaderStreamBuffer.upload(buffer, BufferUsage.DYNAMIC);
+						shaderStreamBuffer.bind();
+						
+						if (type.textureMap() != null) {
+							AbstractTextureMap<ResourceLocation> textureMap = VoxelEngine.getInstance().getTextureLoader().getTexture(type.textureMap());
+							shader.getUniform("AnimMat").setMatrix3f(textureMap.frameMatrix());
+							shader.getUniform("AnimMatLast").setMatrix3f(textureMap.lastFrameMatrix());
+							shader.getUniform("Texture").setTextureSampler(textureMap);
+						} else {
+							shader.getUniform("Texture").setTextureSampler(null);
+						}
+						
+						shaderStreamBuffer.drawAll(type.primitive());
 					}
+					type.resetState();
 					
-					shaderStreamBuffer.drawAll(type.primitive());
 				}
-				type.resetState();
 				
 			});
 			
@@ -151,7 +158,7 @@ public class GameRenderer {
 				
 				if (compiledStructure.isDirty()) {
 					
-					drawStructure(bufferSource, poseStack, structure, 1F, 1F, 1F, 1F);
+					drawStructure(shader, bufferSource, poseStack, structure, 1F, 1F, 1F, 1F);
 					
 					for (RenderType renderLayer : RenderType.voxelRenderLayers()) {
 						compiledStructure.getBuffer(renderLayer).upload(bufferSource.getBuffer(renderLayer), BufferUsage.DYNAMIC);
@@ -166,8 +173,6 @@ public class GameRenderer {
 			for (RenderType renderLayer : RenderType.voxelRenderLayers()) {
 				
 				renderLayer.setState();
-				GL33.glPointSize(10);
-				GL33.glEnable(GL33.GL_POINT_SIZE);
 				
 				level.getStructures().forEach((structure) -> {
 					
@@ -200,7 +205,11 @@ public class GameRenderer {
 		
 	}
 	
-	public static void drawStructure(BufferSource bufferSource, PoseStack poseStack, VoxelStructure structure, float r, float g, float b, float a) {
+	public void renderAdditionalBufferedObjects(float partialTick) {
+		
+	}
+	
+	public static void drawStructure(ShaderInstance shader, BufferSource bufferSource, PoseStack poseStack, VoxelStructure structure, float r, float g, float b, float a) {
 		
 		for (RenderType renderLayer : RenderType.voxelRenderLayers()) {
 			
@@ -212,8 +221,13 @@ public class GameRenderer {
 				poseStack.push();
 				poseStack.translate(structureComponent.position.x, structureComponent.position.y, structureComponent.position.z);
 				poseStack.rotate(structureComponent.orientation);
+				Vec3i[] aabb = structureComponent.component.getAabb();
+				Vec3i offset = aabb[1].sub(aabb[0]).div(2).add(aabb[0]);
+				poseStack.translate(offset);
 				
-				drawComponent(buffer, renderLayer, poseStack, structureComponent.component, r, g, b, a);
+				shader.getUniform("VoxelMat").setMatrix4f(poseStack.last().pose());
+				
+				drawComponent(buffer, renderLayer, structureComponent.component, r, g, b, a);
 				
 				poseStack.pop();
 				
@@ -225,12 +239,7 @@ public class GameRenderer {
 		
 	}
 	
-	public static void drawComponent(BufferBuilder buffer, RenderType renderLayer, PoseStack poseStack, VoxelComponent component, float r, float g, float b, float a) {
-		
-		poseStack.push();
-		Vec3i[] aabb = component.getAabb();
-		Vec3i offset = aabb[1].sub(aabb[0]).div(2).add(aabb[0]).mul(-1);
-		poseStack.translate(offset);
+	public static void drawComponent(BufferBuilder buffer, RenderType renderLayer, VoxelComponent component, float r, float g, float b, float a) {
 		
 		AbstractTextureMap<ResourceLocation> texture = VoxelEngine.getInstance().getTextureLoader().getTextureMap(MATERIAL_ATLAS);
 		List<int[][][]> voxelGroups = component.getVoxels();
@@ -263,17 +272,16 @@ public class GameRenderer {
 								int texWidth = (int) (texture.getImageWidth() * material.pixelScale());
 								int texHeight = (int) (texture.getImageHeight() * material.pixelScale());
 								
-								buffer.vertex(poseStack, x, y, z).nextElement().putInt(x).putInt(y).putInt(z).nextElement().putInt(sideState).color(r, g, b, a).nextElement().putFloat(texUV.x).putFloat(texUV.y).putFloat(texUV.z).putFloat(texUV.w).nextElement().putInt(texWidth).putInt(texHeight).endVertex();
+								buffer.vertex(x, y, z).vec3i(x, y, z).nextElement().putInt(sideState).color(r, g, b, a).vec4f(texUV.x, texUV.y, texUV.z, texUV.w).vec2i(texWidth, texHeight).endVertex();
 								
 							}
+							
 						}
 						
 					}
 				}
 			}
 		}
-		
-		poseStack.pop();
 		
 	}
 	

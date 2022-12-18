@@ -25,7 +25,7 @@ import de.m_marvin.univec.impl.Vec3i;
 import de.m_marvin.voxelengine.rendering.GameRenderer;
 import de.m_marvin.voxelengine.rendering.RenderType;
 import de.m_marvin.voxelengine.resources.ReloadState;
-import de.m_marvin.voxelengine.screens.MainMenuScreen;
+import de.m_marvin.voxelengine.screens.ComponentEditorScreen;
 import de.m_marvin.voxelengine.world.ClientLevel;
 import de.m_marvin.voxelengine.world.VoxelComponent;
 import de.m_marvin.voxelengine.world.VoxelMaterial;
@@ -340,7 +340,7 @@ public class VoxelEngine {
 		
 		level.setGravity(new Vec3f(0F, -9.81F, 0F));
 		
-		openScreen(new MainMenuScreen());
+		openScreen(new ComponentEditorScreen(c3));
 		
 	}
 	
@@ -385,6 +385,8 @@ public class VoxelEngine {
 		if (this.level != null) this.gameRenderer.renderLevel(level, partialTick);
 		
 		if (this.screen != null) this.gameRenderer.renderScreen(this.screen, partialTick);
+
+		this.gameRenderer.renderAdditionalBufferedObjects(partialTick);
 		
 		mainWindow.glSwapFrames();
 		
