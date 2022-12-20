@@ -1,5 +1,7 @@
 package de.m_marvin.voxelengine;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,10 +21,14 @@ import de.m_marvin.renderengine.shaders.ShaderLoader;
 import de.m_marvin.renderengine.textures.utility.TextureLoader;
 import de.m_marvin.renderengine.translation.Camera;
 import de.m_marvin.renderengine.windows.Window;
+import de.m_marvin.simplelogging.filehandling.LogFileHandler;
+import de.m_marvin.simplelogging.printing.LogType;
+import de.m_marvin.simplelogging.printing.Logger;
 import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
 import de.m_marvin.voxelengine.rendering.GameRenderer;
+import de.m_marvin.voxelengine.rendering.RenderStage;
 import de.m_marvin.voxelengine.rendering.RenderType;
 import de.m_marvin.voxelengine.resources.ReloadState;
 import de.m_marvin.voxelengine.screens.ComponentEditorScreen;
@@ -32,9 +38,41 @@ import de.m_marvin.voxelengine.world.VoxelMaterial;
 import de.m_marvin.voxelengine.world.VoxelStructure;
 
 public class VoxelEngine {
-
+	
+	private static LogFileHandler logFileHandler;
+	
 	public static void main(String... args) {
-		new VoxelEngine().run();
+
+		// Start new logger
+		try {
+			logFileHandler = new LogFileHandler(new File(new File(ResourceLoader.getRuntimeFolder()).getParentFile().getParentFile(), "logs"), "EngineTest");
+			Logger logger = logFileHandler.beginLogging();
+			Logger.setDefaultLogger(logger);
+		} catch (IOException e) {
+			System.err.println("Failed to create logger!");
+			e.printStackTrace();
+			logFileHandler = null;
+			Logger.setDefaultLogger(new Logger());
+		}
+		
+		// Start application
+		try {
+			new VoxelEngine().run();
+		} catch (Exception e) {
+			Logger.defaultLogger().logError("CRASH", "The engine has crashed!");
+			Logger.defaultLogger().printException(LogType.ERROR, "CRASH", e);
+		}
+		
+		// Terminate logger
+		if (logFileHandler != null) {
+			try {
+				logFileHandler.endLogging();
+			} catch (IOException e) {
+				System.err.println("Failed to terminate logger, the log files might be corrupted!");
+				e.printStackTrace();
+			}
+		}
+		
 	}
 	
 	private static VoxelEngine instance;
@@ -78,7 +116,7 @@ public class VoxelEngine {
 	
 	public void run() {
 		
-		System.out.println("Start!");
+		Logger.defaultLogger().logInfo("Start!");
 		
 		// Setup resource loaders
 		resourceLoader = new ResourceLoader<>();
@@ -98,7 +136,7 @@ public class VoxelEngine {
 		mainWindow = new Window(1000, 600, "Engine Test");
 		mainCamera = new Camera(new Vec3f(0F, 0F, 0F), new Vec3f(0F, 0F, 0F));
 		
-		System.out.println("Start Render-Thread");
+		Logger.defaultLogger().logInfo("Start Render-Thread");
 		
 		// Start and initialize render thread
 		startRenderThread(() -> {
@@ -129,32 +167,39 @@ public class VoxelEngine {
 		// Setup main thread
 		setupUpdateThread();
 		
-		System.out.println("Start game loop");
+		Logger.defaultLogger().logInfo("Start game loop");
 		
 		// Start game loop
 		startUpdateLoop();
 
-		System.out.println("Stop, wait for Render-Thread to shutdown");
+		Logger.defaultLogger().logInfo("Stop, wait for Render-Thread to shutdown");
 		
 		// Wait for render thread to terminate
 		synchronized (renderThread) {
 			try {
 				renderThread.wait();
 			} catch (InterruptedException e) {
-				System.err.println("Fatel error on termination of application!");
-				e.printStackTrace();
+				Logger.defaultLogger().logError("Fatel error on termination of application!");
+				Logger.defaultLogger().printException(LogType.ERROR, e);
 			}
 		}
 		
 		// Terminate GLFW
 		GLStateManager.terminate();
 		
-		System.out.println("Exit");
+		Logger.defaultLogger().logInfo("Exit");
 		
 	}
 	
 	protected void startRenderThread(Runnable threadTask) {
-		this.renderThread = new Thread(threadTask, "RenderThread");
+		this.renderThread = new Thread(() -> {
+			try {
+				threadTask.run();
+			} catch (Exception e) {
+				Logger.defaultLogger().logError("CRASH", "Render thread crashed!");
+				Logger.defaultLogger().printException(LogType.ERROR, "CRASH", e);
+			}
+		}, "RenderThread");
 		this.renderThread.start();
 	}
 	
@@ -212,7 +257,7 @@ public class VoxelEngine {
 				ticks++;
 				tick();
 				
-				if (!this.renderThread.isAlive()) throw new IllegalStateException("Render-Thread terminated unexpeted!");
+				if (!this.renderThread.isAlive()) throw new IllegalStateException("Render-Thread terminated unexpected!");
 			}
 			
 			if (timeMillis - secondTimer > 1000) {
@@ -293,14 +338,13 @@ public class VoxelEngine {
 		voxels.add(vc);
 		VoxelComponent c = new VoxelComponent(voxels, materials);
 		VoxelStructure s = new VoxelStructure();
-		s.addComponent(c, new Vec3f(0F, 0F, 0F), new Quaternion(new Vec3i(1, 0, 0), 0));
+		s.addComponent(c, new Vec3f(0F, 0F, 0F), new Quaternion(new Vec3i(1, 0, 0), (float) Math.toRadians(45)));
 		level.addStructure(s);
 		s.setPosition(new Vec3f(-20F, 0F, 0F));
-		s.setOrientation(new Quaternion(new Vec3i(1, 0, 0), (float) Math.toRadians(45)));
+		//s.setOrientation(new Quaternion(new Vec3i(1, 0, 0), (float) Math.toRadians(45)));
 		
 		List<VoxelMaterial> materials2 = new ArrayList<>();
 		materials2.add(new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/metal"), 1F));
-		List<int[][][]> voxels2 = new ArrayList<>();
 		int[][][] vc2 = new int[32][32][32];
 		for (int i0 = 0; i0 < 20; i0++) {
 			for (int i1 = 0; i1 < 20; i1++) {
@@ -310,14 +354,27 @@ public class VoxelEngine {
 			}
 		}
 		
+		int[][][] vc22 = new int[32][32][32];
+		for (int i0 = 0; i0 < 20; i0++) {
+			for (int i1 = 0; i1 < 20; i1++) {
+				for (int i2 = 0; i2 < 32; i2++) {
+					vc22[i0][i1][i2] = 1;
+				}
+			}
+		}
+		
+		List<int[][][]> voxels2 = new ArrayList<>();
 		voxels2.add(vc2);
+		List<int[][][]> voxels22 = new ArrayList<>();
+		voxels22.add(vc22);
 		VoxelComponent c2 = new VoxelComponent(voxels2, materials2);
+		VoxelComponent c22 = new VoxelComponent(voxels22, materials2);
 		VoxelStructure s4 = new VoxelStructure();
 		s4.addComponent(c2, new Vec3f(0F, 0F, 0F), new Quaternion(new Vec3i(1, 0, 0), 0));
+		s4.addComponent(c22, new Vec3f(0F, 20F, 0F), new Quaternion(new Vec3i(1, 0, 0), 45));
 		level.addStructure(s4);
 		s4.setPosition(new Vec3f(0F, 40F, 0F));
 		
-
 		List<VoxelMaterial> materials3 = new ArrayList<>();
 		materials3.add(new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/dirt"), 1F));
 		List<int[][][]> voxels3 = new ArrayList<>();
@@ -336,18 +393,20 @@ public class VoxelEngine {
 		s5.addComponent(c3, new Vec3f(0F, 0F, 0F), new Quaternion(new Vec3i(1, 0, 0), 0));
 		level.addStructure(s5);
 		s5.setStatic(true);
-		s5.setPosition(new Vec3f(-20F, -80F, -40F));
+		s5.setPosition(new Vec3f(-20F, -80F, -20F));
 		
 		level.setGravity(new Vec3f(0F, -9.81F, 0F));
 		
-		openScreen(new ComponentEditorScreen(c3));
+		openScreen(new ComponentEditorScreen(c22));
 		
 	}
 	
 	// https://learnopengl.com/Advanced-OpenGL/Geometry-Shader
 	
 	private void frame(float partialTick) {
-		
+
+		this.gameRenderer.switchStage(RenderStage.UTIL);
+
 		if (clientReloadState == ReloadState.RELOAD_RENDER_THREAD) {
 			
 			try {
@@ -373,20 +432,22 @@ public class VoxelEngine {
 				clientReloadState = ReloadState.COMPLETED;
 				
 			} catch (Exception e) {
-				System.err.println("Failed to reload resources! " + e.getMessage());
-				e.printStackTrace();
+				Logger.defaultLogger().logWarn("Failed to reload resources! " + e.getMessage());
+				Logger.defaultLogger().printException(LogType.WARN, "assets", e);
 				clientReloadState = ReloadState.FAILED;
 			}
 			
 		}
-
-		this.gameRenderer.frameStart();
+		
+		this.gameRenderer.switchStage(RenderStage.LEVEL);
 		
 		if (this.level != null) this.gameRenderer.renderLevel(level, partialTick);
+
+		this.gameRenderer.switchStage(RenderStage.UI);
 		
 		if (this.screen != null) this.gameRenderer.renderScreen(this.screen, partialTick);
-
-		this.gameRenderer.renderAdditionalBufferedObjects(partialTick);
+		
+		this.gameRenderer.finishLastStage();
 		
 		mainWindow.glSwapFrames();
 		
@@ -416,6 +477,7 @@ public class VoxelEngine {
 		}
 		mainCamera.upadteViewMatrix();
 		
+		// Testing
 		if (GLFW.glfwGetKey(mainWindow.windowId(), GLFW.GLFW_KEY_P) == GLFW.GLFW_PRESS) level.tick();
 		
 	}

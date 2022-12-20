@@ -1,6 +1,7 @@
 #version 150
 
 in vec3 position; // Position of the voxel in 3D space
+in vec4 orientation; // Normal matrix of the voxel in 3D space
 in ivec3 voxel; // Position of the voxel in its component
 in uint sides; // Bitmap of the visibility of the six sides
 in vec4 color; // Color of the voxel
@@ -8,6 +9,7 @@ in vec4 texuv; // Position of the texture in the atlas (XY) and its width and he
 in ivec2 texsize; // Size of the texture in pixels
 
 out VS_OUT {
+	vec4 orientation;
 	ivec3 voxel;
 	uint sides;
 	vec4 color;
@@ -20,6 +22,7 @@ out VS_OUT {
 void main() {
 	
 	gl_Position = vec4(position, 1.0);
+	vs_out.orientation = orientation;
 	vs_out.voxel = voxel;
 	vs_out.sides = sides;
 	vs_out.color = color;

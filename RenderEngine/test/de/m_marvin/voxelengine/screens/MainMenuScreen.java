@@ -29,8 +29,6 @@ public class MainMenuScreen extends ScreenUI {
 		float rx2 = 100;
 		float ty = size.y;
 		
-		System.out.println(poseStack.last().pose());
-		
 		BufferBuilder buffer = VoxelEngine.getInstance().getGameRenderer().getBufferSource().startBuffer(RenderType.screen());
 		buffer.vertex(poseStack, lx, by).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();
 		buffer.vertex(poseStack, rx1, by).color(0, 0, 0, 0.6F).uv(0, 0).endVertex();

@@ -33,6 +33,8 @@ import de.m_marvin.renderengine.resources.ResourceLoader;
 import de.m_marvin.renderengine.textures.AbstractTextureMap;
 import de.m_marvin.renderengine.textures.AtlasTextureMap;
 import de.m_marvin.renderengine.textures.SingleTextureMap;
+import de.m_marvin.simplelogging.printing.LogType;
+import de.m_marvin.simplelogging.printing.Logger;
 
 /**
  * Handles the loading of textures from files.
@@ -100,8 +102,8 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		try {
 			buildSingleMapsFromTextures0(textureFolderLocation);
 		} catch (IOException e) {
-			System.err.println("Failed to read some of the textures in " + textureFolderLocation);
-			e.printStackTrace();
+			Logger.defaultLogger().logWarn("Failed to read some of the textures in " + textureFolderLocation);
+			Logger.defaultLogger().printException(LogType.WARN, e);
 		}
 	}
 	
@@ -122,8 +124,8 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		try {
 			buildAtlasMapFromTexutes0(textureFolderLocation, atlasName, prioritizeAtlasHeight, selectInterpolatedTextures);
 		} catch (IOException e) {
-			System.err.println("Failed to read some of the textures in " + textureFolderLocation);
-			e.printStackTrace();
+			Logger.defaultLogger().logWarn("Failed to read some of the textures in " + textureFolderLocation);
+			Logger.defaultLogger().printException(LogType.WARN, e);
 		}
 	}
 	
@@ -149,8 +151,8 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 				this.textureMapNames.add(locationName);
 				
 			} catch (FileNotFoundException e) {
-				System.err.println("Warning: A texture could not be loaded!");
-				e.printStackTrace();	
+				Logger.defaultLogger().logWarn("Warning: A texture could not be loaded!");
+				Logger.defaultLogger().printException(LogType.WARN, e);	
 			}
 			
 		}
@@ -215,8 +217,8 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 				}
 					
 			} catch (FileNotFoundException e) {
-				System.err.println("Warning: A texture could not be loaded!");
-				e.printStackTrace();	
+				Logger.defaultLogger().logWarn("Warning: A texture could not be loaded!");
+				Logger.defaultLogger().printException(LogType.WARN, e);	
 			}
 			
 		}
@@ -342,7 +344,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	@SuppressWarnings("unchecked")
 	public AbstractTextureMap<R> getTextureMap(R resourceLocation) {
 		if (!this.textureCache.containsKey(resourceLocation)) {
-			System.err.println("Texture " + resourceLocation + " does not exist!");
+			Logger.defaultLogger().logWarn("Texture " + resourceLocation + " does not exist!");
 			this.textureCache.put(resourceLocation, (AbstractTextureMap<R>) INVALID_TEXTURE_FALLBACK.get());
 		}
 		AbstractTextureMap<R> texture = this.textureCache.get(resourceLocation);

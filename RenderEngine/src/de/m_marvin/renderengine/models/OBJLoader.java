@@ -15,6 +15,8 @@ import de.m_marvin.renderengine.resources.IClearableLoader;
 import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.resources.ResourceLoader;
+import de.m_marvin.simplelogging.printing.LogType;
+import de.m_marvin.simplelogging.printing.Logger;
 import de.m_marvin.univec.impl.Vec2f;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
@@ -61,8 +63,8 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 		try {
 			loadModelsIn0(modelFolderLocation, textureFolderLocation);
 		} catch (IOException e) {
-			System.err.println("Failed to load some of the shaders from " + modelFolderLocation.toString() + "!");
-			e.printStackTrace();
+			Logger.defaultLogger().logWarn("Failed to load some of the shaders from " + modelFolderLocation.toString() + "!");
+			Logger.defaultLogger().printException(LogType.WARN, e);
 		}
 	}
 	
@@ -80,7 +82,7 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 			
 			R locationName = modelFolderLocation.locationOfFile(modelName);
 			if (loadModel(locationName, textureFolderLocation) == null) {
-				System.err.println("Failed to load model '" + modelName + "'!");
+				Logger.defaultLogger().logWarn("Failed to load model '" + modelName + "'!");
 			}
 			
 		}
@@ -142,8 +144,8 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 				RawModel<R> model = load(modelPath, textureFolderLocation);
 				this.modelCache.put(modelLocation, model);
 			} catch (IOException e) {
-				System.err.println("Failed to load model " + modelLocation);
-				e.printStackTrace();
+				Logger.defaultLogger().logWarn("Failed to load model " + modelLocation);
+				Logger.defaultLogger().printException(LogType.WARN, e);
 			}
 		}
 		return this.modelCache.get(modelLocation);

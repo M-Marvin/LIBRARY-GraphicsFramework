@@ -11,6 +11,7 @@ import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.renderengine.textures.atlasbuilding.MultiFrameAtlasLayoutBuilder;
 import de.m_marvin.renderengine.textures.atlasbuilding.MultiFrameAtlasLayoutBuilder.AtlasFrameLayout;
 import de.m_marvin.renderengine.textures.atlasbuilding.MultiFrameAtlasLayoutBuilder.AtlasMultiFrameLayout;
+import de.m_marvin.simplelogging.printing.Logger;
 import de.m_marvin.univec.impl.Vec4f;
 
 /**
@@ -159,7 +160,7 @@ public class AtlasTextureMap<R extends IResourceProvider<R>> extends AbstractTex
 		if (location2uv.containsKey(textureLoc)) {
 			activeTexture = textureLoc;
 		} else {
-			System.err.println("The texture '" + textureLoc + "' does not exist in the atlas!");
+			Logger.defaultLogger().logWarn("The texture '" + textureLoc + "' does not exist in the atlas!");
 			activeTexture = null;
 		}
 	}

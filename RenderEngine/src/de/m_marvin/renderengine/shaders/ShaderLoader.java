@@ -25,6 +25,8 @@ import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.resources.ResourceLoader;
 import de.m_marvin.renderengine.utility.NumberFormat;
 import de.m_marvin.renderengine.vertices.VertexFormat;
+import de.m_marvin.simplelogging.printing.LogType;
+import de.m_marvin.simplelogging.printing.Logger;
 
 /**
  * Handles the loading of shaders from files.
@@ -73,8 +75,8 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 		try {
 			loadShadersIn0(shaderFolderLocation, libFolderLocation);
 		} catch (IOException e) {
-			System.err.println("Failed to load some of the shaders from " + shaderFolderLocation.toString() + "!");
-			e.printStackTrace();
+			Logger.defaultLogger().logWarn("Failed to load some of the shaders from " + shaderFolderLocation.toString() + "!");
+			Logger.defaultLogger().printException(LogType.WARN, e);
 		}
 	}
 	
@@ -138,8 +140,8 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 			try {
 				shaderCache.put(shaderName, load(path, libFolder, format));
 			} catch (IOException e) {
-				System.err.println("Failed to load shader " + shaderLocation.toString());
-				e.printStackTrace();
+				Logger.defaultLogger().logWarn("Failed to load shader " + shaderLocation.toString());
+				Logger.defaultLogger().printException(LogType.WARN, e);
 				return null;
 			}
 		}
@@ -202,6 +204,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 					String name = elementJson.get("Name").getAsString();
 					NumberFormat format = NumberFormat.byName(elementJson.get("Type").getAsString());
 					int count = elementJson.get("Count").getAsInt();
+					if (count > 4) throw new IllegalArgumentException("Failed to parse shader json '" + shaderFile.getName() +"': A attribute can not be larger than 4. Larger attributes should be split up into multiple attributes directly behind each other.");
 					boolean normalize = elementJson.get("Normalize").getAsBoolean();
 					
 					attributeFormat.appand(name, format, count, normalize);

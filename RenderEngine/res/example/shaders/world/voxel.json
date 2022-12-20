@@ -6,7 +6,6 @@
 		{ "Name": "ViewMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
 		{ "Name": "ProjMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
 		{ "Name": "TranMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
-		{ "Name": "VoxelMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
 		{ "Name": "AnimMat", "Type": "matrix3x3", "Value": [ 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0 ] },
 		{ "Name": "AnimMatLast", "Type": "matrix3x3", "Value": [ 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0 ] },
 		{ "Name": "Texture", "Type": "sampler2D", "Value": 0 },
@@ -15,6 +14,7 @@
 	],
 	"Attributes": [
 		{ "Name": "position", "Type": "float", "Count": 3, "Normalize": false },
+		{ "Name": "orientation", "Type": "float", "Count": 4, "Normalize": true },
 		{ "Name": "voxel", "Type": "int", "Count": 3, "Normalize": false },
 		{ "Name": "sides", "Type": "uint", "Count": 1, "Normalize": false },
 		{ "Name": "color", "Type": "float", "Count": 4, "Normalize": false },

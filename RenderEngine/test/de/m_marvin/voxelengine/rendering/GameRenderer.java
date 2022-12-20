@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 
-import com.google.common.collect.Queues;
-
 import de.m_marvin.openui.ScreenUI;
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
@@ -18,7 +16,6 @@ import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec3f;
-import de.m_marvin.univec.impl.Vec3i;
 import de.m_marvin.univec.impl.Vec4f;
 import de.m_marvin.voxelengine.VoxelEngine;
 import de.m_marvin.voxelengine.rendering.LevelRender.StructureRender;
@@ -28,51 +25,61 @@ import de.m_marvin.voxelengine.world.VoxelMaterial;
 import de.m_marvin.voxelengine.world.VoxelStructure;
 
 public class GameRenderer {
-
-	public static final ResourceLocation VOXEL_SHADER = new ResourceLocation("example:world/voxelShader");
 	
 	public float fov;
 	protected Matrix4f projectionMatrix;
 	protected BufferSource bufferSource;
-	protected Queue<Runnable> renderCallQueue;
-	
-	protected LevelRender levelRender;
+	protected RenderStage activeRenderStage;
 	
 	public GameRenderer(int initialBufferSize) {
-		this.renderCallQueue = Queues.newArrayDeque();
+		this.activeRenderStage = null;
 		this.bufferSource = new BufferSource(initialBufferSize);
 		this.levelRender = new LevelRender();
 	}
-
+	
 	public BufferSource getBufferSource() {
 		return this.bufferSource;
+	}
+	
+	public static void executeOnRenderStage(RenderStage renderStage, boolean postStageExecution, Runnable runnable) {
+		Queue<Runnable> taskQueue = postStageExecution ? renderStage.postExecQueue : renderStage.preExecQueue;
+		taskQueue.add(runnable);
+	}
+	
+	public void switchStage(RenderStage stage) {
+		if (activeRenderStage != stage) {
+			if (activeRenderStage != null) while (activeRenderStage.postExecQueue.size() > 0) activeRenderStage.postExecQueue.poll().run();
+			activeRenderStage = stage;
+			while (activeRenderStage.preExecQueue.size() > 0) activeRenderStage.preExecQueue.poll().run();
+		}
+	}
+	
+	public void finishLastStage() {
+		if (activeRenderStage != null) {
+			while (activeRenderStage.postExecQueue.size() > 0) activeRenderStage.postExecQueue.poll().run();
+			activeRenderStage = null;
+		}
 	}
 	
 	public void updatePerspective() {
 		int[] windowSize = VoxelEngine.getInstance().getMainWindow().getSize();
 		this.projectionMatrix = Matrix4f.perspective(this.fov, windowSize[0] / (float) windowSize[1], 1, 1000);
-		executeOnRenderThread(() -> GLStateManager.resizeViewport(0, 0, windowSize[0], windowSize[1]));
-	}
-	
-	public void resetRenderCache() {
-		this.levelRender.discard();
-		this.shaderStreamBuffer.discard();
-	}
-	
-	public void executeOnRenderThread(Runnable runnable) {
-		this.renderCallQueue.add(runnable);
-	}
-	
-	public void frameStart() {
-		while (this.renderCallQueue.size() > 0) this.renderCallQueue.poll().run();
-	}
-	
-	public ResourceLocation getScreenShader() {
-		return new ResourceLocation("example:misc/screen");
+		executeOnRenderStage(RenderStage.UTIL, false, () -> GLStateManager.resizeViewport(0, 0, windowSize[0], windowSize[1]));
 	}
 	
 	public Matrix4f getProjectionMatrix() {
 		return projectionMatrix;
+	}
+
+	public void resetRenderCache() {
+		this.levelRender.discard();
+		this.shaderStreamBuffer.discard();
+	}
+
+	/* Begin of render functions */
+	
+	public ResourceLocation getScreenShader() {
+		return new ResourceLocation("example:misc/screen");
 	}
 	
 	protected VertexBuffer shaderStreamBuffer = new VertexBuffer();
@@ -129,7 +136,9 @@ public class GameRenderer {
 		return new ResourceLocation(VoxelEngine.NAMESPACE, "world/voxel");
 	}
 	
+	public static final ResourceLocation VOXEL_SHADER = new ResourceLocation("example:world/voxelShader");
 	public static final ResourceLocation MATERIAL_ATLAS = new ResourceLocation(VoxelEngine.NAMESPACE, "materials");
+	protected LevelRender levelRender;
 	
 	public void renderLevel(ClientLevel level, float partialTick) {
 		
@@ -205,10 +214,6 @@ public class GameRenderer {
 		
 	}
 	
-	public void renderAdditionalBufferedObjects(float partialTick) {
-		
-	}
-	
 	public static void drawStructure(ShaderInstance shader, BufferSource bufferSource, PoseStack poseStack, VoxelStructure structure, float r, float g, float b, float a) {
 		
 		for (RenderType renderLayer : RenderType.voxelRenderLayers()) {
@@ -219,15 +224,10 @@ public class GameRenderer {
 			structure.getComponents().forEach((structureComponent) -> {
 				
 				poseStack.push();
-				poseStack.translate(structureComponent.position.x, structureComponent.position.y, structureComponent.position.z);
+				poseStack.translate(structureComponent.position);
 				poseStack.rotate(structureComponent.orientation);
-				Vec3i[] aabb = structureComponent.component.getAabb();
-				Vec3i offset = aabb[0];//.sub(aabb[0]).div(2).add(aabb[0]);
-				poseStack.translate(offset);
 				
-				shader.getUniform("VoxelMat").setMatrix4f(poseStack.last().pose());
-				
-				drawComponent(buffer, renderLayer, structureComponent.component, r, g, b, a);
+				drawComponent(buffer, poseStack, renderLayer, structureComponent.component, r, g, b, a);
 				
 				poseStack.pop();
 				
@@ -239,10 +239,14 @@ public class GameRenderer {
 		
 	}
 	
-	public static void drawComponent(BufferBuilder buffer, RenderType renderLayer, VoxelComponent component, float r, float g, float b, float a) {
+	public static void drawComponent(BufferBuilder buffer, PoseStack poseStack, RenderType renderLayer, VoxelComponent component, float r, float g, float b, float a) {
 		
 		AbstractTextureMap<ResourceLocation> texture = VoxelEngine.getInstance().getTextureLoader().getTextureMap(MATERIAL_ATLAS);
 		List<int[][][]> voxelGroups = component.getVoxels();
+		Quaternion orientation = Quaternion.fromOrientationMatrix(poseStack.last().normal());
+		
+		poseStack.push();
+		poseStack.translate(component.getCenterOfShape().mul(-1F));
 		
 		for (int[][][] voxels : voxelGroups) {
 			for (int x = 0; x < voxels.length; x++) {
@@ -253,7 +257,7 @@ public class GameRenderer {
 						int voxelId = voxelRow[z];
 						
 						if (voxelId > 0) {
-
+							
 							byte sideState = 0;
 							if (z > 0 ? voxels[x][y][z - 1] == 0 : true)						sideState += 1; // North
 							if (z < voxelRow.length - 1 ? voxels[x][y][z + 1] == 0 : true)		sideState += 2; // South
@@ -272,7 +276,7 @@ public class GameRenderer {
 								int texWidth = (int) (texture.getImageWidth() * material.pixelScale());
 								int texHeight = (int) (texture.getImageHeight() * material.pixelScale());
 								
-								buffer.vertex(x, y, z).vec3i(x, y, z).nextElement().putInt(sideState).color(r, g, b, a).vec4f(texUV.x, texUV.y, texUV.z, texUV.w).vec2i(texWidth, texHeight).endVertex();
+								buffer.vertex(poseStack, x, y, z).quatf(orientation).vec3i(x, y, z).nextElement().putInt(sideState).color(r, g, b, a).vec4f(texUV.x, texUV.y, texUV.z, texUV.w).vec2i(texWidth, texHeight).endVertex();
 								
 							}
 							
@@ -282,6 +286,8 @@ public class GameRenderer {
 				}
 			}
 		}
+		
+		poseStack.pop();
 		
 	}
 	

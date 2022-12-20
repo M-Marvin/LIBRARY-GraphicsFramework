@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.m_marvin.simplelogging.printing.Logger;
 import de.m_marvin.univec.impl.Vec2i;
 
 /**
@@ -244,7 +245,7 @@ public class AtlasLayoutBuilder<T> {
 
 			// Could not place all images, something must be wrong!
 			System.err.println("Remaining images " + this.atlasImages.size() + ", Paste-Points " + pastePoints.size());
-			this.atlasImages.forEach((image) -> System.err.println("Remaining image >  " + image));
+			this.atlasImages.forEach((image) -> Logger.defaultLogger().logWarn("Remaining image >  " + image));
 			throw new IllegalStateException("Could not place all images in the layout, maybe to large differences in the image formats?");
 			
 		}

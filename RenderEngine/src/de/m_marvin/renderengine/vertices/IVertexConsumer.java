@@ -1,10 +1,13 @@
 package de.m_marvin.renderengine.vertices;
 
+import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.textures.IUVModifyer;
 import de.m_marvin.renderengine.translation.PoseStack;
+import de.m_marvin.unimat.api.IMatrix3f;
+import de.m_marvin.unimat.api.IMatrix4f;
+import de.m_marvin.unimat.api.IQuaternion;
 import de.m_marvin.univec.api.IVector3;
 import de.m_marvin.univec.api.IVector4;
-import de.m_marvin.univec.impl.Vec2f;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec4f;
 
@@ -124,8 +127,51 @@ public interface IVertexConsumer {
 	public default IVertexConsumer uv(float u, float v) {
 		return vec2f(u, v);
 	}
-		
+
 	/* Predefined layouts for common data types attributes */
+
+	/**
+	 * Predefined layout for a mat4x4 float attribute.
+	 * @param m The 4x4 matrix
+	 * @return This consumer to apply more draw calls
+	 */
+	public default IVertexConsumer mat4f(IMatrix4f<?> m) {
+		vec4f(m.m00(), m.m01(), m.m02(), m.m03());
+		vec4f(m.m10(), m.m11(), m.m12(), m.m13());
+		vec4f(m.m20(), m.m21(), m.m22(), m.m23());
+		vec4f(m.m30(), m.m31(), m.m32(), m.m33());
+		return this;
+	}
+
+	/**
+	 * Predefined layout for a mat3x3 float attribute.
+	 * @param m The 3x3 matrix
+	 * @return This consumer to apply more draw calls
+	 */
+	public default IVertexConsumer mat3f(IMatrix3f<?> m) {
+		vec3f(m.m00(), m.m01(), m.m02());
+		vec3f(m.m10(), m.m11(), m.m12());
+		vec3f(m.m20(), m.m21(), m.m22());
+		return this;
+	}
+
+	/**
+	 * Predefined layout for a quaternion float attribute.
+	 * @param m The 3x3 matrix
+	 * @return This consumer to apply more draw calls
+	 */
+	public default IVertexConsumer quatf(IQuaternion<?> q) {
+		return quat(q.i(), q.j(), q.k(), q.r());
+	}
+
+	/**
+	 * Predefined layout for a quaternion float attribute.
+	 * @param m The 3x3 matrix
+	 * @return This consumer to apply more draw calls
+	 */
+	public default IVertexConsumer quat(float i, float j, float k, float r) {
+		return vec4f(i, j, k, r);
+	}
 	
 	/**
 	 * Predefined layout for a vec2 float attribute.

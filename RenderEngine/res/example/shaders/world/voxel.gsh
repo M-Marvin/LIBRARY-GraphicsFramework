@@ -5,7 +5,6 @@
 uniform mat4 ViewMat;
 uniform mat4 ProjMat;
 uniform mat4 TranMat;
-uniform mat4 VoxelMat;
 uniform mat3 AnimMat;
 uniform mat3 AnimMatLast;
 uniform float HalfVoxelSize;
@@ -13,6 +12,7 @@ uniform float HalfVoxelSize;
 layout (points) in;
 
 in VS_OUT {
+	vec4 orientation;
 	ivec3 voxel;
 	uint sides;
 	vec4 color;
@@ -33,11 +33,12 @@ out GS_OUT {
 // Creating a single vertex of a voxel-side
 
 vec4 transform(vec4 vector) {
-	return (VoxelMat * ProjMat * ViewMat * TranMat) * vector;
+	return (ProjMat * ViewMat * TranMat) * vector;
 }
 
 void makeQuadVertex(vec2 textureUV, vec3 offset) {
-	gl_Position = transform(gl_in[0].gl_Position + vec4(offset.x * HalfVoxelSize, offset.y * HalfVoxelSize, offset.z * HalfVoxelSize, 0));
+	vec3 offsetRotated = transformByQuat(offset * HalfVoxelSize, gs_in[0].orientation);
+	gl_Position = transform(gl_in[0].gl_Position + vec4(offsetRotated.xyz, 0));
 	gs_out.uv = translateVec2(textureUV, AnimMat);
 	gs_out.uvLast = translateVec2(textureUV, AnimMatLast);
 	gs_out.color = gs_in[0].color;
