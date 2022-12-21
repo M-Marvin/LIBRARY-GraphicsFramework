@@ -6,6 +6,7 @@ import de.m_marvin.openui.ScreenAligment;
 import de.m_marvin.openui.ScreenUI;
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
+import de.m_marvin.renderengine.buffers.BufferSource;
 import de.m_marvin.renderengine.buffers.BufferUsage;
 import de.m_marvin.renderengine.buffers.VertexBuffer;
 import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
@@ -18,7 +19,6 @@ import de.m_marvin.univec.impl.Vec2f;
 import de.m_marvin.univec.impl.Vec2i;
 import de.m_marvin.univec.impl.Vec3i;
 import de.m_marvin.voxelengine.VoxelEngine;
-import de.m_marvin.voxelengine.rendering.BufferSource;
 import de.m_marvin.voxelengine.rendering.GameRenderer;
 import de.m_marvin.voxelengine.rendering.RenderStage;
 import de.m_marvin.voxelengine.rendering.RenderType;
@@ -44,6 +44,7 @@ public class ComponentEditorScreen extends ScreenBase {
 			
 			BufferBuilder buffer = VoxelEngine.getInstance().getGameRenderer().getBufferSource().startBuffer(RenderType.screen());
 			drawRectangle(buffer, poseStack, 0, 0, windowSize.x, 40, 0, 0, 0, 0.6F);
+			drawRectangle(buffer, poseStack, 0, 0, windowSize.x, windowSize.y, 0, 0, 0, 0.6F);
 			buffer.end();
 		}
 		
@@ -58,7 +59,18 @@ public class ComponentEditorScreen extends ScreenBase {
 	}
 	
 	@Override
+	public void tick() {
+		
+		//VoxelEngine.getInstance().getInputHandler().m
+		
+	}
+	
+	@Override
 	public void drawAdditionalContent(PoseStack poseStack, float partialTicks) {
+		
+//		BufferBuilder screenBuffer = VoxelEngine.getInstance().getGameRenderer().getBufferSource().startBuffer(RenderType.screen());
+//		drawRectangle(screenBuffer, poseStack, 0, 0, windowSize.x, windowSize.y, 0, 0, 0, 0.6F);
+//		screenBuffer.end();
 		
 		GameRenderer.executeOnRenderStage(RenderStage.UI, true, () -> {
 			

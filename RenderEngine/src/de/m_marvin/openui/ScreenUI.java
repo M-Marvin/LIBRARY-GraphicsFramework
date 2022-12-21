@@ -55,8 +55,8 @@ public abstract class ScreenUI {
 		
 		Vec2f aligningOffst = this.aligment.getOffset(this.size, this.windowSize);
 		
-		poseStack.translate(- size.x / 2 + aligningOffst.x, -size.y / 2 + aligningOffst.y, 0);
 		poseStack.scale(scaleX * 2, -scaleY * 2, 1);
+		poseStack.translate(- size.x / 2 + aligningOffst.x, -size.y / 2 + aligningOffst.y, 0);
 		
 	}
 	
@@ -79,7 +79,7 @@ public abstract class ScreenUI {
 	public void removeSubScreen(ScreenUI screen) {
 		this.subScreens.remove(screen);
 	}
-
+	
 	public void onOpen() {
 		this.subScreens.forEach(ScreenUI::onOpen);
 	}
@@ -88,6 +88,8 @@ public abstract class ScreenUI {
 	}
 
 	public abstract void drawAdditionalContent(PoseStack poseStack, float partialTick);
+
+	public void tick() {}
 	
 	public void drawScreen(PoseStack poseStack, int windowWidth, int windowHeight, float partialTick) {
 
@@ -110,6 +112,14 @@ public abstract class ScreenUI {
 		poseStack.pop();
 		
 		this.subScreens.forEach(screen -> screen.drawScreen(poseStack, windowWidth, windowHeight, partialTick));
+		
+	}
+	
+	public void update() {
+		
+		tick();
+		this.uiElements.forEach((element) -> element.tick());
+		this.subScreens.forEach(screen -> screen.update());
 		
 	}
 	

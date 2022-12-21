@@ -12,6 +12,7 @@ public interface IUIElement {
 	public void draw(PoseStack poseStack);
 	public boolean isOverElement(Vec2i coursorPosition);
 	
-	public default void onHover(HoverEvent event, Vec2i coursorPosition) {};
+	public default void onHover(HoverEvent event, Vec2i coursorPosition) {}
+	public default void tick() {}
 	
 }

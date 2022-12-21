@@ -477,6 +477,8 @@ public class VoxelEngine {
 		}
 		mainCamera.upadteViewMatrix();
 		
+		if (this.screen != null) this.screen.update();
+		
 		// Testing
 		if (GLFW.glfwGetKey(mainWindow.windowId(), GLFW.GLFW_KEY_P) == GLFW.GLFW_PRESS) level.tick();
 		

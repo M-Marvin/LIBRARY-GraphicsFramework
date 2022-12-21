@@ -7,6 +7,7 @@ import java.util.Queue;
 import de.m_marvin.openui.ScreenUI;
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
+import de.m_marvin.renderengine.buffers.BufferSource;
 import de.m_marvin.renderengine.buffers.BufferUsage;
 import de.m_marvin.renderengine.buffers.VertexBuffer;
 import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
