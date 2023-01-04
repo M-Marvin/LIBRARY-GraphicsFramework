@@ -20,6 +20,7 @@ import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
 import de.m_marvin.renderengine.shaders.ShaderLoader;
 import de.m_marvin.renderengine.textures.utility.TextureLoader;
 import de.m_marvin.renderengine.translation.Camera;
+import de.m_marvin.renderengine.utility.VoxelComponentLoader;
 import de.m_marvin.renderengine.windows.Window;
 import de.m_marvin.simplelogging.filehandling.LogFileHandler;
 import de.m_marvin.simplelogging.printing.LogType;
@@ -32,6 +33,7 @@ import de.m_marvin.voxelengine.rendering.RenderStage;
 import de.m_marvin.voxelengine.rendering.RenderType;
 import de.m_marvin.voxelengine.resources.ReloadState;
 import de.m_marvin.voxelengine.screens.ComponentEditorScreen;
+import de.m_marvin.voxelengine.utility.SimpleLoader;
 import de.m_marvin.voxelengine.world.ClientLevel;
 import de.m_marvin.voxelengine.world.VoxelComponent;
 import de.m_marvin.voxelengine.world.VoxelMaterial;
@@ -45,7 +47,7 @@ public class VoxelEngine {
 
 		// Start new logger
 		try {
-			logFileHandler = new LogFileHandler(new File(new File(ResourceLoader.getRuntimeFolder()).getParentFile().getParentFile(), "logs"), "EngineTest");
+			logFileHandler = new LogFileHandler(new File(new File(ResourceLoader.getRuntimeFolder()).getParentFile().getParentFile(), "run/logs"), "EngineTest");
 			Logger logger = logFileHandler.beginLogging();
 			Logger.setDefaultLogger(logger);
 		} catch (IOException e) {
@@ -90,6 +92,8 @@ public class VoxelEngine {
 	protected OBJLoader<ResourceLocation, ResourceFolders> modelLoader;
 	protected ReloadState clientReloadState;
 	
+	protected VoxelComponentLoader<ResourceLocation, ResourceFolders> voxelLoader;
+	
 	protected UserInput inputHandler;
 	protected Window mainWindow;
 	// Time in milliseconds
@@ -124,6 +128,9 @@ public class VoxelEngine {
 		textureLoader = new TextureLoader<ResourceLocation, ResourceFolders>(ResourceFolders.TEXTURES, resourceLoader);
 		modelLoader = new OBJLoader<ResourceLocation, ResourceFolders>(ResourceFolders.MODELS, resourceLoader);
 		clientReloadState = ReloadState.RELOAD_RENDER_THREAD;
+		
+		// Setup additional loaders
+		voxelLoader = new VoxelComponentLoader<ResourceLocation, ResourceFolders>(ResourceFolders.VOXELS, resourceLoader);
 		
 		// Setup and loop timings
 		tickTime = 20; // 50 TPS
@@ -318,6 +325,7 @@ public class VoxelEngine {
 		inputHandler.registerBinding("movement.orientate").addBinding(KeySource.getKey(GLFW.GLFW_KEY_LEFT_ALT));
 		inputHandler.registerBinding("physic.activate").addBinding(KeySource.getKey(GLFW.GLFW_KEY_P));
 		inputHandler.registerBinding("misc.click.primary").addBinding(MouseSource.getKey(GLFW.GLFW_MOUSE_BUTTON_1));
+		inputHandler.registerBinding("misc.editor.camera").addBinding(MouseSource.getKey(GLFW.GLFW_MOUSE_BUTTON_1));
 		
 		// Setup world
 		level = new ClientLevel();
@@ -397,7 +405,7 @@ public class VoxelEngine {
 		
 		level.setGravity(new Vec3f(0F, -9.81F, 0F));
 		
-		openScreen(new ComponentEditorScreen(c22));
+		openScreen(new ComponentEditorScreen(c));
 		
 	}
 	
@@ -487,12 +495,12 @@ public class VoxelEngine {
 	public void openScreen(ScreenUI screen) {
 		closeScreen();
 		this.screen = screen;
-		this.screen.onOpen();
+		this.screen.onOpen(this.inputHandler);
 	}
 	
 	public void closeScreen() {
 		if (this.screen != null) {
-			this.screen.onClose();
+			this.screen.onClose(this.inputHandler);
 			this.screen = null;
 		}
 	}

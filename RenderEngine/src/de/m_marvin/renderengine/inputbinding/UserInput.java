@@ -33,6 +33,7 @@ public class UserInput {
 	protected List<KeyEventConsumer> keyboardListeners = new ArrayList<>();
 	protected List<MouseEventConsumer> mouseListeners = new ArrayList<>();
 	protected List<TextInputConsumer> textInputListeners = new ArrayList<>();
+	protected List<CursorEventConsumer> cursorListeners = new ArrayList<>();
 	
 	/**
 	 * Creates a new user-input class to store key-bindings and event-listeners.
@@ -128,7 +129,12 @@ public class UserInput {
 	public static interface TextInputConsumer {
 		public void input(char character, Optional<FunctionalKey> functionalKey);
 	}
-
+	
+	@FunctionalInterface
+	public static interface CursorEventConsumer {
+		public void cursorMove(Vec2d position, boolean entered, boolean leaved);
+	}
+	
 	/* End of functional interfaces for the Events */
 	
 	/**
@@ -156,6 +162,15 @@ public class UserInput {
 	public void addMouseListener(MouseEventConsumer eventConsumer) {
 		this.mouseListeners.add(eventConsumer);
 	}
+
+	/**
+	 * Register a new listener for the mouse-move event.
+	 * The event is fired if the cursor enters or leaves the window, and if it gets moved around.
+	 * @param eventConsumer The consumer of the event
+	 */
+	public void addCursorListener(CursorEventConsumer eventConsumer) {
+		this.cursorListeners.add(eventConsumer);
+	}
 	
 	/**
 	 * Removes a listener from the mouse-key event.
@@ -163,6 +178,14 @@ public class UserInput {
 	 */
 	public void removeMouseListener(MouseEventConsumer eventConsumer) {
 		this.mouseListeners.remove(eventConsumer);
+	}
+
+	/**
+	 * Removes a listener from the mouse-move event.
+	 * @param eventConsumer The consumer to remove from the event
+	 */
+	public void removeCursorListener(CursorEventConsumer eventConsumer) {
+		this.cursorListeners.remove(eventConsumer);
 	}
 
 	/**
@@ -204,9 +227,12 @@ public class UserInput {
 	 */
 	public void detachWindow(long windowId) {
 		this.attachedWindows.remove(windowId);
-		GLFW.glfwSetKeyCallback(windowId, null);		
-		GLFW.glfwSetMouseButtonCallback(windowId, null);		
+		GLFW.glfwSetKeyCallback(windowId, null);
+		GLFW.glfwSetMouseButtonCallback(windowId, null);
+		GLFW.glfwSetCursorPosCallback(windowId, null);
+		GLFW.glfwSetCursorEnterCallback(windowId, null);
 		GLFW.glfwSetScrollCallback(windowId, null);
+		GLFW.glfwSetCharCallback(windowId, null);
 	}
 	
 	/**
@@ -217,9 +243,10 @@ public class UserInput {
 		this.attachedWindows.add(windowId);
 		GLFW.glfwSetKeyCallback(windowId, (window, key, scancode, action, mods) -> this.keyboardListeners.forEach((listener) -> listener.keyEvent(key, scancode, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
 		GLFW.glfwSetMouseButtonCallback(windowId, (window, button, action, mods) -> this.mouseListeners.forEach((listener) -> listener.mouseEvent(Optional.empty(), button, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
+		GLFW.glfwSetCursorPosCallback(windowId, (window, xpos, ypos) -> this.cursorListeners.forEach((listener) -> listener.cursorMove(new Vec2d(xpos, ypos), false, false)));
+		GLFW.glfwSetCursorEnterCallback(windowId, (window, entered) -> this.cursorListeners.forEach((listener) -> listener.cursorMove(getCursorPosition(windowId), entered, !entered)));
 		GLFW.glfwSetScrollCallback(windowId, (window, xoffset, yoffset) ->  this.mouseListeners.forEach((listener) -> listener.mouseEvent(Optional.of(new Vec2d(xoffset, yoffset)), 0, false, false)));		
 		GLFW.glfwSetCharCallback(windowId, (window, codepoint) -> this.textInputListeners.forEach((listener) -> listener.input((char) codepoint, Optional.empty())));
-		
 	}
 	
 	/**
@@ -249,7 +276,7 @@ public class UserInput {
 	 */
 	public boolean isBindingActive(String name) {
 		Optional<InputSet> binding = getBinding(name);
-		if (binding.isPresent()) {
+		if (binding.isPresent() && this.bindingsState.containsKey(name)) {
 			return this.bindingsState.get(name);
 		}
 		return false;
@@ -282,6 +309,17 @@ public class UserInput {
 	 */
 	public boolean isNumLockOn() {
 		return Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_NUM_LOCK);
+	}
+
+	/**
+	 * Returns the position of the cursor.
+	 * @return A Vec2d with the position of the cursor
+	 */
+	public Vec2d getCursorPosition(long windowId) {
+		double[] x = new double[1];
+		double[] y = new double[1];
+		GLFW.glfwGetCursorPos(windowId, x, y);
+		return new Vec2d(x[0], y[0]);
 	}
 	
 }

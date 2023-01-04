@@ -2,8 +2,13 @@ package de.m_marvin.openui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import de.m_marvin.renderengine.buffers.BufferBuilder;
+import de.m_marvin.renderengine.inputbinding.UserInput;
+import de.m_marvin.renderengine.inputbinding.UserInput.FunctionalKey;
 import de.m_marvin.renderengine.translation.PoseStack;
+import de.m_marvin.univec.impl.Vec2d;
 import de.m_marvin.univec.impl.Vec2f;
 import de.m_marvin.univec.impl.Vec2i;
 
@@ -14,6 +19,7 @@ public abstract class ScreenUI {
 	protected Vec2f windowSize;
 	protected List<ScreenUI> subScreens = new ArrayList<>();
 	protected List<IUIElement> uiElements = new ArrayList<>();
+	protected UserInput input;
 	
 	public ScreenUI(Vec2i size, IScreenAligner aligment) {
 		this.size = size;
@@ -80,17 +86,27 @@ public abstract class ScreenUI {
 		this.subScreens.remove(screen);
 	}
 	
-	public void onOpen() {
-		this.subScreens.forEach(ScreenUI::onOpen);
+	public void onOpen(UserInput inputHandler) {
+		this.input = inputHandler;
+		inputHandler.addKeyboardListener(this::keyPressed);
+		inputHandler.addTextInputListener(this::textInput);
+		inputHandler.addMouseListener(this::mousePressed);
+		inputHandler.addCursorListener(this::mouseMove);
+		this.subScreens.forEach((s) -> s.onOpen(inputHandler));
 	}
-	public void onClose() {
-		this.subScreens.forEach(ScreenUI::onClose);
+	public void onClose(UserInput inputHandler) {
+		this.input = null;
+		inputHandler.removeKeyboardListener(this::keyPressed);
+		inputHandler.removeTextInputListener(this::textInput);
+		inputHandler.removeMouseListener(this::mousePressed);
+		inputHandler.removeCursorListener(this::mouseMove);
+		this.subScreens.forEach((s) -> s.onClose(inputHandler));
 	}
-
-	public abstract void drawAdditionalContent(PoseStack poseStack, float partialTick);
-
-	public void tick() {}
 	
+	public UserInput getInput() {
+		return input;
+	}
+
 	public void drawScreen(PoseStack poseStack, int windowWidth, int windowHeight, float partialTick) {
 
 		poseStack.push();
@@ -114,13 +130,72 @@ public abstract class ScreenUI {
 		this.subScreens.forEach(screen -> screen.drawScreen(poseStack, windowWidth, windowHeight, partialTick));
 		
 	}
-	
+
 	public void update() {
 		
 		tick();
 		this.uiElements.forEach((element) -> element.tick());
 		this.subScreens.forEach(screen -> screen.update());
 		
+	}
+	
+	
+	
+	
+	public void keyPressed(int key, int scancode, boolean pressed, boolean repeated) {}
+	public void textInput(char character, Optional<FunctionalKey> functionalKey) {}
+	public void mousePressed(Optional<Vec2d> scroll, int button, boolean pressed, boolean repeated) {}
+	public void mouseMove(Vec2d position, boolean entered, boolean leaved) {}
+	
+	public abstract void drawAdditionalContent(PoseStack poseStack, float partialTick);
+	public void tick() {}
+	
+	
+	
+	
+	public static void drawLine(BufferBuilder buffer, PoseStack poseStack, float x1, float y1, float x2, float y2, float w, float r, float g, float b, float a) {
+		float hlength = (float) Math.sqrt(Math.pow(Math.abs(x1 - x2), 2) + Math.pow(Math.abs(y1 - y2), 2));
+		float xlength = x1 - x2;
+		float ylength = y1 - y2;
+		float ox = ylength / hlength;
+		float oy = xlength / hlength;
+		buffer.vertex(poseStack, x1 + ox * w, y1 - oy * w).color(r, g, b, a).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, x1 - ox * w, y1 + oy * w).color(r, g, b, a).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, x2 - ox * w, y2 + oy * w).color(r, g, b, a).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, x2 + ox * w, y2 - oy * w).color(r, g, b, a).uv(0, 0).endVertex();
+	}
+	
+	public static void drawRectangle(BufferBuilder buffer, PoseStack poseStack, float topLeftX, float topLeftY, float width, float height, float r, float g, float b, float a) {
+		float lx = topLeftX;
+		float ty = topLeftY;
+		float rx = lx + width;
+		float by = ty + height;
+		buffer.vertex(poseStack, lx, ty).color(r, g, b, a).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, rx, ty).color(r, g, b, a).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, rx, by).color(r, g, b, a).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, lx, by).color(r, g, b, a).uv(0, 0).endVertex();
+	}
+
+	public static void drawRectangleTransitionH(BufferBuilder buffer, PoseStack poseStack, float topLeftX, float topLeftY, float width, float height, float r1, float g1, float b1, float a1, float r2, float g2, float b2, float a2) {
+		float lx = topLeftX;
+		float ty = topLeftY;
+		float rx = lx + width;
+		float by = ty + height;
+		buffer.vertex(poseStack, lx, ty).color(r2, g2, b2, a2).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, rx, ty).color(r2, g2, b2, a2).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, rx, by).color(r1, g1, b1, a1).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, lx, by).color(r1, g1, b1, a1).uv(0, 0).endVertex();
+	}
+
+	public static void drawRectangleTransitionV(BufferBuilder buffer, PoseStack poseStack, float topLeftX, float topLeftY, float width, float height, float r1, float g1, float b1, float a1, float r2, float g2, float b2, float a2) {
+		float lx = topLeftX;
+		float ty = topLeftY;
+		float rx = lx + width;
+		float by = ty + height;
+		buffer.vertex(poseStack, lx, ty).color(r1, g1, b1, a1).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, rx, ty).color(r2, g2, b2, a2).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, rx, by).color(r2, g2, b2, a2).uv(0, 0).endVertex();
+		buffer.vertex(poseStack, lx, by).color(r1, g1, b1, a1).uv(0, 0).endVertex();
 	}
 	
 }

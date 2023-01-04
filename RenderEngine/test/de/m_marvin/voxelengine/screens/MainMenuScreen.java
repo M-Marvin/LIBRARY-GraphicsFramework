@@ -42,18 +42,4 @@ public class MainMenuScreen extends ScreenUI {
 		buffer.end();
 	}
 	
-	@Override
-	public void onOpen() {
-		super.onOpen();
-		// TODO Auto-generated method stub
-		
-	}
-	
-	@Override
-	public void onClose() {
-		super.onClose();
-		// TODO Auto-generated method stub
-		
-	}
-	
 }
