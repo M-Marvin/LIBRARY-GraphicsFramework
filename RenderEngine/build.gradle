@@ -33,7 +33,7 @@ dependencies {
 	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
 	runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
 	
-	implementation 'com.github.M-Marvin:LIBRARY-UnifiedVectors:69802d83c4fbd9a872b9b9532af249070727f598'
+	implementation 'com.github.M-Marvin:LIBRARY-UnifiedVectors:0b57415baba864c5cedbd51913c8d084d0b73d39'
 	implementation 'com.github.M-Marvin:LIBRARY-SimpleLogging:6da9e66783af7dd5d60188bbfc09648fd35fbf60'
 	
 	implementation "com.google.code.gson:gson:2.9.1"

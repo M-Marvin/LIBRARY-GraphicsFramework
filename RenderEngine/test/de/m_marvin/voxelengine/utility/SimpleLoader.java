@@ -84,8 +84,29 @@ public abstract class SimpleLoader<R extends IResourceProvider<R>, FE extends IS
 		return cache.get(location);
 	}
 	
+	public boolean save(R location, T object) {
+		File path = resourceLoader.resolveLocation(sourceFolder, location);
+		try {
+			if (save(path, object)) {
+				cache.put(location, object);
+				return true;
+			} else {
+				Logger.defaultLogger().logWarn("Failed to save " + location.toString());
+				return false;
+			}
+		} catch (IOException e) {
+			Logger.defaultLogger().logWarn("Failed to save " + location.toString());
+			Logger.defaultLogger().printException(LogType.WARN, e);
+			return false;
+		}
+	}
+	
 	public T get(R name) {
 		return activeLoading ? load(name) : this.cache.get(name);
+	}
+	
+	public void store(R name, T object) {
+		save(name, object);
 	}
 	
 	public Set<R> getCached() {
@@ -93,5 +114,6 @@ public abstract class SimpleLoader<R extends IResourceProvider<R>, FE extends IS
 	}
 	
 	public abstract T load(File path) throws IOException;
+	public abstract boolean save(File path, T object) throws IOException;
 	
 }

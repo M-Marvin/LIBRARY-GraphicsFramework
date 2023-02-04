@@ -22,10 +22,12 @@ import de.m_marvin.univec.impl.Vec2f;
 import de.m_marvin.univec.impl.Vec2i;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
+import de.m_marvin.univec.impl.Vec4f;
 import de.m_marvin.voxelengine.VoxelEngine;
 import de.m_marvin.voxelengine.rendering.GameRenderer;
 import de.m_marvin.voxelengine.rendering.RenderStage;
 import de.m_marvin.voxelengine.rendering.RenderType;
+import de.m_marvin.voxelengine.utility.Raytracer;
 import de.m_marvin.voxelengine.world.VoxelComponent;
 
 public class ComponentEditorScreen extends ScreenBase {
@@ -36,7 +38,7 @@ public class ComponentEditorScreen extends ScreenBase {
 	protected float rotationDirection = 0F;
 	protected float zoom = 1F;
 	protected float zoomMotion = 0F;
-	protected Vec3f offset = new Vec3f(0, 0, 0);
+	protected Vec3f offset = new Vec3f(0, 0, -100);
 	protected boolean cameraButtonPressed = false;
 	protected Vec2d  lastMousePos = null;
 	
@@ -53,7 +55,7 @@ public class ComponentEditorScreen extends ScreenBase {
 		public void drawAdditionalContent(PoseStack poseStack, float partialTick) {
 			
 			BufferBuilder buffer = VoxelEngine.getInstance().getGameRenderer().getBufferSource().startBuffer(RenderType.screen());
-			drawRectangle(buffer, poseStack, 0, 0, windowSize.x, 40, 0, 0, 0, 0.8F);
+			drawRectangle(buffer, poseStack, 0, 0, windowSize.x, 40, 0, 0, 0, 0.6F);
 			buffer.end();
 			
 		}
@@ -111,8 +113,27 @@ public class ComponentEditorScreen extends ScreenBase {
 		} else if (lastMousePos != null) {
 			lastMousePos = null;
 			this.rotationDirection = 0F;
+		} else {
+			
+			Vec3f mouseRay = Raytracer.getCameraRay(position, this.getSize(), this.viewMatrix, VoxelEngine.getInstance().getGameRenderer().getProjectionMatrix());
+			Vec3f rayOrigin = offset.mul(-1F);
+			Raytracer raytracer = new Raytracer(rayOrigin, mouseRay);
+			Optional<Vec3i> hitVoxel = raytracer.raytraceComponent(component, 0.25F, 150F);
+			
+			System.out.println(hitVoxel.isPresent() ? hitVoxel.get().toString() : "MISSED");
+			
 		}
 		
+	}
+	
+	protected void invert(Matrix4f m) {
+		Matrix4f nm = new Matrix4f(
+				1 / m.m00(), m.m01(), m.m02(), -m.m03(),
+				m.m10(), 1 / m.m11(), m.m12(), -m.m13(),
+				m.m20(), m.m21(), 1 / m.m22(), -m.m23(),
+				m.m30(), m.m31(), m.m32(), m.m33()
+			);
+		m.setI(nm);
 	}
 	
 	@Override
@@ -121,6 +142,10 @@ public class ComponentEditorScreen extends ScreenBase {
 		if (scroll.isPresent()) {
 			
 			this.zoomMotion = (float) (scroll.get().y * 0.05F);
+			
+		} else {
+			
+			
 			
 		}
 		
@@ -194,7 +219,6 @@ public class ComponentEditorScreen extends ScreenBase {
 				
 				vxlShader.useShader();
 				vxlShader.getUniform("ProjMat").setMatrix4f(VoxelEngine.getInstance().getGameRenderer().getProjectionMatrix());
-				vxlShader.getUniform("ViewMat").setMatrix4f(viewMatrix);
 				vxlShader.getUniform("HalfVoxelSize").setFloat(this.zoom * 0.51F);
 				vxlShader.getUniform("Texture").setTextureSampler(materialAtlas);
 				vxlShader.getUniform("AnimMat").setMatrix3f(materialAtlas.frameMatrix());
@@ -204,7 +228,7 @@ public class ComponentEditorScreen extends ScreenBase {
 				if (component != null) {
 					
 					poseStack.push();
-					poseStack.translate(0, -2, -100);
+					poseStack.translate(this.offset);
 					poseStack.scale(this.zoom, this.zoom, this.zoom);
 					poseStack.rotate(new Quaternion(new Vec3i(1, 0, 0), (float) this.rotation.y));
 					poseStack.rotate(new Quaternion(new Vec3i(0, 1, 0), (float) this.rotation.x));
@@ -223,6 +247,8 @@ public class ComponentEditorScreen extends ScreenBase {
 						vao.unbind();
 						renderLayer.resetState();
 					}
+					
+					viewMatrix = poseStack.last().pose();
 					
 					poseStack.pop();
 					

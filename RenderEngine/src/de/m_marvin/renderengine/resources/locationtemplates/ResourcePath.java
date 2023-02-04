@@ -53,4 +53,9 @@ public class ResourcePath implements IResourceProvider<ResourcePath> {
 		return new ResourcePath((this.path.isEmpty() ? this.path : this.path + "/") + fileName);
 	}
 	
+	@Override
+	public String nameString() {
+		return this.path;
+	}
+	
 }

@@ -24,6 +24,7 @@ public abstract class ScreenUI {
 	public ScreenUI(Vec2i size, IScreenAligner aligment) {
 		this.size = size;
 		this.aligment = aligment;
+		this.windowSize = new Vec2f(0, 0);
 	}
 	
 	public void setSize(Vec2i size) {

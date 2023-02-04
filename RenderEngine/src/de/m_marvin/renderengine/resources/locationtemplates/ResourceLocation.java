@@ -74,8 +74,13 @@ public class ResourceLocation implements IResourceProvider<ResourceLocation> {
 	}
 	
 	@Override
+	public String nameString() {
+		return this.namespace + ":" + this.path;
+	}
+	
+	@Override
 	public String toString() {
-		return "Resource{" + this.namespace + ":" + this.path + "}";
+		return "Resource{" + nameString() + "}";
 	}
 		
 }

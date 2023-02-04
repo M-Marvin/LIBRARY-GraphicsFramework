@@ -22,4 +22,6 @@ public interface IResourceProvider<R> {
 	 */
 	public R locationOfFile(String fileName);
 	
+	public String nameString();
+	
 }

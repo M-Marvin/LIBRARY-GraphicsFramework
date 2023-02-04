@@ -20,7 +20,6 @@ import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
 import de.m_marvin.renderengine.shaders.ShaderLoader;
 import de.m_marvin.renderengine.textures.utility.TextureLoader;
 import de.m_marvin.renderengine.translation.Camera;
-import de.m_marvin.renderengine.utility.VoxelComponentLoader;
 import de.m_marvin.renderengine.windows.Window;
 import de.m_marvin.simplelogging.filehandling.LogFileHandler;
 import de.m_marvin.simplelogging.printing.LogType;
@@ -34,6 +33,8 @@ import de.m_marvin.voxelengine.rendering.RenderType;
 import de.m_marvin.voxelengine.resources.ReloadState;
 import de.m_marvin.voxelengine.screens.ComponentEditorScreen;
 import de.m_marvin.voxelengine.utility.SimpleLoader;
+import de.m_marvin.voxelengine.utility.VoxelComponentLoader;
+import de.m_marvin.voxelengine.utility.VoxelMaterialRegistry;
 import de.m_marvin.voxelengine.world.ClientLevel;
 import de.m_marvin.voxelengine.world.VoxelComponent;
 import de.m_marvin.voxelengine.world.VoxelMaterial;
@@ -93,6 +94,7 @@ public class VoxelEngine {
 	protected ReloadState clientReloadState;
 	
 	protected VoxelComponentLoader<ResourceLocation, ResourceFolders> voxelLoader;
+	protected VoxelMaterialRegistry materialRegistry;
 	
 	protected UserInput inputHandler;
 	protected Window mainWindow;
@@ -130,6 +132,7 @@ public class VoxelEngine {
 		clientReloadState = ReloadState.RELOAD_RENDER_THREAD;
 		
 		// Setup additional loaders
+		materialRegistry = new VoxelMaterialRegistry();
 		voxelLoader = new VoxelComponentLoader<ResourceLocation, ResourceFolders>(ResourceFolders.VOXELS, resourceLoader);
 		
 		// Setup and loop timings
@@ -330,73 +333,27 @@ public class VoxelEngine {
 		// Setup world
 		level = new ClientLevel();
 		
-		// Testing
-		List<VoxelMaterial> materials = new ArrayList<>();
-		materials.add(new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/ground_anim"), 0.5F));
-		List<int[][][]> voxels = new ArrayList<>();
-		int[][][] vc = new int[32][32][32];
-		for (int i0 = 0; i0 < 32; i0++) {
-			for (int i1 = 0; i1 < 32; i1++) {
-				for (int i2 = 0; i2 < 32; i2++) {
-					vc[i0][i1][i2] = 1;
-				}
-			}
-		}
+		VoxelMaterial m_test = materialRegistry.registerMaterial(new ResourceLocation(NAMESPACE, "test"), new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/ground_anim"), 0.5F));
+		VoxelMaterial m_metal = materialRegistry.registerMaterial(new ResourceLocation(NAMESPACE, "metal"), new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/metal"), 1F));
+		VoxelMaterial m_dirt = materialRegistry.registerMaterial(new ResourceLocation(NAMESPACE, "dirt"), new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/dirt"), 1F));
 		
-		voxels.add(vc);
-		VoxelComponent c = new VoxelComponent(voxels, materials);
+		// Testing
+		VoxelComponent c = voxelLoader.get(new ResourceLocation("example:test")); //
 		VoxelStructure s = new VoxelStructure();
 		s.addComponent(c, new Vec3f(0F, 0F, 0F), new Quaternion(new Vec3i(1, 0, 0), (float) Math.toRadians(45)));
 		level.addStructure(s);
 		s.setPosition(new Vec3f(-20F, 0F, 0F));
 		//s.setOrientation(new Quaternion(new Vec3i(1, 0, 0), (float) Math.toRadians(45)));
 		
-		List<VoxelMaterial> materials2 = new ArrayList<>();
-		materials2.add(new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/metal"), 1F));
-		int[][][] vc2 = new int[32][32][32];
-		for (int i0 = 0; i0 < 20; i0++) {
-			for (int i1 = 0; i1 < 20; i1++) {
-				for (int i2 = 0; i2 < 32; i2++) {
-					vc2[i0][i1][i2] = 1;
-				}
-			}
-		}
-		
-		int[][][] vc22 = new int[32][32][32];
-		for (int i0 = 0; i0 < 20; i0++) {
-			for (int i1 = 0; i1 < 20; i1++) {
-				for (int i2 = 0; i2 < 32; i2++) {
-					vc22[i0][i1][i2] = 1;
-				}
-			}
-		}
-		
-		List<int[][][]> voxels2 = new ArrayList<>();
-		voxels2.add(vc2);
-		List<int[][][]> voxels22 = new ArrayList<>();
-		voxels22.add(vc22);
-		VoxelComponent c2 = new VoxelComponent(voxels2, materials2);
-		VoxelComponent c22 = new VoxelComponent(voxels22, materials2);
+		VoxelComponent c2 = voxelLoader.get(new ResourceLocation("example:metal_block"));
+		VoxelComponent c22 = voxelLoader.get(new ResourceLocation("example:metal_block"));
 		VoxelStructure s4 = new VoxelStructure();
 		s4.addComponent(c2, new Vec3f(0F, 0F, 0F), new Quaternion(new Vec3i(1, 0, 0), 0));
 		s4.addComponent(c22, new Vec3f(0F, 20F, 0F), new Quaternion(new Vec3i(1, 0, 0), 45));
 		level.addStructure(s4);
 		s4.setPosition(new Vec3f(0F, 40F, 0F));
 		
-		List<VoxelMaterial> materials3 = new ArrayList<>();
-		materials3.add(new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/dirt"), 1F));
-		List<int[][][]> voxels3 = new ArrayList<>();
-		int[][][] vc3 = new int[100][8][100];
-		for (int i0 = 0; i0 < 100; i0++) {
-			for (int i1 = 0; i1 < 8; i1++) {
-				for (int i2 = 0; i2 < 100; i2++) {
-					vc3[i0][i1][i2] = 1;
-				}
-			}
-		}
-		
-		voxels3.add(vc3);
-		VoxelComponent c3 = new VoxelComponent(voxels3, materials3);
+		VoxelComponent c3 = voxelLoader.get(new ResourceLocation("example:ground"));
 		VoxelStructure s5 = new VoxelStructure();
 		s5.addComponent(c3, new Vec3f(0F, 0F, 0F), new Quaternion(new Vec3i(1, 0, 0), 0));
 		level.addStructure(s5);
@@ -404,6 +361,7 @@ public class VoxelEngine {
 		s5.setPosition(new Vec3f(-20F, -80F, -20F));
 		
 		level.setGravity(new Vec3f(0F, -9.81F, 0F));
+		
 		
 		openScreen(new ComponentEditorScreen(c));
 		
@@ -555,6 +513,14 @@ public class VoxelEngine {
 	
 	public GameRenderer getGameRenderer() {
 		return gameRenderer;
+	}
+	
+	public VoxelComponentLoader<ResourceLocation, ResourceFolders> getVoxelLoader() {
+		return voxelLoader;
+	}
+	
+	public VoxelMaterialRegistry getMaterialRegistry() {
+		return materialRegistry;
 	}
 	
 	public void reloadResources() {

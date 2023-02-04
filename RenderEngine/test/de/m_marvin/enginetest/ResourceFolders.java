@@ -9,8 +9,8 @@ public enum ResourceFolders implements ISourceFolder {
 	
 	SHADERS((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/shaders/")),
 	TEXTURES((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/textures/")),
-	MODELS((loader, namespace) -> new File(new File(ResourceLoader.getRuntimeFolder()).getParentFile().getParentFile(), "run/models/")),
-	VOXELS((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/voxels/"));
+	MODELS((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/models/")),
+	VOXELS((loader, namespace) -> new File(new File(ResourceLoader.getRuntimeFolder()).getParentFile().getParentFile(), "run/voxels/"));
 	
 	private ISourceFolder pathSource;
 	
