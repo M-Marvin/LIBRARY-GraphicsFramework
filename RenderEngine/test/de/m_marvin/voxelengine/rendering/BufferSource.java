@@ -1,10 +1,11 @@
-package de.m_marvin.renderengine.buffers;
+package de.m_marvin.voxelengine.rendering;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import de.m_marvin.voxelengine.rendering.RenderType;
+import de.m_marvin.renderengine.buffers.BufferBuilder;
+import de.m_marvin.renderengine.buffers.IBufferSource;
 
 public class BufferSource implements IBufferSource<RenderType> {
 	

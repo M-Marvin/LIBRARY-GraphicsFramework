@@ -3,8 +3,8 @@ package de.m_marvin.renderengine.buffers;
 import java.util.Set;
 
 /**
- * An optional interface for handling the creation and reusing of multiple {@link BufferBuilders}.
- * No implementation is provided because this depends of on the application.
+ * An optional interface for handling the creation and reuse of multiple {@link BufferBuilders}.
+ * No implementation is provided because this depends on the application.
  * 
  * @author Marvin Koehler
  *

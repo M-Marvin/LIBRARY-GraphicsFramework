@@ -156,5 +156,79 @@ public abstract class RenderType {
 	public static RenderType[] screenLayers() {
 		return new RenderType[] { screen(), screenTextured(null) };
 	}
+
+	protected static RenderType solid = new RenderType() {
+		
+		@Override
+		public VertexFormat vertexFormat() {
+			return DefaultVertexFormat.SOLID;
+		}
+		
+		@Override
+		public ResourceLocation textureMap() {
+			return null;
+		}
+		
+		@Override
+		public void setState() {
+			GLStateManager.enable(GL11.GL_BLEND);
+		}
+		
+		@Override
+		public void resetState() {
+			GLStateManager.disable(GL11.GL_BLEND);
+		}
+		
+		@Override
+		public RenderPrimitive primitive() {
+			return RenderPrimitive.QUADS;
+		}
+		
+		@Override
+		public String getName() {
+			return "solid";
+		}
+	};	
+	public static RenderType solid() {
+		return solid;
+	}
+
+	protected static Function<ResourceLocation, RenderType> solidTextured = Utility.memorize((texture) -> {
+		return new RenderType() {
+			
+			@Override
+			public VertexFormat vertexFormat() {
+				return DefaultVertexFormat.SOLID;
+			}
+			
+			@Override
+			public ResourceLocation textureMap() {
+				return texture;
+			}
+			
+			@Override
+			public void setState() {
+				GLStateManager.enable(GL11.GL_BLEND);
+			}
+			
+			@Override
+			public void resetState() {
+				GLStateManager.disable(GL11.GL_BLEND);
+			}
+			
+			@Override
+			public RenderPrimitive primitive() {
+				return RenderPrimitive.QUADS;
+			}
+			
+			@Override
+			public String getName() {
+				return "solidTextured";
+			}
+		};
+	});
+	public static RenderType solidTextured(ResourceLocation texture) {
+		return solidTextured.apply(texture);
+	}
 	
 }

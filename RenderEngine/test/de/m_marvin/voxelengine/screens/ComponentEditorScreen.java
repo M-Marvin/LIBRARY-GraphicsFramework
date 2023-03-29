@@ -8,7 +8,6 @@ import de.m_marvin.openui.ScreenAligment;
 import de.m_marvin.openui.ScreenUI;
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
-import de.m_marvin.renderengine.buffers.BufferSource;
 import de.m_marvin.renderengine.buffers.BufferUsage;
 import de.m_marvin.renderengine.buffers.VertexBuffer;
 import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
@@ -20,10 +19,12 @@ import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec2d;
 import de.m_marvin.univec.impl.Vec2f;
 import de.m_marvin.univec.impl.Vec2i;
+import de.m_marvin.univec.impl.Vec3d;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
 import de.m_marvin.univec.impl.Vec4f;
 import de.m_marvin.voxelengine.VoxelEngine;
+import de.m_marvin.voxelengine.rendering.BufferSource;
 import de.m_marvin.voxelengine.rendering.GameRenderer;
 import de.m_marvin.voxelengine.rendering.RenderStage;
 import de.m_marvin.voxelengine.rendering.RenderType;
@@ -40,7 +41,9 @@ public class ComponentEditorScreen extends ScreenBase {
 	protected float zoomMotion = 0F;
 	protected Vec3f offset = new Vec3f(0, 0, -100);
 	protected boolean cameraButtonPressed = false;
-	protected Vec2d  lastMousePos = null;
+	protected Vec2d lastMousePos = null;
+	protected Vec3f ray2 = new Vec3f(0, 0, 0);
+	protected Vec3f ray1 = new Vec3f(0, 0, 0);
 	
 	protected VoxelComponent component;
 	
@@ -115,11 +118,24 @@ public class ComponentEditorScreen extends ScreenBase {
 			this.rotationDirection = 0F;
 		} else {
 			
-			Vec3f mouseRay = Raytracer.getCameraRay(position, this.getSize(), this.viewMatrix, VoxelEngine.getInstance().getGameRenderer().getProjectionMatrix());
-			Vec3f rayOrigin = offset.mul(-1F);
+			Vec3f rayOrigin = offset.add(0.0F, 0.0F, 0.0F).mul(-1F);
+			Vec3f camPoint = Raytracer.getCameraRay(position, 0.5F, this.getWindowSize(), this.viewMatrix, VoxelEngine.getInstance().getGameRenderer().getProjectionMatrix());
+			Vec3f mouseRay = camPoint.sub(rayOrigin);
+			
+			System.out.println(mouseRay);
+			
+			double angle = new Vec3f(0, 0, -1).angle(mouseRay);
+			System.out.println(Math.toDegrees(angle));
+			
 			Raytracer raytracer = new Raytracer(rayOrigin, mouseRay);
 			Optional<Vec3i> hitVoxel = raytracer.raytraceComponent(component, 0.25F, 150F);
 			
+			mouseRay.z *= -1;
+			
+			this.ray1 = rayOrigin.sub(0F, 0F, 100f);
+			this.ray2 = mouseRay;
+			
+			//System.out.println(rayOrigin.add(mouseRay.mul(100F)));
 			System.out.println(hitVoxel.isPresent() ? hitVoxel.get().toString() : "MISSED");
 			
 		}
@@ -211,7 +227,7 @@ public class ComponentEditorScreen extends ScreenBase {
 			}
 			
 			// Additional Voxel-Components
-			ShaderInstance vxlShader = VoxelEngine.getInstance().getShaderLoader().getShader(VoxelEngine.getInstance().getGameRenderer().getLevelShader());
+			ShaderInstance vxlShader = VoxelEngine.getInstance().getShaderLoader().getShader(VoxelEngine.getInstance().getGameRenderer().getVoxelShader());
 			
 			if (vxlShader != null) {
 				
@@ -257,7 +273,52 @@ public class ComponentEditorScreen extends ScreenBase {
 				vxlShader.unbindShader();
 				
 			}
-
+			
+			// TEST
+			ShaderInstance levelShader = VoxelEngine.getInstance().getShaderLoader().getShader(VoxelEngine.getInstance().getGameRenderer().getLevelShader());
+			
+			if (levelShader != null) {
+				
+				AbstractTextureMap<ResourceLocation> materialAtlas = VoxelEngine.getInstance().getTextureLoader().getTextureMap(GameRenderer.MATERIAL_ATLAS);
+				
+				levelShader.useShader();
+				levelShader.getUniform("ProjMat").setMatrix4f(VoxelEngine.getInstance().getGameRenderer().getProjectionMatrix());
+				levelShader.getUniform("Texture").setTextureSampler(materialAtlas);
+				levelShader.getUniform("AnimMat").setMatrix3f(materialAtlas.frameMatrix());
+				levelShader.getUniform("AnimMatLast").setMatrix3f(materialAtlas.lastFrameMatrix());
+				levelShader.getUniform("Interpolation").setFloat(partialTicks);
+				
+				if (component != null) {
+					
+					poseStack.push();
+					poseStack.translate(this.offset);
+					poseStack.scale(this.zoom, this.zoom, this.zoom);
+					poseStack.rotate(new Quaternion(new Vec3i(1, 0, 0), (float) this.rotation.y));
+					poseStack.rotate(new Quaternion(new Vec3i(0, 1, 0), (float) this.rotation.x));
+					
+					RenderType renderLayer = RenderType.solid();
+					
+					BufferBuilder buffer = bufferSource.getBuffer(renderLayer);
+					buffer.begin(renderLayer.primitive(), renderLayer.vertexFormat());
+					GameRenderer.drawLine(buffer, poseStack, this.ray1.x, this.ray1.y, this.ray1.z, this.ray2.x, this.ray2.y, this.ray2.z, 0.01F, 1, 1, 1, 1);
+					buffer.end();
+					
+					GLStateManager.disable(GL11.GL_DEPTH_TEST);
+					vao.upload(buffer, BufferUsage.DYNAMIC);
+					vao.bind();
+					vao.drawAll(renderLayer.primitive());
+					vao.unbind();
+					
+					//viewMatrix = poseStack.last().pose();
+					
+					poseStack.pop();
+					
+				}
+				
+				levelShader.unbindShader();
+				
+			}
+			
 			vao.discard();
 			
 		});

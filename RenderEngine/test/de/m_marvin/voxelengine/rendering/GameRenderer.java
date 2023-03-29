@@ -7,7 +7,6 @@ import java.util.Queue;
 import de.m_marvin.openui.ScreenUI;
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
-import de.m_marvin.renderengine.buffers.BufferSource;
 import de.m_marvin.renderengine.buffers.BufferUsage;
 import de.m_marvin.renderengine.buffers.VertexBuffer;
 import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
@@ -133,17 +132,16 @@ public class GameRenderer {
 		
 	}
 	
-	public ResourceLocation getLevelShader() {
+	public ResourceLocation getVoxelShader() {
 		return new ResourceLocation(VoxelEngine.NAMESPACE, "world/voxel");
 	}
 	
-	public static final ResourceLocation VOXEL_SHADER = new ResourceLocation("example:world/voxelShader");
 	public static final ResourceLocation MATERIAL_ATLAS = new ResourceLocation(VoxelEngine.NAMESPACE, "materials");
 	protected LevelRender levelRender;
 	
 	public void renderLevel(ClientLevel level, float partialTick) {
 		
-		ShaderInstance shader = VoxelEngine.getInstance().getShaderLoader().getShader(getLevelShader());
+		ShaderInstance shader = VoxelEngine.getInstance().getShaderLoader().getShader(getVoxelShader());
 		
 		if (shader != null) {
 
@@ -290,6 +288,32 @@ public class GameRenderer {
 		
 		poseStack.pop();
 		
+	}
+	
+	public ResourceLocation getLevelShader() {
+		return new ResourceLocation(VoxelEngine.NAMESPACE, "world/solid");
+	}
+	
+	public static void drawLine(BufferBuilder buffer, PoseStack poseStack, float x1, float y1, float z1, float x2, float y2, float z2, float width, float r, float g, float b, float a) {
+		drawLine(buffer, poseStack, new Vec3f(x1, y1, z1), new Vec3f(x2, y2, z2), width, r, g, b, a);		
+	}
+	
+	public static void drawLine(BufferBuilder buffer, PoseStack poseStack, Vec3f p1, Vec3f p2, float width, float r, float g, float b, float a) {
+		Vec3f lineVec = p2.sub(p1).normalize();
+		Vec3f plane1 = lineVec.anyOrthogonal();
+		Vec3f plane2 = lineVec.cross(plane1);
+		Vec3f p1l = plane1.mul(-width);
+		Vec3f p1h = plane1.mul(width);
+		Vec3f p2l = plane2.mul(-width);
+		Vec3f p2h = plane2.mul(width);
+		buffer.vertex(p1.x + p1l.x, p1.y + p1l.y, p1.z + p1l.z).normal(1, 1, 1).color(r, g, b, a).uv(0, 0).endVertex();
+		buffer.vertex(p1.x + p1h.x, p1.y + p1h.y, p1.z + p1h.z).normal(1, 1, 1).color(r, g, b, a).uv(0, 0).endVertex();
+		buffer.vertex(p2.x + p1h.x, p2.y + p1h.y, p2.z + p1h.z).normal(1, 1, 1).color(r, g, b, a).uv(0, 0).endVertex();
+		buffer.vertex(p2.x + p1l.x, p2.y + p1l.y, p2.z + p1l.z).normal(1, 1, 1).color(r, g, b, a).uv(0, 0).endVertex();
+		buffer.vertex(p1.x + p2l.x, p1.y + p2l.y, p1.z + p2l.z).normal(1, 1, 1).color(r, g, b, a).uv(0, 0).endVertex();
+		buffer.vertex(p1.x + p2h.x, p1.y + p2h.y, p1.z + p2h.z).normal(1, 1, 1).color(r, g, b, a).uv(0, 0).endVertex();
+		buffer.vertex(p2.x + p2h.x, p2.y + p2h.y, p2.z + p2h.z).normal(1, 1, 1).color(r, g, b, a).uv(0, 0).endVertex();
+		buffer.vertex(p2.x + p2l.x, p2.y + p2l.y, p2.z + p2l.z).normal(1, 1, 1).color(r, g, b, a).uv(0, 0).endVertex();
 	}
 	
 }

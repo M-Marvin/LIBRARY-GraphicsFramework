@@ -11,6 +11,14 @@ apply plugin: 'java'
 project.ext.lwjglVersion = "3.3.1"
 project.ext.lwjglNatives = "natives-windows"
 
+tasks.named('jar') {
+    manifest {
+        attributes('Implementation-Title': project.name,
+                   'Implementation-Version': version,
+                   'Author': 'M_Marvin')
+    }
+}
+
 repositories {
 	mavenCentral()
 	maven { url 'https://jitpack.io' }
@@ -33,7 +41,7 @@ dependencies {
 	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
 	runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
 	
-	implementation 'com.github.M-Marvin:LIBRARY-UnifiedVectors:0b57415baba864c5cedbd51913c8d084d0b73d39'
+	implementation 'com.github.M-Marvin:LIBRARY-UnifiedVectors:a6bd8de5a0b9e8bab55779ee9eef5abc0d4daef9'
 	implementation 'com.github.M-Marvin:LIBRARY-SimpleLogging:6da9e66783af7dd5d60188bbfc09648fd35fbf60'
 	
 	implementation "com.google.code.gson:gson:2.9.1"
