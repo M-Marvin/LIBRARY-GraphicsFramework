@@ -7,6 +7,7 @@
  */
 
 apply plugin: 'java'
+apply plugin: 'maven-publish'
 
 project.ext.lwjglVersion = "3.3.1"
 project.ext.lwjglNatives = "natives-windows"
@@ -14,7 +15,7 @@ project.ext.lwjglNatives = "natives-windows"
 tasks.named('jar') {
     manifest {
         attributes('Implementation-Title': project.name,
-                   'Implementation-Version': version,
+                   'Implementation-Version': '1.0',
                    'Author': 'M_Marvin')
     }
 }
@@ -49,4 +50,12 @@ dependencies {
 	
 	implementation "cz.advel.jbullet:jbullet:20101010-1"
 	
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+			from components.java
+        }
+    }
 }
