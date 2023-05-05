@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL33;
 
 /**
@@ -42,7 +43,12 @@ public class GLStateManager {
 	 * @return True if a OpenGL context is bound
 	 */
 	public static boolean isOnRenderThread() {
-		return GLFW.glfwGetCurrentContext() > 0;
+		try {
+			GL.getCapabilities();
+		} catch (IllegalStateException e) {
+			return false;
+		}
+		return true;
 	}
 	
 	public static void assertOnRenderThread() {
