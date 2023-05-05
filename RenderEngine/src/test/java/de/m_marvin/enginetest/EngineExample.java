@@ -1,5 +1,7 @@
 package de.m_marvin.enginetest;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -34,10 +36,13 @@ import de.m_marvin.renderengine.utility.NumberFormat;
 import de.m_marvin.renderengine.vertices.RenderPrimitive;
 import de.m_marvin.renderengine.vertices.VertexFormat;
 import de.m_marvin.renderengine.windows.Window;
+import de.m_marvin.simplelogging.filehandling.LogFileHandler;
+import de.m_marvin.simplelogging.printing.Logger;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
+import de.m_marvin.voxelengine.VoxelEngine;
 
 public class EngineExample {
 
@@ -82,6 +87,12 @@ public class EngineExample {
 	private int frameTime;
 	
 	public void run() {
+		
+		// Start new logger
+		Logger.setDefaultLogger(new Logger());
+
+		// Redirect run folder (since all resources are located in the test folder)
+		ResourceLoader.redirectRuntimeFolder(VoxelEngine.class.getClassLoader().getResource("").getPath().replace("bin/main/", "run/"));
 		
 		// Setup resource loaders
 		resourceLoader = new ResourceLoader<>();

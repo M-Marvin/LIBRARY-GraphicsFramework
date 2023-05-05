@@ -7,10 +7,10 @@ import de.m_marvin.renderengine.resources.ResourceLoader;
 
 public enum ResourceFolders implements ISourceFolder {
 	
-	SHADERS((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/shaders/")),
-	TEXTURES((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/textures/")),
-	MODELS((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder(), namespace + "/models/")),
-	VOXELS((loader, namespace) -> new File(new File(ResourceLoader.getRuntimeFolder()).getParentFile().getParentFile(), "run/voxels/"));
+	SHADERS((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder() + "/assets", namespace + "/shaders/")),
+	TEXTURES((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder() + "/assets", namespace + "/textures/")),
+	MODELS((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder() + "/assets", namespace + "/models/")),
+	VOXELS((loader, namespace) -> new File(new File(ResourceLoader.getRuntimeFolder()), "/voxels/"));
 	
 	private ISourceFolder pathSource;
 	

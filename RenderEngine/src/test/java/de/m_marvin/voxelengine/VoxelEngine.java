@@ -58,6 +58,9 @@ public class VoxelEngine {
 			Logger.setDefaultLogger(new Logger());
 		}
 		
+		// Redirect run folder (since all resources are located in the test folder)
+		ResourceLoader.redirectRuntimeFolder(VoxelEngine.class.getClassLoader().getResource("").getPath().replace("bin/main/", "run/"));
+		
 		// Start application
 		try {
 			new VoxelEngine().run();

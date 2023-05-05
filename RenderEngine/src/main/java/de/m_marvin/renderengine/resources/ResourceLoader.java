@@ -14,6 +14,8 @@ import java.io.File;
  */
 public class ResourceLoader<R extends IResourceProvider<R>, FE extends ISourceFolder> {
 	
+	public static String runFolder = null;
+	
 	/**
 	 * Returns the full path to the given source folder without an namespace.
 	 * @implNote Passes an empty string as namespace to the {@link ISourceFolder#getPath(ResourceLoader, String)} method and 
@@ -55,7 +57,14 @@ public class ResourceLoader<R extends IResourceProvider<R>, FE extends ISourceFo
 	 * @return The path to the folder in which the application is running.
 	 */
 	public static String getRuntimeFolder() {
-		return ResourceLoader.class.getClassLoader().getResource("").getPath();
+		if (runFolder == null) {
+			runFolder = ResourceLoader.class.getClassLoader().getResource("").getPath();
+		}
+		return runFolder;
+	}
+	
+	public static void redirectRuntimeFolder(String folder) {
+		runFolder = folder;
 	}
 	
 }
