@@ -1,10 +1,9 @@
 package de.m_marvin.renderengine.models;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,8 +76,7 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 	 */
 	public void loadModelsIn0(R modelFolderLocation, R textureFolderLocation) throws IOException {
 		
-		File path = resourceLoader.resolveLocation(sourceFolder, modelFolderLocation);
-		for (String modelName : listModelNames(path)) {
+		for (String modelName : listModelNames(modelFolderLocation)) {
 			
 			R locationName = modelFolderLocation.locationOfFile(modelName);
 			if (loadModel(locationName, textureFolderLocation) == null) {
@@ -92,14 +90,13 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 	/**
 	 * Lists all models in the given folders.
 	 * 
-	 * @param modelFolder The model source folder
+	 * @param modelFolder The model source folder location
 	 * @return A list of all model names in the folder
 	 * @throws FileNotFoundException if the path is not valid
 	 */
-	protected static List<String> listModelNames(File modelFolder) throws FileNotFoundException {
-		if (!modelFolder.isDirectory()) throw new FileNotFoundException("The model folder path '" + modelFolder + "' ist not valid!");
+	protected List<String> listModelNames(R modelFolder) throws FileNotFoundException {
 		List<String> modelNames = new ArrayList<>();
-		for (String fileName : modelFolder.list()) {
+		for (String fileName : resourceLoader.listFilesIn(sourceFolder, modelFolder)) {
 			String[] fileNameParts = fileName.split("\\.");
 			if (fileNameParts[fileNameParts.length - 1].equals(MATERIAL_FILE_FORMAT)) continue;
 			if (fileNameParts.length > 1) {
@@ -139,9 +136,8 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 	 */
 	public RawModel<R> loadModel(R modelLocation, R textureFolderLocation) {
 		if (!this.modelCache.containsKey(modelLocation)) {
-			File modelPath = this.resourceLoader.resolveLocation(sourceFolder, modelLocation);
 			try {
-				RawModel<R> model = load(modelPath, textureFolderLocation);
+				RawModel<R> model = load(modelLocation, textureFolderLocation);
 				this.modelCache.put(modelLocation, model);
 			} catch (IOException e) {
 				Logger.defaultLogger().logWarn("Failed to load model " + modelLocation);
@@ -155,15 +151,14 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 	 * Loads but does not cache the model from the files specified.
 	 * Texture paths are build with the provided location.
 	 * 
-	 * @param <R> The type of resource locations
-	 * @param modelFile The model files
-	 * @param textureFolderLocation 
+	 * @param modelFile The model file location
+	 * @param textureFolderLocation The location to look for the textures
 	 * @return The loaded model
 	 * @throws IOException If an error occurs accessing the files
 	 */
-	public static <R extends IResourceProvider<R>> RawModel<R> load(File modelFile, R textureFolderLocation) throws IOException {
+	public RawModel<R> load(R modelFile, R textureFolderLocation) throws IOException {
 		
-		BufferedReader reader = new BufferedReader(new FileReader(new File(modelFile + "." + MODEL_FILE_FORMAT)));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(resourceLoader.getAsStream(sourceFolder, modelFile.append("." + MODEL_FILE_FORMAT))));
 		
 		RawModel<R> model = new RawModel<R>();
 		
@@ -175,7 +170,7 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 		while ((line = reader.readLine()) != null) {
 			switch (line.split(" ")[0]) {
 			case "mtllib":
-				loadMtlLib(new File(modelFile.getParentFile(), parseString(line)), material2texture);
+				loadMtlLib(modelFile.getParent().locationOfFile(parseString(line)), material2texture);
 				break;
 			case "v":
 				model.vertices.add(parseVec3(line));
@@ -217,13 +212,13 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 	/**
 	 * Loads the content of the mtl-lib into the material to texture name map.
 	 * 
-	 * @param mtlFile The material lib file
+	 * @param mtlFile The material lib file location
 	 * @param material2texture The map to fill
 	 * @throws IOException If an error occurs accessing the file
 	 */
-	protected static void loadMtlLib(File mtlFile, Map<String, String> material2texture) throws IOException {
+	protected void loadMtlLib(R mtlFile, Map<String, String> material2texture) throws IOException {
 		
-		BufferedReader reader = new BufferedReader(new FileReader(mtlFile));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(resourceLoader.getAsStream(sourceFolder, mtlFile)));
 		
 		String currentMtlName = null;
 		String currentTextureName = null;

@@ -6,7 +6,7 @@ import com.bulletphysics.collision.dispatch.CollisionFlags;
 import com.bulletphysics.collision.shapes.BoxShape;
 import com.bulletphysics.collision.shapes.CollisionShape;
 
-import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
+import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.univec.impl.Vec3f;
 
 public class GroundPlateObject extends WorldObject {

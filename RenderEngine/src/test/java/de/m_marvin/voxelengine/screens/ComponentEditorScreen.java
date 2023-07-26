@@ -4,13 +4,13 @@ import java.util.Optional;
 
 import org.lwjgl.opengl.GL11;
 
-import de.m_marvin.openui.ScreenAligment;
-import de.m_marvin.openui.ScreenUI;
+import de.m_marvin.openui.dep.ScreenAligment;
+import de.m_marvin.openui.dep.ScreenUI;
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.BufferUsage;
 import de.m_marvin.renderengine.buffers.VertexBuffer;
-import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
+import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.renderengine.shaders.ShaderInstance;
 import de.m_marvin.renderengine.textures.AbstractTextureMap;
 import de.m_marvin.renderengine.translation.PoseStack;
@@ -19,10 +19,8 @@ import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec2d;
 import de.m_marvin.univec.impl.Vec2f;
 import de.m_marvin.univec.impl.Vec2i;
-import de.m_marvin.univec.impl.Vec3d;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
-import de.m_marvin.univec.impl.Vec4f;
 import de.m_marvin.voxelengine.VoxelEngine;
 import de.m_marvin.voxelengine.rendering.BufferSource;
 import de.m_marvin.voxelengine.rendering.GameRenderer;

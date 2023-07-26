@@ -18,7 +18,7 @@ import com.google.gson.JsonObject;
 import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.resources.ResourceLoader;
-import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
+import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.simplelogging.printing.LogType;
 import de.m_marvin.simplelogging.printing.Logger;
 import de.m_marvin.voxelengine.VoxelEngine;

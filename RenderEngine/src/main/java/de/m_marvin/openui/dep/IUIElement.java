@@ -1,4 +1,4 @@
-package de.m_marvin.openui;
+package de.m_marvin.openui.dep;
 
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.univec.impl.Vec2i;

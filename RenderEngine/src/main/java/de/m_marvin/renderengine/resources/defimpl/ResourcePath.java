@@ -1,4 +1,6 @@
-package de.m_marvin.renderengine.resources.locationtemplates;
+package de.m_marvin.renderengine.resources.defimpl;
+
+import java.io.File;
 
 import de.m_marvin.renderengine.resources.IResourceProvider;
 
@@ -51,6 +53,17 @@ public class ResourcePath implements IResourceProvider<ResourcePath> {
 	public ResourcePath locationOfFile(String fileName) {
 		if (fileName == null) return null;
 		return new ResourcePath((this.path.isEmpty() ? this.path : this.path + "/") + fileName);
+	}
+	
+	@Override
+	public ResourcePath append(String string) {
+		if (string == null) return null;
+		return new ResourcePath(this.path + string);
+	}
+	
+	@Override
+	public ResourcePath getParent() {
+		return new ResourcePath(new File(this.path).getParent());
 	}
 	
 	@Override

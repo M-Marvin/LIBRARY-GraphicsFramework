@@ -4,12 +4,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 
-import de.m_marvin.openui.ScreenUI;
+import de.m_marvin.openui.dep.ScreenUI;
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.BufferUsage;
 import de.m_marvin.renderengine.buffers.VertexBuffer;
-import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
+import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.renderengine.shaders.ShaderInstance;
 import de.m_marvin.renderengine.textures.AbstractTextureMap;
 import de.m_marvin.renderengine.translation.PoseStack;

@@ -4,6 +4,9 @@
 
 uniform mat3 AnimMat;
 uniform mat3 AnimMatLast;
+uniform mat4 ProjMat;
+uniform mat4 ObjectMat;
+uniform mat4 ModelViewMat;
 
 in vec3 position;
 in vec3 normal;
@@ -17,7 +20,7 @@ out vec2 vs_uvLast;
 
 void main() {
 	
-	gl_Position = vec4(position, 1);
+	gl_Position = (ProjMat * ModelViewMat * ObjectMat) * vec4(position, 1);
 	vs_normal = normal;
 	vs_color = color;
 	vs_uv = translateVec2(uv, AnimMat);

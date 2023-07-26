@@ -2,21 +2,19 @@ package de.m_marvin.voxelengine;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL33;
 
 import de.m_marvin.enginetest.ResourceFolders;
-import de.m_marvin.openui.ScreenUI;
+import de.m_marvin.openui.dep.ScreenUI;
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.inputbinding.UserInput;
 import de.m_marvin.renderengine.inputbinding.bindingsource.KeySource;
 import de.m_marvin.renderengine.inputbinding.bindingsource.MouseSource;
 import de.m_marvin.renderengine.models.OBJLoader;
 import de.m_marvin.renderengine.resources.ResourceLoader;
-import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
+import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.renderengine.shaders.ShaderLoader;
 import de.m_marvin.renderengine.textures.utility.TextureLoader;
 import de.m_marvin.renderengine.translation.Camera;
@@ -32,7 +30,6 @@ import de.m_marvin.voxelengine.rendering.RenderStage;
 import de.m_marvin.voxelengine.rendering.RenderType;
 import de.m_marvin.voxelengine.resources.ReloadState;
 import de.m_marvin.voxelengine.screens.ComponentEditorScreen;
-import de.m_marvin.voxelengine.utility.SimpleLoader;
 import de.m_marvin.voxelengine.utility.VoxelComponentLoader;
 import de.m_marvin.voxelengine.utility.VoxelMaterialRegistry;
 import de.m_marvin.voxelengine.world.ClientLevel;

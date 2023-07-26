@@ -1,8 +1,8 @@
 package de.m_marvin.voxelengine.screens;
 
-import de.m_marvin.openui.ScreenAligment;
-import de.m_marvin.openui.ScreenUI;
-import de.m_marvin.openui.elements.UIButtonElement;
+import de.m_marvin.openui.dep.ScreenAligment;
+import de.m_marvin.openui.dep.ScreenUI;
+import de.m_marvin.openui.dep.UIButtonElement;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.univec.impl.Vec2i;

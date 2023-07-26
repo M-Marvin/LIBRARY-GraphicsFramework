@@ -235,13 +235,13 @@ public class ShaderInstance {
 		GLStateManager.compileShader(fragmentShader);
 		if (!GLStateManager.checkShaderCompile(fragmentShader)) {
 			String errorLog = GLStateManager.shaderInfoLog(fragmentShader);
-			throw new IllegalArgumentException("Failed to compile the provoided fragment shader code:\n" + errorLog);
+			throw new IllegalArgumentException("Failed to compile fragment shader code:\n" + errorLog);
 		}
 		
 		GLStateManager.compileShader(vertexShader);
 		if (!GLStateManager.checkShaderCompile(vertexShader)) {
 			String errorLog = GLStateManager.shaderInfoLog(vertexShader);
-			throw new IllegalArgumentException("Failed to compile the provoided vertex shader code:\n" + errorLog);
+			throw new IllegalArgumentException("Failed to compile vertex shader code:\n" + errorLog);
 		}
 		
 		if (geometryProgram.isPresent()) {
@@ -249,7 +249,7 @@ public class ShaderInstance {
 			GLStateManager.compileShader(geometryShader);
 			if (!GLStateManager.checkShaderCompile(geometryShader)) {
 				String errorLog = GLStateManager.shaderInfoLog(geometryShader);
-				throw new IllegalArgumentException("Failed to compile the provoided geometry shader code:\n" + errorLog);
+				throw new IllegalArgumentException("Failed to compile geometry shader code:\n" + errorLog);
 			}
 			
 		}
@@ -328,6 +328,7 @@ public class ShaderInstance {
 	 * @return The uniform with the given name
 	 */
 	public Uniform<?> getUniform(String name) {
+		if (!this.uniforms.containsKey(name)) throw new IllegalArgumentException("The uniform '" + name + "' doesn not exist in the shader!");
 		return this.uniforms.get(name);
 	}
 

@@ -1,4 +1,4 @@
-package de.m_marvin.openui;
+package de.m_marvin.openui.dep;
 
 import java.util.ArrayList;
 import java.util.List;

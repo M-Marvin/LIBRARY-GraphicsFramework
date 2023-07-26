@@ -1,6 +1,10 @@
 package de.m_marvin.enginetest;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.function.BiFunction;
 
 import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.resources.ResourceLoader;
@@ -11,16 +15,28 @@ public enum ResourceFolders implements ISourceFolder {
 	TEXTURES((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder() + "/assets", namespace + "/textures/")),
 	MODELS((loader, namespace) -> new File(ResourceLoader.getRuntimeFolder() + "/assets", namespace + "/models/")),
 	VOXELS((loader, namespace) -> new File(new File(ResourceLoader.getRuntimeFolder()), "/voxels/"));
+
+	private BiFunction<ResourceLoader<?, ?>, String, File> pathResolver;
 	
-	private ISourceFolder pathSource;
-	
-	private ResourceFolders(ISourceFolder pathSource) {
-		this.pathSource = pathSource;
+	private ResourceFolders(BiFunction<ResourceLoader<?, ?>, String, File> pathResolver) {
+		this.pathResolver = pathResolver;
 	}
 	
 	@Override
 	public File getPath(ResourceLoader<?, ?> loader, String namespace) {
-		return this.pathSource.getPath(loader, namespace);
+		return this.pathResolver.apply(loader, namespace);
+	}
+	
+	@Override
+	public InputStream getAsStream(String path) throws FileNotFoundException {
+		return new FileInputStream(path);
 	}
 
+	@Override
+	public String[] listFiles(String path) {
+		File folder = new File(path);
+		if (folder.isDirectory()) return folder.list();
+		return new String[] {};
+	}
+	
 }

@@ -1,4 +1,4 @@
-package de.m_marvin.enginetest;
+package de.m_marvin.uitest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,11 +7,14 @@ import java.util.Random;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL33;
 
+import de.m_marvin.enginetest.ResourceFolders;
 import de.m_marvin.enginetest.world.objects.GroundPlateObject;
 import de.m_marvin.enginetest.world.objects.KorbuvaObject;
 import de.m_marvin.enginetest.world.objects.MotorObject;
 import de.m_marvin.enginetest.world.objects.TestBlockObject;
 import de.m_marvin.enginetest.world.objects.WorldObject;
+import de.m_marvin.openui.UIContainer;
+import de.m_marvin.openui.components.ButtonComponent;
 import de.m_marvin.physicengine.d3.physic.RigidPhysicWorld;
 import de.m_marvin.physicengine.d3.util.BroadphaseAlgorithm;
 import de.m_marvin.renderengine.GLStateManager;
@@ -37,20 +40,22 @@ import de.m_marvin.renderengine.windows.Window;
 import de.m_marvin.simplelogging.printing.Logger;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.unimat.impl.Quaternion;
+import de.m_marvin.univec.impl.Vec2f;
+import de.m_marvin.univec.impl.Vec2i;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
 import de.m_marvin.voxelengine.VoxelEngine;
 
-public class EngineExample {
+public class UITest {
 
 	public static void main(String... args) {
-		new EngineExample().run();
+		new UITest().run();
 	}
 	
-	private static EngineExample instance;
-	private EngineExample() { instance = this; }
+	private static UITest instance;
+	private UITest() { instance = this; }
 	
-	public static EngineExample getInstance() {
+	public static UITest getInstance() {
 		return instance;
 	}
 	
@@ -62,6 +67,7 @@ public class EngineExample {
 	public static final ResourceLocation OBJECT_TEXTURE_ATLAS_INTERPOLATED = new ResourceLocation(NAMESPACE, "object_atlas_interpolated");
 	public static final ResourceLocation SHADER_LIB_LOCATION = new ResourceLocation(NAMESPACE, "glsl");
 	public static final ResourceLocation WORLD_SHADER_LOCATION = new ResourceLocation(NAMESPACE, "world");
+	public static final ResourceLocation OPENUI_SHADER_LOCATION = new ResourceLocation(NAMESPACE, "openui");
 		
 	private ResourceLoader<ResourceLocation, ResourceFolders> resourceLoader;
 	private ShaderLoader<ResourceLocation, ResourceFolders> shaderLoader;
@@ -70,7 +76,7 @@ public class EngineExample {
 	private UserInput inputHandler;
 	
 	protected Camera mainCamera;
-	protected Matrix4f projectionMatrix = Matrix4f.perspective(50, 1000F / 600F, 1F, 1000F);
+	protected Matrix4f projectionMatrix;
 	
 	protected RigidPhysicWorld<WorldObject> physicWorld;
 	protected Map<ResourceLocation, VertexBuffer> name2vertexMap = new HashMap<>();
@@ -82,6 +88,8 @@ public class EngineExample {
 	private int ticksPerSecond;
 	private int tickTime;
 	private int frameTime;
+	
+	protected UIContainer<ResourceLocation> uiContainer;
 	
 	public void run() {
 		
@@ -189,6 +197,7 @@ public class EngineExample {
 		
 		// Load shader, textures and models
 		shaderLoader.loadShadersIn(WORLD_SHADER_LOCATION, SHADER_LIB_LOCATION);
+		shaderLoader.loadShadersIn(OPENUI_SHADER_LOCATION, SHADER_LIB_LOCATION);
 		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS, false, false);
 		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS_INTERPOLATED, false, true);
 		modelLoader.loadModelsIn(OBJECT_MODEL_LOCATION, OBJECT_TEXTURE_LOCATION);
@@ -206,6 +215,22 @@ public class EngineExample {
 		plate.getRigidBody().setOrientation(new Quaternion(new Vec3i(1, 0, 0), 0));
 		plate.getRigidBody().setPosition(new Vec3f(0F, -1F, 0F));
 		
+		this.uiContainer = new UIContainer<>();
+		
+		ButtonComponent b = new ButtonComponent();
+		b.setSize(new Vec2i(100, 100));
+		
+		this.uiContainer.getRootCompound().addComponent(b);
+		
+		windowResized(new Vec2i(this.mainWindow.getSize()[0], this.mainWindow.getSize()[1]));
+		this.mainWindow.registerWindowListener((shouldClose, windowResize, focused, unfocused, maximized, restored) -> { if (windowResize.isPresent()) windowResized(windowResize.get()); });
+		
+	}
+	
+	public void windowResized(Vec2i screenSize) {
+		GLStateManager.resizeViewport(0, 0, screenSize.x, screenSize.y);
+		this.projectionMatrix = Matrix4f.perspective(50, screenSize.x / screenSize.y, 1F, screenSize.x);
+		this.uiContainer.screenResize(screenSize);
 	}
 	
 	public void compileModel(ResourceLocation name) {
@@ -240,6 +265,9 @@ public class EngineExample {
 	}
 	
 	private void frame(float partialTick) {
+		
+		this.uiContainer.updateOutdatedVAOs();
+		this.uiContainer.renderVAOs(shaderLoader, textureLoader);
 		
 		ShaderInstance shader = shaderLoader.getShader(new ResourceLocation("example:world/solid"));
 		

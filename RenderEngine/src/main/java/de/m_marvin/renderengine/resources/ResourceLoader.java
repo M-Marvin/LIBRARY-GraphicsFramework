@@ -1,6 +1,8 @@
 package de.m_marvin.renderengine.resources;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 /**
  * Provides different methods to access files on the disc.
@@ -43,11 +45,34 @@ public class ResourceLoader<R extends IResourceProvider<R>, FE extends ISourceFo
 	 * Converts the resource location into a full path.
 	 * 
 	 * @param folder The resource folder in which the location points
-	 * @param resourceProvoider The resource location to resolve to a full path
+	 * @param resourceProvider The resource location to resolve to a full path
 	 * @return The full path pointing to the location specified in the resource location
 	 */
-	public File resolveLocation(FE folder, R resourceProvoider) {
-		return new File(this.getResourceFolderPath(folder, resourceProvoider.getNamespace()), resourceProvoider.getPath());
+	public File resolveLocation(FE folder, R resourceProvider) {
+		return new File(this.getResourceFolderPath(folder, resourceProvider.getNamespace()), resourceProvider.getPath());
+	}
+
+	/**
+	 * Opens an InputStream to the given resource.
+	 * 
+	 * @param sourceFolder The resource folder in which the location points
+	 * @param resourceProvider The resource location to get an InputStream for
+	 * @return An InputStream of the given resource
+	 * @throws FileNotFoundException if the resource does not exist
+	 */
+	public InputStream getAsStream(FE sourceFolder, R resourceProvider) throws FileNotFoundException {
+		return sourceFolder.getAsStream(resolveLocation(sourceFolder, resourceProvider).getPath());
+	}
+	
+	/**
+	 * Lists all files in the given folder
+	 * 
+	 * @param sourceFolder The resource folder in which the location points
+	 * @param resourceProvider The resource location to the folder
+	 * @return A array of file names in the folder
+	 */
+	public String[] listFilesIn(FE sourceFolder, R resourceProvider) {
+		return sourceFolder.listFiles(resolveLocation(sourceFolder, resourceProvider).getPath());
 	}
 	
 	/**

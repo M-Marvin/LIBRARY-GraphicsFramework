@@ -1,6 +1,7 @@
 
-package de.m_marvin.renderengine.resources.locationtemplates;
+package de.m_marvin.renderengine.resources.defimpl;
 
+import java.io.File;
 import java.util.Objects;
 
 import de.m_marvin.renderengine.resources.IResourceProvider;
@@ -57,6 +58,17 @@ public class ResourceLocation implements IResourceProvider<ResourceLocation> {
 	}
 	
 	@Override
+	public ResourceLocation append(String string) {
+		if (string == null) return null;
+		return new ResourceLocation(this.namespace, this.path + string);
+	}
+
+	@Override
+	public ResourceLocation getParent() {
+		return new ResourceLocation(this.namespace, new File(this.path).getParent());
+	}
+	
+	@Override
 	public int hashCode() {
 		return Objects.hash(namespace, path);
 	}
@@ -82,5 +94,5 @@ public class ResourceLocation implements IResourceProvider<ResourceLocation> {
 	public String toString() {
 		return "Resource{" + nameString() + "}";
 	}
-		
+	
 }

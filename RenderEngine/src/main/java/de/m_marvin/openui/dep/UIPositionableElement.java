@@ -1,6 +1,5 @@
-package de.m_marvin.openui.elements;
+package de.m_marvin.openui.dep;
 
-import de.m_marvin.openui.IUIElement;
 import de.m_marvin.univec.impl.Vec2i;
 
 public abstract class UIPositionableElement implements IUIElement {

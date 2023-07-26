@@ -2,7 +2,7 @@ package de.m_marvin.voxelengine.screens.elements;
 
 import java.awt.Color;
 
-import de.m_marvin.openui.elements.UIPlane;
+import de.m_marvin.openui.dep.UIPlane;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.univec.impl.Vec2i;

@@ -2,7 +2,6 @@ package de.m_marvin.renderengine.shaders;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -90,10 +89,10 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	 */
 	public void loadShadersIn0(R shaderFolderLocation, R libFolderLocation) throws IOException {
 		
-		File path = resourceLoader.resolveLocation(sourceFolder, shaderFolderLocation);
-		for (String shaderName : listShaderNames(path)) {
+		// FIXME Rework all "loadIn" methods
+		for (String shaderName : resourceLoader.listFilesIn(sourceFolder, shaderFolderLocation)) {
 			
-			R locationName = shaderFolderLocation.locationOfFile(shaderName);
+			R locationName = shaderFolderLocation.locationOfFile(shaderName.split("\\.")[0]);
 			loadShader(locationName, libFolderLocation, locationName, Optional.empty());
 			
 		}
@@ -135,10 +134,8 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	 */
 	public ShaderInstance loadShader(R shaderLocation, R libFolderLocation, R shaderName, Optional<VertexFormat> format) {
 		if (!shaderCache.containsKey(shaderName)) {
-			File libFolder = resourceLoader.resolveLocation(sourceFolder, libFolderLocation);
-			File path = resourceLoader.resolveLocation(sourceFolder, shaderLocation);
 			try {
-				shaderCache.put(shaderName, load(path, libFolder, format));
+				shaderCache.put(shaderName, load(shaderLocation, libFolderLocation, format));
 			} catch (IOException e) {
 				Logger.defaultLogger().logWarn("Failed to load shader " + shaderLocation.toString());
 				Logger.defaultLogger().printException(LogType.WARN, e);
@@ -171,27 +168,27 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	 * Loads the shader under the given path with the given vertex format.
 	 * If no vertex format is specified the default from the shader JSON is applied.
 	 * 
-	 * @param shaderFile The path to the shader JSON (without the .json ending)
-	 * @param sourceFolder The path to the source folder containing the GLSL library files
+	 * @param shaderLocation The path to the shader JSON (without the .json ending)
+	 * @param libFolderLocation The path to the source folder containing the GLSL library files
 	 * @param vertexFormat The (optional) applied vertex format
 	 * @return The loaded uncached shader instance
 	 * @throws IOException If an error occurs accessing the files
 	 */
-	public static ShaderInstance load(File shaderFile, File sourceFolder, Optional<VertexFormat> vertexFormat) throws IOException {
+	public ShaderInstance load(R shaderLocation, R libFolderLocation, Optional<VertexFormat> vertexFormat) throws IOException {
 		
 		try {
 
 			Gson gson = new GsonBuilder().create();
-			InputStreamReader inputStream = new InputStreamReader(new FileInputStream(new File(shaderFile + "." + SHADER_META_FORMAT)));
+			InputStreamReader inputStream = new InputStreamReader(resourceLoader.getAsStream(sourceFolder, shaderLocation.append("." + SHADER_META_FORMAT)));
 			
 			JsonObject json = gson.fromJson(inputStream, JsonObject.class);
 			
 			String vertexShaderFile = json.get("VertexShaderFile").getAsString();
 			String fragmentShaderFile = json.get("FragmentShaderFile").getAsString();
 			Optional<String> geometryShaderFile = json.has("GeometryShaderFile") ? Optional.of(json.get("GeometryShaderFile").getAsString()) : Optional.empty();
-			String vertexShaderSource = loadGLSLFile(sourceFolder, new File(shaderFile.getParentFile(), vertexShaderFile + "." + VERTEX_SHADER_FORMAT));
-			String fragmentShaderSource = loadGLSLFile(sourceFolder, new File(shaderFile.getParentFile(), fragmentShaderFile + "." + FRAGMENT_SHADER_FORMAT));
-			Optional<String> geometryShaderSource = geometryShaderFile.isPresent() ? Optional.of(loadGLSLFile(sourceFolder, new File(shaderFile.getParentFile(), geometryShaderFile.get() + "." + GEOMETRY_SHADER_FORMAT))) : Optional.empty();
+			String vertexShaderSource = loadGLSLFile(libFolderLocation, shaderLocation.getParent().locationOfFile(vertexShaderFile + "." + VERTEX_SHADER_FORMAT));
+			String fragmentShaderSource = loadGLSLFile(libFolderLocation, shaderLocation.getParent().locationOfFile(fragmentShaderFile + "." + FRAGMENT_SHADER_FORMAT));
+			Optional<String> geometryShaderSource = geometryShaderFile.isPresent() ? Optional.of(loadGLSLFile(libFolderLocation, shaderLocation.getParent().locationOfFile(geometryShaderFile.get() + "." + GEOMETRY_SHADER_FORMAT))) : Optional.empty();
 			
 			VertexFormat attributeFormat = vertexFormat.isPresent() ? vertexFormat.get() : null;
 			if (vertexFormat.isEmpty()) {
@@ -204,7 +201,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 					String name = elementJson.get("Name").getAsString();
 					NumberFormat format = NumberFormat.byName(elementJson.get("Type").getAsString());
 					int count = elementJson.get("Count").getAsInt();
-					if (count > 4) throw new IllegalArgumentException("Failed to parse shader json '" + shaderFile.getName() +"': A attribute can not be larger than 4. Larger attributes should be split up into multiple attributes directly behind each other.");
+					if (count > 4) throw new IllegalArgumentException("Failed to parse shader json '" + shaderLocation.nameString() +"': A attribute can not be larger than 4. Larger attributes should be split up into multiple attributes directly behind each other.");
 					boolean normalize = elementJson.get("Normalize").getAsBoolean();
 					
 					attributeFormat.appand(name, format, count, normalize);
@@ -231,11 +228,11 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 				return shaderInstance;
 				
 			} catch (IllegalArgumentException e) {
-				throw new IOException("Failed to load shader '" + shaderFile.getName() + "' with exception:\n" + e.getMessage());
+				throw new IOException("Failed to load shader '" + shaderLocation.nameString() + "' with exception:\n" + e.getMessage());
 			}
 			
 		} catch (NullPointerException e) {
-			throw new IOException("Failed to load shader definition file '" + shaderFile.getName() + "'! Maleformed JSON!");
+			throw new IOException("Failed to load shader definition file '" + shaderLocation.nameString() + "'! Maleformed JSON!");
 		}
 		
 	}
@@ -245,18 +242,18 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	 * Resolves any #includes in the library file.
 	 * Used by {@link #load(File, Optional)}.
 	 * 
-	 * @param sourceFolder The folder containing the library files
-	 * @param fileName The name of the library to load
+	 * @param libFolderLocation The folder containing the library files
+	 * @param fileLocation The name of the library to load
 	 * @return The GLSL code of the library with all #includes resolved
 	 * @throws IOException If an error occurs accessing the files
 	 */
-	protected static String loadGLSLFile(File sourceFolder, File file) throws IOException {
+	protected String loadGLSLFile(R libFolderLocation, R fileLocation) throws IOException {
 		String line;
-		BufferedReader vertexShaderInputStream = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+		BufferedReader vertexShaderInputStream = new BufferedReader(new InputStreamReader(resourceLoader.getAsStream(sourceFolder, fileLocation)));
 		StringBuilder stringBuilder = new StringBuilder();
 		while ((line = vertexShaderInputStream.readLine()) != null) {
 			if (line.startsWith(INCLUDE_LINE)) {
-				String includeCode = loadGLSLFile(sourceFolder, new File(sourceFolder, line.substring(INCLUDE_LINE.length()) + "." + SHADER_LIB_FORMAT));
+				String includeCode = loadGLSLFile(libFolderLocation, libFolderLocation.locationOfFile(line.substring(INCLUDE_LINE.length()) + "." + SHADER_LIB_FORMAT));
 				stringBuilder.append(includeCode);
 			} else {
 				stringBuilder.append(line + "\n");

@@ -3,7 +3,7 @@ package de.m_marvin.voxelengine.utility;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
+import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.voxelengine.world.VoxelMaterial;
 
 public class VoxelMaterialRegistry {

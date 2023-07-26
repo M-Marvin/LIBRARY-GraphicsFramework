@@ -2,9 +2,9 @@ package de.m_marvin.voxelengine.screens.elements;
 
 import java.awt.Color;
 
-import de.m_marvin.openui.elements.UIButtonElement;
+import de.m_marvin.openui.dep.UIButtonElement;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
-import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
+import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.renderengine.textures.AbstractTextureMap;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.univec.impl.Vec2i;

@@ -1,6 +1,8 @@
 package de.m_marvin.renderengine.resources;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 /**
  * This interface is intended to be implemented by an enum or something similar, that lists all resource-folders that are used in the application.
@@ -10,7 +12,6 @@ import java.io.File;
  * 
  * @author Marvin Koehler
  */
-@FunctionalInterface
 public interface ISourceFolder {
 	
 	/**
@@ -21,5 +22,23 @@ public interface ISourceFolder {
 	 * @return The full path to the resource folder
 	 */
 	public File getPath(ResourceLoader<?, ?> loader, String namespace);
+
+	/**
+	 * Loads an InputStream of the given resource.
+	 * 
+	 * @param path The path to the resource, in most cases the return value of getPath()
+	 * @return An InputStream of the given resource
+	 * @throws FileNotFoundException if the resource does not exist
+	 */
+	public InputStream getAsStream(String path) throws FileNotFoundException;
+	
+	/**
+	 * Lists all files contained in the given folder.
+	 * Returns an empty array if the folder does not exist.
+	 * 
+	 * @param path  The path to the folder
+	 * @return A list of files contained in the given folder
+	 */
+	public String[] listFiles(String path);
 	
 }

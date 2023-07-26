@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -117,7 +115,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	 * 
 	 * @param textureFolderLocation The texture folder location of the textures to load
 	 * @param atlasName The additional custom name for the atlas
-	 * @param prioritizeAtlasHeight Decides if the aligment of the images in the atlas are oriented on the x or y axis
+	 * @param prioritizeAtlasHeight Decides if the alignment of the images in the atlas are oriented on the x or y axis
 	 * @param selectInterpolatedTextures If true, only interpolated textures are loaded into the atlas, if false only non interpolated textures are loaded, mixing is not allowed
 	 */
 	public void buildAtlasMapFromTextures(R textureFolderLocation, R atlasName, boolean prioritizeAtlasHeight, boolean selectInterpolatedTextures) {
@@ -137,13 +135,11 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	 */
 	public void buildSingleMapsFromTextures0(R textureFolderLocation) throws IOException {
 		
-		File path = resourceLoader.resolveLocation(sourceFolder, textureFolderLocation);
-		for (String textureName : listTextureNames(path)) {
+		for (String textureName : listTextureNames(textureFolderLocation)) {
 			
 			try {
-
-				File texturePath = new File(path, textureName);
-				TexturePack textureData = loadTexture(texturePath);
+				
+				TexturePack textureData = loadTexture(textureFolderLocation.locationOfFile(textureName));
 				R locationName = textureFolderLocation.locationOfFile(textureName);
 				
 				SingleTextureMap<R> map = new SingleTextureMap<R>(textureData.texture(), textureData.metaData().frames(), textureData.metaData().frametime(), textureData.metaData().interpolate());
@@ -164,13 +160,11 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	 * 
 	 * @param textureFolderLocation The texture folder location of the textures to load
 	 * @param atlasName The additional custom name for the atlas
-	 * @param prioritizeAtlasHeight Decides if the aligment of the images in the atlas are oriented on the x or y axis
+	 * @param prioritizeAtlasHeight Decides if the alignment of the images in the atlas are oriented on the x or y axis
 	 * @param selectInterpolatedTextures If true, only interpolated textures are loaded into the atlas, if false only non interpolated textures are loaded
 	 * @throws IOException If an error occurs accessing the texture files
 	 */
 	public void buildAtlasMapFromTexutes0(R textureFolderLocation, R atlasName, boolean prioritizeAtlasHeight, boolean selectInterpolatedTextures) throws IOException {
-
-		File path = resourceLoader.resolveLocation(sourceFolder, textureFolderLocation);
 		
 		AtlasTextureMap<R> map = new AtlasTextureMap<>();
 		List<R> locationsToLink = new ArrayList<>();
@@ -187,12 +181,11 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		);
 		
 		boolean addedImages = false;
-		for (String textureName : listTextureNames(path)) {
+		for (String textureName : listTextureNames(textureFolderLocation)) {
 			
 			try {
-
-				File texturePath = new File(path, textureName);
-				TexturePack textureData = loadTexture(texturePath);
+				
+				TexturePack textureData = loadTexture(textureFolderLocation.locationOfFile(textureName));
 				
 				if (textureData.metaData().interpolate() == selectInterpolatedTextures) {
 
@@ -235,17 +228,16 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	}
 
 	/**
-	 * Lists all texture names found in the fiven folder.
+	 * Lists all texture names found in the given folder.
 	 * Does not search in sub-folders.
 	 * 
-	 * @param textureFolder The folder to search for textures
+	 * @param textureFolder The folder location to search for textures
 	 * @return A list containing all found texture names
 	 * @throws IOException If an error occurs accessing the files
 	 */
-	protected static List<String> listTextureNames(File textureFolder) throws IOException {
-		if (!textureFolder.isDirectory()) throw new IOException("The texture folder path '" + textureFolder + "' ist not valid!");
+	protected List<String> listTextureNames(R textureFolder) throws IOException {
 		List<String> textureNames = new ArrayList<>();
-		for (String fileName : textureFolder.list()) {
+		for (String fileName : resourceLoader.listFilesIn(sourceFolder, textureFolder)) {
 			String[] fileNameParts = fileName.split("\\.");
 			if (fileNameParts.length > 1) {
 				int formatEndingLength = fileNameParts[fileNameParts.length - 1].length() + 1;
@@ -264,18 +256,24 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	 * @return A {@link TexturePack} containing all informations about the texture
 	 * @throws IOException If an error occurs accessing the files
 	 */
-	public static TexturePack loadTexture(File texturePath) throws IOException {
-		File textureMeta = new File(texturePath + "." + TEXTURE_META_DATA_FORMAT);
-		TextureMetaData metaData = textureMeta.isFile() ? loadJsonMetaData(new FileInputStream(textureMeta)) : DEFAULT_META_DATA;
-		File textureFile = new File(texturePath + "." + metaData.fileFormat());
-		if (!textureFile.isFile()) throw new FileNotFoundException("The texture file " + textureFile + " does not exist!");
-		BufferedImage texture = loadBufferedTexture(new FileInputStream(textureFile));
-		return new TexturePack(metaData, texture);
+	public TexturePack loadTexture(R textureLocation) throws IOException {
+		R textureMeta = textureLocation.append("." + TEXTURE_META_DATA_FORMAT);
+		TextureMetaData metaData = DEFAULT_META_DATA;
+		try {
+			metaData = loadJsonMetaData(resourceLoader.getAsStream(sourceFolder, textureMeta));
+		} catch (FileNotFoundException e) {}
+		R textureFile = textureLocation.append("." + metaData.fileFormat());
+		try {
+			BufferedImage texture = loadBufferedTexture(resourceLoader.getAsStream(sourceFolder, textureFile));
+			return new TexturePack(metaData, texture);
+		} catch (FileNotFoundException e) {
+			throw new FileNotFoundException("The texture file " + textureFile + " does not exist!");
+		}
 	}
 	
 	/**
 	 * Loads a texture from an input stream.
-	 * @param inputStream The input stream to read from
+	 * @param inputStream The {@link InputStream} to read from
 	 * @return The texture as {@link BufferedImage}
 	 * @throws IOException If an error occurs accessing the input stream
 	 */
@@ -290,15 +288,15 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	
 	/**
 	 * Loads the metadata of a texture from an input stream.
-	 * @param inputSteam The input stream to read from
+	 * @param inputStream The {@link InputStream} to read from
 	 * @return The metadata as {@link TextureMetaData}
 	 * @throws IOException If an error occurs accessing the input stream
 	 */
-	public static TextureMetaData loadJsonMetaData(InputStream inputSteam) throws IOException {
+	public static TextureMetaData loadJsonMetaData(InputStream inputStream) throws IOException {
 		
 		Gson gson = new Gson();
-		JsonObject metaJson = gson.fromJson(new InputStreamReader(inputSteam), JsonObject.class);
-		inputSteam.close();
+		JsonObject metaJson = gson.fromJson(new InputStreamReader(inputStream), JsonObject.class);
+		inputStream.close();
 		
 		int frameTime = metaJson.get("FrameTime").getAsInt();
 		

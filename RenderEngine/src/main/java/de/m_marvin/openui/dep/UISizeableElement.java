@@ -1,4 +1,4 @@
-package de.m_marvin.openui.elements;
+package de.m_marvin.openui.dep;
 
 import de.m_marvin.univec.impl.Vec2i;
 

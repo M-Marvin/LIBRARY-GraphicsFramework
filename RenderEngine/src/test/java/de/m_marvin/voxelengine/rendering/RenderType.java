@@ -8,7 +8,7 @@ import org.lwjgl.opengl.GL33;
 import com.google.common.base.Function;
 
 import de.m_marvin.renderengine.GLStateManager;
-import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
+import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.renderengine.vertices.RenderPrimitive;
 import de.m_marvin.renderengine.vertices.VertexFormat;
 import de.m_marvin.voxelengine.Utility;

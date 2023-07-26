@@ -6,7 +6,7 @@ import com.bulletphysics.linearmath.Transform;
 import de.m_marvin.physicengine.d3.physic.IRigidObject;
 import de.m_marvin.physicengine.d3.univec.SimplifiedRigidBody;
 import de.m_marvin.physicengine.d3.univec.UniVecHelper;
-import de.m_marvin.renderengine.resources.locationtemplates.ResourceLocation;
+import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.univec.impl.Vec3f;
 
