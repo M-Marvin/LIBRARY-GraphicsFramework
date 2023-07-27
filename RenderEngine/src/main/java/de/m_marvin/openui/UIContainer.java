@@ -31,6 +31,7 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	protected Map<RenderMode<R>, Map<Compound<R>, List<VertexBuffer>>> vertexBuffers;
 	protected List<VertexBuffer> emptyVAOs = new ArrayList<>();
 	protected Matrix4f projectionMatrix;
+	protected PoseStack matrixStack;
 	
 	public UIContainer() {
 		this(DEFAULT_INITIAL_BUFFER_SIZE);
@@ -47,7 +48,7 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	}
 	
 	public void screenResize(Vec2i size) {
-		this.projectionMatrix = Matrix4f.orthographic(0, size.x, 0, size.y, 0F, 1F);
+		this.projectionMatrix = Matrix4f.orthographic(0, size.x, 0, size.y, -1F, 1F);
 		this.compound.setSize(size);
 		this.compound.setSizeMin(size);
 		this.compound.setSizeMax(size);
@@ -61,16 +62,16 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	/* Rendering */
 	
 	public void updateOutdatedVAOs() {
+		this.matrixStack = new PoseStack();
 		this.compound.updateOutdatedVAOs(this);
 	}
 	
 	public void updateVAOs(Compound<R> component) {
-
-		PoseStack matrixStack = new PoseStack();
 		
+		matrixStack.translate(0, 0, -0.01F);
 		matrixStack.push();
-		component.drawBackground(this.bufferSource, matrixStack);
-		component.drawForeground(this.bufferSource, matrixStack);
+		component.drawBackground(this.bufferSource, this.matrixStack);
+		component.drawForeground(this.bufferSource, this.matrixStack);
 		matrixStack.pop();
 		
 		removeOutdatedVAOs(component);

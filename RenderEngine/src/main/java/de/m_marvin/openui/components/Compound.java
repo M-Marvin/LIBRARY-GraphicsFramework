@@ -17,10 +17,10 @@ public class Compound<R extends IResourceProvider<R>> {
 	protected Vec2i sizeMax;
 	protected Vec2i size;
 	protected Vec2i offset;
-	protected float marginLeft;
-	protected float marginRight;
-	protected float marginUp;
-	protected float marginDown;
+	protected int marginLeft;
+	protected int marginRight;
+	protected int marginTop;
+	protected int marginBottom;
 	
 	protected UIContainer<R> container;
 	protected Layout<?> layout;
@@ -29,23 +29,27 @@ public class Compound<R extends IResourceProvider<R>> {
 	protected boolean needsRedraw;
 	
 	public Compound() {
-		this.sizeMin = new Vec2i(-1, -1);
-		this.sizeMax = new Vec2i(-1, -1);
+		this.sizeMin = new Vec2i(20, 20);
+		this.sizeMax = new Vec2i(1000, 1000);
 		this.size = new Vec2i(30, 30);
 		this.offset = new Vec2i(0, 0);
-		this.marginLeft = 5;
-		this.marginRight = 5;
-		this.marginUp = 5;
-		this.marginDown = 5;
+		this.marginLeft = 0;
+		this.marginRight = 0;
+		this.marginTop = 0;
+		this.marginBottom = 0;
 		this.layout = null;
 		this.childComponents = new ArrayList<>();
 		this.needsRedraw = true;
 	}
 	
 	public void updateLayout() {
-		if (this.layout != null) this.layout.rearange(this, this.childComponents);
-		this.redraw();
 		for (Compound<R> c : this.childComponents) c.updateLayout();
+		if (this.layout != null) {
+			this.layout.rearange(this, this.childComponents);
+		} else {
+			this.size = this.sizeMin;
+		}
+		this.redraw();
 	}
 	
 	public void redraw() {
@@ -54,6 +58,7 @@ public class Compound<R extends IResourceProvider<R>> {
 	
 	protected void setContainer(UIContainer<R> container) {
 		this.container = container;
+		for (Compound<R> c : this.childComponents) c.setContainer(container);
 	}
 	
 	public void addComponent(Compound<R> childComponent) {
@@ -89,22 +94,36 @@ public class Compound<R extends IResourceProvider<R>> {
 	
 	public void setSizeMax(Vec2i sizeMax) {
 		this.sizeMax = sizeMax;
+		this.sizeMax.minI(sizeMax);
 	}
 	
 	public Vec2i getSizeMax() {
 		return sizeMax;
 	}
 	
+	public Vec2i getSizeMaxMargin() {
+		return sizeMax.add(new Vec2i(marginLeft + marginRight, marginTop + marginBottom));
+	}
+	
 	public void setSizeMin(Vec2i sizeMin) {
 		this.sizeMin = sizeMin;
+		this.sizeMax.maxI(sizeMin);
 	}
 	
 	public Vec2i getSizeMin() {
 		return sizeMin;
 	}
+
+	public Vec2i getSizeMinMargin() {
+		return sizeMin.add(new Vec2i(marginLeft + marginRight, marginTop + marginBottom));
+	}
 	
 	public void setOffset(Vec2i offset) {
 		this.offset = offset;
+	}
+
+	public void setOffsetMargin(Vec2i offset) {
+		this.offset = offset.add(new Vec2i(marginLeft, marginTop));
 	}
 	
 	public Vec2i getOffset() {
@@ -114,16 +133,24 @@ public class Compound<R extends IResourceProvider<R>> {
 	public void setSize(Vec2i size) {
 		this.size = size;
 	}
+
+	public void setSizeMargin(Vec2i size) {
+		setSize(size.sub(new Vec2i(marginLeft + marginRight, marginTop + marginBottom)));
+	}
 	
 	public Vec2i getSize() {
 		return size;
 	}
+
+	public Vec2i getSizeMargin() {
+		return size.add(new Vec2i(marginLeft + marginRight, marginTop + marginBottom));
+	}
 	
-	public void setMargin(float marginLeft, float marginRight, float marginUp, float marginDown) {
+	public void setMargin(int marginLeft, int marginRight, int marginUp, int marginDown) {
 		this.marginLeft = marginLeft;
 		this.marginRight = marginRight;
-		this.marginUp = marginUp;
-		this.marginDown = marginDown;
+		this.marginTop = marginUp;
+		this.marginBottom = marginDown;
 	}
 	
 	public float getMarginLeft() {
@@ -135,11 +162,11 @@ public class Compound<R extends IResourceProvider<R>> {
 	}
 	
 	public float getMarginUp() {
-		return marginUp;
+		return marginTop;
 	}
 	
 	public float getMarginDown() {
-		return marginDown;
+		return marginBottom;
 	}
 	
 	public void drawBackground(SimpleBufferSource<R> bufferSource, PoseStack matrixStack) {}

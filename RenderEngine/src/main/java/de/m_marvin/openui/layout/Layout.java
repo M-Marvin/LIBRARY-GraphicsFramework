@@ -18,7 +18,9 @@ public abstract class Layout<T extends Layout.LayoutData> {
 	public T getData(Compound<?> component) {
 		if (this.getDataClass().isInstance(component.getLayoutData())) return (T) component.getLayoutData();
 		try {
-			return getDataClass().getConstructor().newInstance();
+			T defaultData = (T) getDataClass().getConstructor().newInstance();
+			component.setLayoutData(defaultData);
+			return defaultData;
 		} catch (InstantiationException | IllegalAccessException 
 				| IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {

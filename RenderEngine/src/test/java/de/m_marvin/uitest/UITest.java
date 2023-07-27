@@ -1,5 +1,6 @@
 package de.m_marvin.uitest;
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -15,6 +16,11 @@ import de.m_marvin.enginetest.world.objects.TestBlockObject;
 import de.m_marvin.enginetest.world.objects.WorldObject;
 import de.m_marvin.openui.UIContainer;
 import de.m_marvin.openui.components.ButtonComponent;
+import de.m_marvin.openui.components.Compound;
+import de.m_marvin.openui.components.GroupBox;
+import de.m_marvin.openui.layout.BorderLayout;
+import de.m_marvin.openui.layout.BorderLayout.BorderSection;
+import de.m_marvin.openui.layout.BorderLayout.CornerStretch;
 import de.m_marvin.physicengine.d3.physic.RigidPhysicWorld;
 import de.m_marvin.physicengine.d3.util.BroadphaseAlgorithm;
 import de.m_marvin.renderengine.GLStateManager;
@@ -40,7 +46,6 @@ import de.m_marvin.renderengine.windows.Window;
 import de.m_marvin.simplelogging.printing.Logger;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.unimat.impl.Quaternion;
-import de.m_marvin.univec.impl.Vec2f;
 import de.m_marvin.univec.impl.Vec2i;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
@@ -216,17 +221,47 @@ public class UITest {
 		plate.getRigidBody().setPosition(new Vec3f(0F, -1F, 0F));
 		
 		this.uiContainer = new UIContainer<>();
+		this.uiContainer.getRootCompound().setLayout(new BorderLayout(CornerStretch.VERTICAL));
 		
-		ButtonComponent b = new ButtonComponent();
-		b.setSize(new Vec2i(100, 100));
+		Compound<ResourceLocation> b = new GroupBox<ResourceLocation>();
+		b.setLayout(new BorderLayout());
+		b.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.LEFT));
+		
+		ButtonComponent<ResourceLocation> bb1 = new ButtonComponent<>(Color.WHITE);
+		bb1.setSizeMin(new Vec2i(90, 25));
+		bb1.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.TOP));
+		b.addComponent(bb1);
+		
+		ButtonComponent<ResourceLocation> b1 = new ButtonComponent<ResourceLocation>(Color.RED);
+		b1.setSizeMin(new Vec2i(100, 100));
+		b1.setSize(new Vec2i(100, 100));
+		b1.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.TOP));
+		
+		ButtonComponent<ResourceLocation> b2 = new ButtonComponent<ResourceLocation>(Color.GREEN);
+		b2.setSizeMin(new Vec2i(100, 100));
+		b2.setSize(new Vec2i(100, 100));
+		b2.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.RIGHT));
+		
+		ButtonComponent<ResourceLocation> b3 = new ButtonComponent<ResourceLocation>(Color.BLUE);
+		b3.setSizeMin(new Vec2i(100, 100));
+		b3.setSize(new Vec2i(100, 100));
+		b3.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.BOTTOM));
+
+		ButtonComponent<ResourceLocation> b4 = new ButtonComponent<ResourceLocation>(Color.CYAN);
+		b4.setSizeMin(new Vec2i(100, 100));
+		b4.setSize(new Vec2i(100, 100));
 		
 		this.uiContainer.getRootCompound().addComponent(b);
+		this.uiContainer.getRootCompound().addComponent(b1);
+		this.uiContainer.getRootCompound().addComponent(b2);
+		this.uiContainer.getRootCompound().addComponent(b3);
+		this.uiContainer.getRootCompound().addComponent(b4);
 		
 		windowResized(new Vec2i(this.mainWindow.getSize()[0], this.mainWindow.getSize()[1]));
 		this.mainWindow.registerWindowListener((shouldClose, windowResize, focused, unfocused, maximized, restored) -> { if (windowResize.isPresent()) windowResized(windowResize.get()); });
 		
 	}
-	
+	 
 	public void windowResized(Vec2i screenSize) {
 		GLStateManager.resizeViewport(0, 0, screenSize.x, screenSize.y);
 		this.projectionMatrix = Matrix4f.perspective(50, screenSize.x / screenSize.y, 1F, screenSize.x);
