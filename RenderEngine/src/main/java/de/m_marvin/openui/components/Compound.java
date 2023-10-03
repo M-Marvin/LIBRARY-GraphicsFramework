@@ -1,5 +1,6 @@
 package de.m_marvin.openui.components;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,12 +44,10 @@ public class Compound<R extends IResourceProvider<R>> {
 	}
 	
 	public void updateLayout() {
-		for (Compound<R> c : this.childComponents) c.updateLayout();
 		if (this.layout != null) {
 			this.layout.rearange(this, this.childComponents);
-		} else {
-			this.size = this.sizeMin;
 		}
+		for (Compound<R> c : this.childComponents) c.updateLayout();
 		this.redraw();
 	}
 	
@@ -89,10 +88,16 @@ public class Compound<R extends IResourceProvider<R>> {
 	}
 	
 	public <D extends LayoutData, T extends Layout<D>> D getLayoutData(T layout) {
-		if (this.layoutData != null && this.layoutData.getClass() == layout.getDataClass()) {
-			return layout.getDataClass().cast(this.layoutData);
+		if (this.layoutData == null || this.layoutData.getClass() != layout.getDataClass()) {
+			try {
+				this.layoutData = layout.getDataClass().getConstructor().newInstance();
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+					| NoSuchMethodException | SecurityException e) {
+				e.printStackTrace();
+				return null;
+			}
 		}
-		return null;
+		return layout.getDataClass().cast(this.layoutData);
 	}
 	
 	public List<Compound<R>> getChildComponents() {
@@ -184,12 +189,13 @@ public class Compound<R extends IResourceProvider<R>> {
 	public void drawBackground(SimpleBufferSource<R> bufferSource, PoseStack matrixStack) {}
 	public void drawForeground(SimpleBufferSource<R> bufferSource, PoseStack matrixStack) {}
 	
-	public void updateOutdatedVAOs(UIContainer<R> container) {
+	public void updateOutdatedVAOs(UIContainer<R> container, Vec2i offset) {
 		if (this.needsRedraw) {
 			this.needsRedraw = false;
-			container.updateVAOs(this);
+			container.updateVAOs(this, offset);
 		}
-		for (Compound<R> c : this.childComponents) c.updateOutdatedVAOs(container);
+		Vec2i offset2 = offset.add(this.getOffset());
+		for (Compound<R> c : this.childComponents) c.updateOutdatedVAOs(container, offset2);
 	}
 	
 }

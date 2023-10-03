@@ -21,6 +21,7 @@ import de.m_marvin.openui.components.GroupBox;
 import de.m_marvin.openui.layout.BorderLayout;
 import de.m_marvin.openui.layout.BorderLayout.BorderSection;
 import de.m_marvin.openui.layout.BorderLayout.CornerStretch;
+import de.m_marvin.openui.layout.GridLayout;
 import de.m_marvin.physicengine.d3.physic.RigidPhysicWorld;
 import de.m_marvin.physicengine.d3.util.BroadphaseAlgorithm;
 import de.m_marvin.renderengine.GLStateManager;
@@ -224,13 +225,13 @@ public class UITest {
 		this.uiContainer.getRootCompound().setLayout(new BorderLayout(CornerStretch.VERTICAL));
 		
 		Compound<ResourceLocation> b = new GroupBox<ResourceLocation>();
-		b.setLayout(new BorderLayout());
+		//b.setLayout(new BorderLayout());
 		b.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.LEFT));
 		
-		ButtonComponent<ResourceLocation> bb1 = new ButtonComponent<>(Color.WHITE);
-		bb1.setSizeMin(new Vec2i(90, 25));
-		bb1.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.TOP));
-		b.addComponent(bb1);
+//		ButtonComponent<ResourceLocation> bb1 = new ButtonComponent<>(Color.WHITE);
+//		bb1.setSizeMin(new Vec2i(190, 25));
+//		bb1.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.TOP));
+		//b.addComponent(bb1);
 		
 		ButtonComponent<ResourceLocation> b1 = new ButtonComponent<ResourceLocation>(Color.RED);
 		b1.setSizeMin(new Vec2i(100, 100));
@@ -247,15 +248,33 @@ public class UITest {
 		b3.setSize(new Vec2i(100, 100));
 		b3.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.BOTTOM));
 
-		ButtonComponent<ResourceLocation> b4 = new ButtonComponent<ResourceLocation>(Color.CYAN);
-		b4.setSizeMin(new Vec2i(100, 100));
-		b4.setSize(new Vec2i(100, 100));
+//		ButtonComponent<ResourceLocation> b4 = new ButtonComponent<ResourceLocation>(Color.CYAN);
+//		b4.setSizeMin(new Vec2i(100, 100));
+//		b4.setSize(new Vec2i(100, 100));
+//		b4.setLayout(new GridLayout(true, true));
+		
+//		ButtonComponent<ResourceLocation> bbb1 = new ButtonComponent<>(Color.red);
+//		bbb1.setSizeMin(new Vec2i(40, 20));
+//		bbb1.setSizeMax(new Vec2i(80, 40));
+//		bbb1.setLayoutData(new GridLayout.GridLayoutData(0, 0));
+//
+//		ButtonComponent<ResourceLocation> bbb2 = new ButtonComponent<>(Color.red);
+//		bbb1.setSizeMin(new Vec2i(40, 20));
+//		bbb1.setSizeMax(new Vec2i(80, 40));
+//		bbb1.setLayoutData(new GridLayout.GridLayoutData(1, 0));
+//
+//		ButtonComponent<ResourceLocation> bbb3 = new ButtonComponent<>(Color.red);
+//		bbb1.setSizeMin(new Vec2i(40, 20));
+//		bbb1.setSizeMax(new Vec2i(80, 40));
+//		bbb1.setLayoutData(new GridLayout.GridLayoutData(1, 2));
+//		
+//		b4.addComponent(bbb1);
 		
 		this.uiContainer.getRootCompound().addComponent(b);
 		this.uiContainer.getRootCompound().addComponent(b1);
 		this.uiContainer.getRootCompound().addComponent(b2);
 		this.uiContainer.getRootCompound().addComponent(b3);
-		this.uiContainer.getRootCompound().addComponent(b4);
+		//this.uiContainer.getRootCompound().addComponent(b4);
 		
 		windowResized(new Vec2i(this.mainWindow.getSize()[0], this.mainWindow.getSize()[1]));
 		this.mainWindow.registerWindowListener((shouldClose, windowResize, focused, unfocused, maximized, restored) -> { if (windowResize.isPresent()) windowResized(windowResize.get()); });

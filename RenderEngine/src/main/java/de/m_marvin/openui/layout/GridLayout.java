@@ -1,6 +1,9 @@
 package de.m_marvin.openui.layout;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import de.m_marvin.openui.components.Compound;
 import de.m_marvin.renderengine.resources.IResourceProvider;
@@ -39,20 +42,21 @@ public class GridLayout extends Layout<GridLayout.GridLayoutData> {
 	}
 	
 	public <R extends IResourceProvider<R>> Vec2i countRowsAndColumns(List<Compound<R>> components) {
-		int row = 0, column = 0;
+		int row = -1, column = -1;
 		for (Compound<R> c : components) {
 			GridLayoutData data = c.getLayoutData(this);
+			if (data == null) continue;
 			if (data.row > row) row = data.row;
 			if (data.column > column) column = data.column;
 		}
-		return new Vec2i(row, column);
+		return new Vec2i(row + 1, column + 1);
 	}
 	
 	@Override
 	public <R extends IResourceProvider<R>> void rearange(Compound<R> compound, List<Compound<R>> childComponents) {
 		
 		Vec2i gridSize = countRowsAndColumns(childComponents);
-
+		
 		int[] rowWidthsMin = null;
 		int[] rowWidthsMax = null;
 		int[] columnHeightsMin = null;
@@ -86,7 +90,13 @@ public class GridLayout extends Layout<GridLayout.GridLayoutData> {
 			}
 		}
 		
+		for (int ix = 0; ix < gridSize.x; ix++) {
+			
+			
+			
+		}
 		
+		System.out.println(columnHeightsMax.length + " " + rowWidthsMax.length);
 		
 	}
 

@@ -50,8 +50,7 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	public void screenResize(Vec2i size) {
 		this.projectionMatrix = Matrix4f.orthographic(0, size.x, 0, size.y, -1F, 1F);
 		this.compound.setSize(size);
-		this.compound.setSizeMin(size);
-		this.compound.setSizeMax(size);
+		this.compound.fixSize();
 		this.compound.updateLayout();
 	}
 	
@@ -63,13 +62,14 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	
 	public void updateOutdatedVAOs() {
 		this.matrixStack = new PoseStack();
-		this.compound.updateOutdatedVAOs(this);
+		this.compound.updateOutdatedVAOs(this, new Vec2i(0, 0));
 	}
 	
-	public void updateVAOs(Compound<R> component) {
+	public void updateVAOs(Compound<R> component, Vec2i offset) {
 		
 		matrixStack.translate(0, 0, -0.01F);
 		matrixStack.push();
+		matrixStack.translate(offset.x, offset.y, 0);
 		component.drawBackground(this.bufferSource, this.matrixStack);
 		component.drawForeground(this.bufferSource, this.matrixStack);
 		matrixStack.pop();
