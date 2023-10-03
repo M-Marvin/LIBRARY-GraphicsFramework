@@ -88,6 +88,13 @@ public class Compound<R extends IResourceProvider<R>> {
 		return layoutData;
 	}
 	
+	public <D extends LayoutData, T extends Layout<D>> D getLayoutData(T layout) {
+		if (this.layoutData != null && this.layoutData.getClass() == layout.getDataClass()) {
+			return layout.getDataClass().cast(this.layoutData);
+		}
+		return null;
+	}
+	
 	public List<Compound<R>> getChildComponents() {
 		return childComponents;
 	}
@@ -136,6 +143,11 @@ public class Compound<R extends IResourceProvider<R>> {
 
 	public void setSizeMargin(Vec2i size) {
 		setSize(size.sub(new Vec2i(marginLeft + marginRight, marginTop + marginBottom)));
+	}
+	
+	public void fixSize() {
+		setSizeMin(getSize());
+		setSizeMax(getSize());
 	}
 	
 	public Vec2i getSize() {
