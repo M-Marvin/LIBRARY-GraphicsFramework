@@ -13,12 +13,13 @@ public class GridLayout extends Layout<GridLayout.GridLayoutData> {
 		public final int column;
 		public final int row;
 		public GridLayoutData(int column, int row) {
+			assert column > 0 && row > 0 : "Row and column index negative!";
 			this.column = column;
 			this.row = row;
 		}
 		public GridLayoutData() {
-			this.column = -1;
-			this.row = -1;
+			this.column = 0;
+			this.row = 0;
 		}
 	}
 	
@@ -52,104 +53,61 @@ public class GridLayout extends Layout<GridLayout.GridLayoutData> {
 		return new Vec2i(row + 1, column + 1);
 	}
 	
-	@SuppressWarnings("unchecked")
+	protected Vec2i minSizeRquired = new Vec2i();
+	
 	@Override
 	public <R extends IResourceProvider<R>> void rearange(Compound<R> compound, List<Compound<R>> childComponents) {
 		
-		Vec2i gridSize = countRowsAndColumns(childComponents);
+		Vec2i gridSize = new Vec2i(
+				childComponents.stream().mapToInt(c -> c.getLayoutData(this).column	).max().getAsInt() + 1,
+				childComponents.stream().mapToInt(c -> c.getLayoutData(this).row	).max().getAsInt() + 1
+		);
 		
-		Compound<R>[][] grid = (Compound<R>[][]) new Object[gridSize.x][gridSize.y];
-		for (int i = 0; i < grid.length; i++) grid[i] = (Compound<R>[]) new Object[gridSize.x];
+		int[][] widthsMinMax = IntStream
+			.range(0, gridSize.x)
+			.mapToObj(column ->
+				totalMinAndMax(
+					childComponents
+					.stream()
+					.filter(c -> c.getLayoutData(this).column == column)
+					.map(Layout::widthMinMax)
+					.toArray(i -> new int[i][i])
+				)
+			)
+			.toArray(i -> new int[i][i]);
+		int[] widths = fitSizes(compound.getSize().x, widthsMinMax);
 		
-		for (Compound<R> c : childComponents) {
-			GridLayoutData data = c.getLayoutData(this);
-			grid[data.column][data.row] = c;
+		int[][] heightsMinMax = IntStream
+				.range(0, gridSize.y)
+				.mapToObj(row ->
+					totalMinAndMax(
+						childComponents
+						.stream()
+						.filter(c -> c.getLayoutData(this).row == row)
+						.map(Layout::heightMinMax)
+						.toArray(i -> new int[i][i])
+					)
+				)
+				.toArray(i -> new int[i][i]);
+		int[] heights = fitSizes(compound.getSize().y, heightsMinMax);
+		
+		this.minSizeRquired = new Vec2i(minSizeRequired(widthsMinMax), minSizeRequired(heightsMinMax));
+		
+		for (Compound<R> component : childComponents) {
+			GridLayoutData data = component.getLayoutData(this);
+			int x = 0;
+			for (int i = 0; i < data.column; i++) x += widths[i];
+			int y = 0;
+			for (int i = 0; i < data.row; i++) y += heights[i];
+			component.setOffsetMargin(new Vec2i(x, y));
+			component.setSizeMargin(new Vec2i(widths[data.column], heights[data.row]));
 		}
 		
-		if (columnsEqualSize) {
-			int[] columnSizes = 
-					fitSizes(
-						compound.getSize().x,
-						IntStream.range(0, gridSize.x)
-						.mapToObj(column -> 
-							totalMinAndMax(
-									IntStream.range(0, gridSize.y)
-									.mapToObj(row -> grid[row][column])
-									.map(Layout::widthMinMax)
-									.toArray(i -> new int[2][i])
-							)
-						)
-						.toArray(i -> new int[2][i])
-					);					
+	}
 
-			for (Compound<R> c : childComponents) {
-				Vec2i newSize = c.getSizeMargin();
-				newSize.setX(columnSizes[c.getLayoutData(this).column]);
-				c.setSizeMargin(newSize);
-			}
-		} else {
-			for (int row = 0; row < gridSize.y; row++) {
-				int rowF = row;
-				
-				int[] columnSizes =
-						fitSizes(
-							compound.getSize().x,
-							IntStream.range(0, gridSize.x)
-							.mapToObj(column -> grid[column][rowF])
-							.map(Layout::widthMinMax)
-							.toArray(i -> new int[2][i])
-						);
-				
-				for (int column = 0; column < gridSize.x; column++) {
-					Vec2i newSize = grid[row][column].getSizeMargin();
-					newSize.setX(columnSizes[column]);
-					grid[row][column].setSizeMargin(newSize);
-				}
-			}
-		}
-		
-		if (rowsEquealSize) {
-			int[] rowSizes = 
-					fitSizes(
-						compound.getSize().y,	
-						IntStream.range(0, gridSize.y)
-						.mapToObj(row -> 
-							totalMinAndMax(
-									IntStream.range(0, gridSize.x)
-									.mapToObj(column -> grid[column][row])
-									.map(Layout::heightMinMax)
-									.toArray(i -> new int[2][i])
-							)
-						)
-						.toArray(i -> new int[2][i])
-					);					
-
-			for (Compound<R> c : childComponents) {
-				Vec2i newSize = c.getSizeMargin();
-				newSize.setY(rowSizes[c.getLayoutData(this).row]);
-				c.setSizeMargin(newSize);
-			}
-		} else {
-			for (int column = 0; column < gridSize.y; column++) {
-				int columnF = column;
-				
-				int[] rowSizes =
-						fitSizes(
-							compound.getSize().y,
-							IntStream.range(0, gridSize.y)
-							.mapToObj(row -> grid[row][columnF])
-							.map(Layout::heightMinMax)
-							.toArray(i -> new int[2][i])
-						);
-				
-				for (int row = 0; row < gridSize.y; row++) {
-					Vec2i newSize = grid[row][column].getSizeMargin();
-					newSize.setX(rowSizes[row]);
-					grid[row][column].setSizeMargin(newSize);
-				}
-			}
-		}
-		
+	@Override
+	public Vec2i getMinSizeRequired() {
+		return this.minSizeRquired;
 	}
 
 }

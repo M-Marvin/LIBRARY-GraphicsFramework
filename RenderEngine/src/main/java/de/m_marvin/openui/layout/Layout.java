@@ -5,13 +5,15 @@ import java.util.List;
 
 import de.m_marvin.openui.components.Compound;
 import de.m_marvin.renderengine.resources.IResourceProvider;
+import de.m_marvin.univec.impl.Vec2i;
 
 public abstract class Layout<T extends Layout.LayoutData> {
 	
 	public static class LayoutData {}
-	
+
+	public abstract Vec2i getMinSizeRequired();
 	public abstract <R extends IResourceProvider<R>> void rearange(Compound<R> compound, List<Compound<R>> childComponents);
-	
+
 	public abstract Class<T> getDataClass();
 	
 	@Deprecated
@@ -31,6 +33,7 @@ public abstract class Layout<T extends Layout.LayoutData> {
 		}
 	}
 	
+	// TODO Rework: Let small objects reach max size first (scale all objects with same step size)
 	public static int[] fitSizes(int totalSize, int[] ... sizeMinAndMax)  {
 		int min = 0, max = 0;
 		for (int i = 0; i < sizeMinAndMax.length; i++) {
@@ -46,22 +49,30 @@ public abstract class Layout<T extends Layout.LayoutData> {
 	}
 	
 	public static int[] widthMinMax(Compound<?> component) {
-		return component == null ? new int[] {0, 0} : new int[] {component.getSizeMin().x, component.getSizeMax().x};
+		return component == null ? new int[] {0, 0} : new int[] {component.getSizeMinMargin().x, component.getSizeMaxMargin().x};
 	}
 
 	public static int[] heightMinMax(Compound<?> component) {
-		return component == null ? new int[] {0, 0} : new int[] {component.getSizeMin().y, component.getSizeMax().y};
+		return component == null ? new int[] {0, 0} : new int[] {component.getSizeMinMargin().y, component.getSizeMaxMargin().y};
 	}
 	
 	public static int[] totalMinAndMax(int[] ... sizeMinAndMax) {
+		if (sizeMinAndMax.length == 0) return new int[] {0, 0};
 		int min = sizeMinAndMax[0][0];
 		int max = sizeMinAndMax[0][1];
 		for (int i = 0; i < sizeMinAndMax.length; i++) {
 			if (sizeMinAndMax[i][0] > min) min = sizeMinAndMax[i][0];
-			if (sizeMinAndMax[i][1] < max && sizeMinAndMax[i][1] != 0) max = sizeMinAndMax[i][1];
+			if ((sizeMinAndMax[i][1] < max || max == 0) && sizeMinAndMax[i][1] != 0) max = sizeMinAndMax[i][1];
 		}
 		if (min > max) return new int[] {min, min};
 		return new int[] {min, max};
+	}
+	
+	public static int minSizeRequired(int[]... sizeMinAndMax) {
+		if (sizeMinAndMax.length == 0) return 0;
+		int min = 0;
+		for (int[] minAndMax : sizeMinAndMax) min += minAndMax[0];
+		return min;
 	}
 	
 }

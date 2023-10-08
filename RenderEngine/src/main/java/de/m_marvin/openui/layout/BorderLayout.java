@@ -75,6 +75,8 @@ public class BorderLayout extends Layout<BorderLayout.BorderLayoutData> {
 		return maxSize > component.getSizeMaxMargin().y || maxSize == -1 ? component.getSizeMaxMargin().y : maxSize;
 	}
 	
+	protected Vec2i minSizeRequired = new Vec2i();
+	
 	@Override
 	public <R extends IResourceProvider<R>> void rearange(Compound<R> compound, List<Compound<R>> childComponents) {
 		
@@ -84,7 +86,7 @@ public class BorderLayout extends Layout<BorderLayout.BorderLayoutData> {
 			if (!compounds.containsKey(section)) compounds.put(section, c);
 		}
 		
-		int[] widths = fitSizes(compound.getSize().x, 
+		int[][] widthsMinMax = {
 				totalMinAndMax(
 						widthMinMax(compounds.get(BorderSection.BOTTOM_LEFT)),
 						widthMinMax(compounds.get(BorderSection.LEFT)),
@@ -92,31 +94,37 @@ public class BorderLayout extends Layout<BorderLayout.BorderLayoutData> {
 				),
 				totalMinAndMax(
 						widthMinMax(compounds.get(BorderSection.TOP)),
-						widthMinMax(compounds.get(BorderSection.TOP))
+						widthMinMax(compounds.get(BorderSection.CENTERED)),
+						widthMinMax(compounds.get(BorderSection.BOTTOM))
 				),
 				totalMinAndMax(
 						widthMinMax(compounds.get(BorderSection.BOTTOM_RIGHT)),
 						widthMinMax(compounds.get(BorderSection.RIGHT)),
 						widthMinMax(compounds.get(BorderSection.TOP_RIGHT))
 				)
-		);
+		};
+		int[] widths = fitSizes(compound.getSize().x, widthsMinMax);
 
-		int[] heights = fitSizes(compound.getSize().y, 
+		int[][] heightsMinMax = {
 				totalMinAndMax(
-						heightMinMax(compounds.get(BorderSection.BOTTOM_LEFT)),
-						heightMinMax(compounds.get(BorderSection.LEFT)),
+						heightMinMax(compounds.get(BorderSection.TOP_RIGHT)),
+						heightMinMax(compounds.get(BorderSection.TOP)),
 						heightMinMax(compounds.get(BorderSection.TOP_LEFT))
 				),
 				totalMinAndMax(
-						heightMinMax(compounds.get(BorderSection.TOP)),
-						heightMinMax(compounds.get(BorderSection.TOP))
+						heightMinMax(compounds.get(BorderSection.LEFT)),
+						heightMinMax(compounds.get(BorderSection.CENTERED)),
+						heightMinMax(compounds.get(BorderSection.RIGHT))
 				),
 				totalMinAndMax(
 						heightMinMax(compounds.get(BorderSection.BOTTOM_RIGHT)),
-						heightMinMax(compounds.get(BorderSection.RIGHT)),
-						heightMinMax(compounds.get(BorderSection.TOP_RIGHT))
+						heightMinMax(compounds.get(BorderSection.BOTTOM)),
+						heightMinMax(compounds.get(BorderSection.BOTTOM_LEFT))
 				)
-		);
+		};
+		int[] heights = fitSizes(compound.getSize().y, heightsMinMax);
+
+		this.minSizeRequired = new Vec2i(minSizeRequired(widthsMinMax), minSizeRequired(heightsMinMax));
 		
 		boolean leftTop = false;
 		boolean leftBottom = false;
@@ -172,6 +180,11 @@ public class BorderLayout extends Layout<BorderLayout.BorderLayoutData> {
 			compounds.get(BorderSection.CENTERED).setOffsetMargin(new Vec2i(widths[0], heights[0]));
 		}
 		
+	}
+
+	@Override
+	public Vec2i getMinSizeRequired() {
+		return this.minSizeRequired;
 	}
 
 }

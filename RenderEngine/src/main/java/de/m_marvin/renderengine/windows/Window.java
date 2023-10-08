@@ -213,6 +213,26 @@ public class Window {
 	}
 	
 	/**
+	 * Sets the minimum width and height of the window on the screen.
+	 * @param widthMin The min width
+	 * @param heightMin The min height
+	 */
+	public void setMinSize(int widthMin, int heightMin) {
+		setSizeLimits(widthMin, heightMin, GLFW.GLFW_DONT_CARE, GLFW.GLFW_DONT_CARE);
+	}
+	
+	/**
+	 * Sets the minimum and maximum width and height of the window on the screen.
+	 * @param widthMin The min width
+	 * @param heightMin The min height
+	 * @param widthMax The max width
+	 * @param heightMax The max height
+	 */
+	public void setSizeLimits(int widthMin, int heightMin, int widthMax, int heightMax) {
+		GLFW.glfwSetWindowSizeLimits(glWindow, widthMin, heightMin, widthMax, heightMax);
+	}
+	
+	/**
 	 * Returns the width and height of window on the screen.
 	 * @return An integer array of the length 2 containing the width and height values
 	 */

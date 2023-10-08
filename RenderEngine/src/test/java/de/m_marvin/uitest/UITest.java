@@ -225,35 +225,59 @@ public class UITest {
 		this.uiContainer.getRootCompound().setLayout(new BorderLayout(CornerStretch.VERTICAL));
 		
 		Compound<ResourceLocation> b = new ButtonComponent<ResourceLocation>(Color.CYAN);
-		//b.setLayout(new BorderLayout());
+		b.setSizeMin(new Vec2i(100, 100));
+		b.setSizeMax(new Vec2i(150, 0));
 		b.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.LEFT));
 		
 		ButtonComponent<ResourceLocation> b1 = new ButtonComponent<ResourceLocation>(Color.RED);
 		b1.setSizeMin(new Vec2i(100, 100));
-		b1.setSize(new Vec2i(100, 100));
+		b1.setSizeMax(new Vec2i(0, 150));
 		b1.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.TOP));
 		
 		ButtonComponent<ResourceLocation> b2 = new ButtonComponent<ResourceLocation>(Color.GREEN);
-		b2.setSizeMin(new Vec2i(100, 100));
-		b2.setSize(new Vec2i(100, 100));
+		b2.setSize(new Vec2i(100, 0));
+		b2.fixSize();
 		b2.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.RIGHT));
 		
 		ButtonComponent<ResourceLocation> b3 = new ButtonComponent<ResourceLocation>(Color.BLUE);
 		b3.setSizeMin(new Vec2i(100, 100));
-		b3.setSize(new Vec2i(100, 100));
+		b3.setSizeMax(new Vec2i(0, 150));
 		b3.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.BOTTOM));
 		
-		ButtonComponent<ResourceLocation> b5 = new ButtonComponent<ResourceLocation>(Color.YELLOW);
-		b5.setSizeMin(new Vec2i(100, 100));
-		b5.setSize(new Vec2i(100, 100));
+		ButtonComponent<ResourceLocation> b5 = new ButtonComponent<ResourceLocation>(new Color(1, 0, 1));
 		b5.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.CENTERED));
+		b5.setLayout(new GridLayout());
+		b5.setSizeMin(new Vec2i(10 * 60, 10 * 20));
+		
+		for (int i = 0; i < 10; i++) {
+			for (int t = 0; t < 10; t++) {
+				
+				Color color = Color.GRAY;
+				if (!(i == 0 || i == 9 || t == 0 || t == 9)) color = Color.WHITE;
+				
+				ButtonComponent<ResourceLocation> b6 = new ButtonComponent<>(color);
+				b6.setLayoutData(new GridLayout.GridLayoutData(i, t));
+				//b6.setMargin(0, 0, 0, 0);
+				b6.setSize(new Vec2i(60, 20));
+				b6.fixSize();
+				b5.addComponent(b6);
+				
+			}
+		}
+		
+		b5.autoSetMinSize();
 		
 		this.uiContainer.getRootCompound().addComponent(b);
 		this.uiContainer.getRootCompound().addComponent(b1);
 		this.uiContainer.getRootCompound().addComponent(b2);
 		this.uiContainer.getRootCompound().addComponent(b3);
-		//this.uiContainer.getRootCompound().addComponent(b4);
 		this.uiContainer.getRootCompound().addComponent(b5);
+		this.uiContainer.getRootCompound().autoSetMinSize();
+		
+		Vec2i minSize = this.uiContainer.calculateMinSize();
+		this.mainWindow.setMinSize(minSize.x, minSize.y);
+		
+		System.out.println(minSize);
 		
 		windowResized(new Vec2i(this.mainWindow.getSize()[0], this.mainWindow.getSize()[1]));
 		this.mainWindow.registerWindowListener((shouldClose, windowResize, focused, unfocused, maximized, restored) -> { if (windowResize.isPresent()) windowResized(windowResize.get()); });
@@ -262,7 +286,7 @@ public class UITest {
 	 
 	public void windowResized(Vec2i screenSize) {
 		GLStateManager.resizeViewport(0, 0, screenSize.x, screenSize.y);
-		this.projectionMatrix = Matrix4f.perspective(50, screenSize.x / screenSize.y, 1F, screenSize.x);
+		this.projectionMatrix = Matrix4f.perspective(50, screenSize.x / Math.max(1, screenSize.y), 1F, screenSize.x);
 		this.uiContainer.screenResize(screenSize);
 	}
 	

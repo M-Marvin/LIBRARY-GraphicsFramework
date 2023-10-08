@@ -114,7 +114,7 @@ public class Compound<R extends IResourceProvider<R>> {
 	}
 	
 	public Vec2i getSizeMaxMargin() {
-		return sizeMax.add(new Vec2i(marginLeft + marginRight, marginTop + marginBottom));
+		return sizeMax.add(new Vec2i(sizeMax.x > 0 ? marginLeft + marginRight : 0, sizeMax.y > 0 ? marginTop + marginBottom : 0));
 	}
 	
 	public void setSizeMin(Vec2i sizeMin) {
@@ -127,7 +127,7 @@ public class Compound<R extends IResourceProvider<R>> {
 	}
 
 	public Vec2i getSizeMinMargin() {
-		return sizeMin.add(new Vec2i(marginLeft + marginRight, marginTop + marginBottom));
+		return sizeMin.add(new Vec2i(sizeMin.x > 0 ? marginLeft + marginRight : 0, sizeMin.y > 0 ? marginTop + marginBottom : 0));
 	}
 	
 	public void setOffset(Vec2i offset) {
@@ -186,16 +186,33 @@ public class Compound<R extends IResourceProvider<R>> {
 		return marginBottom;
 	}
 	
+	public Vec2i calculateMinSize() {
+		updateLayout();
+		Vec2i minSize = this.getSizeMin();
+		if (this.layout != null) {
+			return minSize.max(this.layout.getMinSizeRequired());
+		}
+		return minSize;
+	}
+	
+	public void autoSetMinSize() {
+		this.setSizeMin(new Vec2i());
+		this.setSizeMin(calculateMinSize());
+	}
+	
+	// TODO autoSetMaxSize for centered objects
+	
 	public void drawBackground(SimpleBufferSource<R> bufferSource, PoseStack matrixStack) {}
 	public void drawForeground(SimpleBufferSource<R> bufferSource, PoseStack matrixStack) {}
 	
-	public void updateOutdatedVAOs(UIContainer<R> container, Vec2i offset) {
+	public void updateOutdatedVAOs(UIContainer<R> container, Vec2i offset, PoseStack matrixStack) {
 		if (this.needsRedraw) {
 			this.needsRedraw = false;
 			container.updateVAOs(this, offset);
 		}
 		Vec2i offset2 = offset.add(this.getOffset());
-		for (Compound<R> c : this.childComponents) c.updateOutdatedVAOs(container, offset2);
+		matrixStack.translate(0, 0, -0.001F);
+		for (Compound<R> c : this.childComponents) c.updateOutdatedVAOs(container, offset2, matrixStack);
 	}
 	
 }
