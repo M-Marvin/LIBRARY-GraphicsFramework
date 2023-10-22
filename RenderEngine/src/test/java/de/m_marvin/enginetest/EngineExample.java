@@ -1,29 +1,21 @@
 package de.m_marvin.enginetest;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL33;
 
-import de.m_marvin.physicengine.d3.physic.RigidPhysicWorld;
-import de.m_marvin.physicengine.d3.util.BroadphaseAlgorithm;
+import de.m_marvin.enginetest.particles.Particle;
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.BufferUsage;
-import de.m_marvin.renderengine.buffers.IBufferBuilder;
 import de.m_marvin.renderengine.buffers.VertexBuffer;
 import de.m_marvin.renderengine.inputbinding.UserInput;
 import de.m_marvin.renderengine.inputbinding.bindingsource.KeySource;
-import de.m_marvin.renderengine.models.OBJLoader;
-import de.m_marvin.renderengine.models.RawModel;
 import de.m_marvin.renderengine.resources.ResourceLoader;
 import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.renderengine.shaders.ShaderInstance;
 import de.m_marvin.renderengine.shaders.ShaderLoader;
-import de.m_marvin.renderengine.textures.AbstractTextureMap;
-import de.m_marvin.renderengine.textures.ITextureSampler;
 import de.m_marvin.renderengine.textures.utility.TextureLoader;
 import de.m_marvin.renderengine.translation.Camera;
 import de.m_marvin.renderengine.utility.NumberFormat;
@@ -32,20 +24,12 @@ import de.m_marvin.renderengine.vertices.VertexFormat;
 import de.m_marvin.renderengine.windows.Window;
 import de.m_marvin.simplelogging.printing.Logger;
 import de.m_marvin.uitest.ResourceFolders;
-import de.m_marvin.uitest.world.objects.GroundPlateObject;
-import de.m_marvin.uitest.world.objects.KorbuvaObject;
-import de.m_marvin.uitest.world.objects.MotorObject;
-import de.m_marvin.uitest.world.objects.TestBlockObject;
-import de.m_marvin.uitest.world.objects.WorldObject;
 import de.m_marvin.unimat.impl.Matrix4f;
-import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec2i;
 import de.m_marvin.univec.impl.Vec3d;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
-import de.m_marvin.univec.impl.Vec4f;
 import de.m_marvin.voxelengine.VoxelEngine;
-import de.m_marvin.voxelengine.rendering.BufferSource;
 
 public class EngineExample {
 
@@ -143,6 +127,10 @@ public class EngineExample {
 		long secondTimer = timeMillis;
 		long lastFrameTime = 0;
 		
+		Thread physicsThread = new Thread(this::runPhysics);
+		physicsThread.setDaemon(true);
+		physicsThread.start();
+		
 		while (!mainWindow.shouldClose()) {
 			
 			lastFrameTime = timeMillis;
@@ -201,27 +189,49 @@ public class EngineExample {
 		physicWorld = new Space3D();
 		
 		Random r = new Random();
-		int spread = 100;
-		int spread2 = 4;
+		int spread = 0;
+		int spread2 = 1;
 		
-		physicWorld.getParticles().add(new Particle(new Vec3d(0, 0, 0), 4E13, new Vec3d(0, 1, 0), new Vec4f(0, 0, 1, 1)));
-		
-		physicWorld.getParticles().add(new Particle(new Vec3d(10, 0, 0), 1000, new Vec3d(0, 0, 3), new Vec4f(0, 0, 1, 1)));
-
-		physicWorld.getParticles().add(new Particle(new Vec3d(40, 10, -5), 4E13, new Vec3d(0, 2, 0), new Vec4f(0, 0, 1, 1)));
-		
-		physicWorld.getParticles().add(new Particle(new Vec3d(40, 10, -5), 0.001, new Vec3d(1, 1, 1), new Vec4f(0, 0, 1, 1)));
-		
-		physicWorld.getParticles().add(new Particle(new Vec3d(10, 0, 20), 99E10, new Vec3d(0, 0, -3), new Vec4f(0, 0, 1, 1)));
 		for (int i = 0; i < 30; i++) {
 
 			Vec3d pos = new Vec3d((r.nextFloat() - 0.5F) * spread, (r.nextFloat() - 0.5F) * spread, (r.nextFloat() - 0.5F) * spread);
 			Vec3d velocity = new Vec3d((r.nextFloat() - 0.5F) * spread2, (r.nextFloat() - 0.5F) * spread2, (r.nextFloat() - 0.5F) * spread2);
-			long mass = (long) (r.nextFloat() * 1000);
+			ParticleType type = r.nextBoolean() ? ParticleType.PROTON : ParticleType.NEUTRON; //ParticleType.values()[r.nextInt(3)];
 			
-			physicWorld.getParticles().add(new Particle(pos, mass, velocity, new Vec4f(r.nextFloat(), r.nextFloat(), r.nextFloat(), 1)));
+			physicWorld.getParticles().add(type.create(pos, velocity));
 			
 		}
+		
+//		spread = 10;
+//		for (int i = 0; i < 30; i++) {
+//
+//			Vec3d pos = new Vec3d((r.nextFloat() - 0.5F) * spread, (r.nextFloat() - 0.5F) * spread, (r.nextFloat() - 0.5F) * spread);
+//			Vec3d velocity = new Vec3d((r.nextFloat() - 0.5F) * spread2, (r.nextFloat() - 0.5F) * spread2, (r.nextFloat() - 0.5F) * spread2);
+//			ParticleType type = ParticleType.ELECTRON;
+//			
+//			physicWorld.getParticles().add(type.create(pos, velocity));
+//			
+//		}
+		
+//		physicWorld.getParticles().add(new Particle(new Vec3d(0, 0, 0), new Vec3d(0, 1, 0), 4E13, -1, Particle.COLOR_CHARGE_WHITE.get(), Particle.WEAK_CHARGE_Z));
+//		
+//		physicWorld.getParticles().add(new Particle(new Vec3d(10, 0, 0), new Vec3d(0, 0, 3), 1000, +1, Particle.COLOR_CHARGE_WHITE.get(), Particle.WEAK_CHARGE_Z));
+//
+//		physicWorld.getParticles().add(new Particle(new Vec3d(40, 10, -5), new Vec3d(0, 2, 0), 4E13, +1, Particle.COLOR_CHARGE_WHITE.get(), Particle.WEAK_CHARGE_Z));
+//		
+//		physicWorld.getParticles().add(new Particle(new Vec3d(40, 10, -5), new Vec3d(1, 1, 1), 0.001, 0, Particle.COLOR_CHARGE_WHITE.get(), Particle.WEAK_CHARGE_Z));
+//		
+//		physicWorld.getParticles().add(new Particle(new Vec3d(10, 0, 20), new Vec3d(0, 0, -3), 99E10, 0, Particle.COLOR_CHARGE_WHITE.get(), Particle.WEAK_CHARGE_Z));
+//		for (int i = 0; i < 30; i++) {
+//
+//			Vec3d pos = new Vec3d((r.nextFloat() - 0.5F) * spread, (r.nextFloat() - 0.5F) * spread, (r.nextFloat() - 0.5F) * spread);
+//			Vec3d velocity = new Vec3d((r.nextFloat() - 0.5F) * spread2, (r.nextFloat() - 0.5F) * spread2, (r.nextFloat() - 0.5F) * spread2);
+//			double mass = r.nextFloat() * 1000;
+//			double charge = (r.nextFloat() > 0.3F) ? (r.nextDouble() - 0.5) * 0.0004 : 0;
+//			
+//			physicWorld.getParticles().add(new Particle(pos, velocity, mass, charge, Particle.COLOR_CHARGE_WHITE.get(), Particle.WEAK_CHARGE_Z));
+//			
+//		}
 		
 	}
 	
@@ -302,8 +312,17 @@ public class EngineExample {
 		}
 		
 		mainCamera.upadteViewMatrix();
-
-		physicWorld.stepPhysic(tickTime / 1000F);
+		
+	}
+	
+	protected void runPhysics() {
+		
+		double lastTime = 1;
+		while (!this.mainWindow.shouldClose()) {
+			long timeStart = System.currentTimeMillis();
+			physicWorld.stepPhysic(lastTime / 1000);
+			lastTime = System.currentTimeMillis() - timeStart;
+		}
 		
 	}
 	
