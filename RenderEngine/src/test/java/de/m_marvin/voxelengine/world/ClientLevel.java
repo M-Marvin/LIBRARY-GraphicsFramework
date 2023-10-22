@@ -3,11 +3,11 @@ package de.m_marvin.voxelengine.world;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.m_marvin.enginetest.world.objects.GroundPlateObject;
-import de.m_marvin.enginetest.world.objects.WorldObject;
 import de.m_marvin.physicengine.d3.physic.IRigidObject;
 import de.m_marvin.physicengine.d3.physic.RigidPhysicWorld;
 import de.m_marvin.physicengine.d3.util.BroadphaseAlgorithm;
+import de.m_marvin.uitest.world.objects.GroundPlateObject;
+import de.m_marvin.uitest.world.objects.WorldObject;
 import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;

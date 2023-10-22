@@ -2,7 +2,6 @@ package de.m_marvin.openui.components;
 
 import java.awt.Color;
 
-import de.m_marvin.openui.layout.GridLayout.GridLayoutData;
 import de.m_marvin.openui.rendering.UIRenderModes;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.defimpl.RenderMode;
@@ -10,7 +9,6 @@ import de.m_marvin.renderengine.buffers.defimpl.SimpleBufferSource;
 import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.renderengine.translation.PoseStack;
-import de.m_marvin.univec.impl.Vec2i;
 
 public class ButtonComponent<R extends IResourceProvider<R>> extends Compound<R> {
 	

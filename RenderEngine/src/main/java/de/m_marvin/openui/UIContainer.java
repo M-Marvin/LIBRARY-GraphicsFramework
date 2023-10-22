@@ -47,6 +47,11 @@ public class UIContainer<R extends IResourceProvider<R>> {
 		screenResize(new Vec2i(1000, 600));
 	}
 	
+	/**
+	 * Change screen size of the UI container and update layout.
+	 * 
+	 * @param size Screen size in pixels
+	 */
 	public void screenResize(Vec2i size) {
 		this.projectionMatrix = Matrix4f.orthographic(0, size.x, 0, size.y, -1F, 1F);
 		this.compound.setSize(size);
@@ -57,12 +62,15 @@ public class UIContainer<R extends IResourceProvider<R>> {
 		return compound;
 	}
 	
-	public Vec2i calculateMinSize() {
+	public Vec2i calculateMinScreenSize() {
 		return compound.calculateMinSize();
 	}
 	
 	/* Rendering */
 	
+	/**
+	 * Check if any components need to be redrawn, and update the VAOs.
+	 */
 	public void updateOutdatedVAOs() {
 		this.matrixStack = new PoseStack();
 		this.compound.updateOutdatedVAOs(this, new Vec2i(0, 0), this.matrixStack);
@@ -129,7 +137,14 @@ public class UIContainer<R extends IResourceProvider<R>> {
 			}
 		}
 	}
-
+	
+	/**
+	 * Render the cached VAOs.<br>
+	 * <b>NEEDS TO BE CALLED ON RENDER THREAD</b>
+	 * 
+	 * @param shaderLoader Shader loader
+	 * @param textureLoader Texture loader
+	 */
 	public void renderVAOs(ShaderLoader<R, ? extends ISourceFolder> shaderLoader, TextureLoader<R, ? extends ISourceFolder> textureLoader) {
 		
 		for (RenderMode<R> renderMode : this.vertexBuffers.keySet()) {

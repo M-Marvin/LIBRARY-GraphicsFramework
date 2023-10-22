@@ -1,4 +1,4 @@
-package de.m_marvin.enginetest.world.objects;
+package de.m_marvin.uitest.world.objects;
 
 import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.linearmath.Transform;

@@ -8,16 +8,9 @@ import java.util.Random;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL33;
 
-import de.m_marvin.enginetest.ResourceFolders;
-import de.m_marvin.enginetest.world.objects.GroundPlateObject;
-import de.m_marvin.enginetest.world.objects.KorbuvaObject;
-import de.m_marvin.enginetest.world.objects.MotorObject;
-import de.m_marvin.enginetest.world.objects.TestBlockObject;
-import de.m_marvin.enginetest.world.objects.WorldObject;
 import de.m_marvin.openui.UIContainer;
 import de.m_marvin.openui.components.ButtonComponent;
 import de.m_marvin.openui.components.Compound;
-import de.m_marvin.openui.components.GroupBox;
 import de.m_marvin.openui.layout.BorderLayout;
 import de.m_marvin.openui.layout.BorderLayout.BorderSection;
 import de.m_marvin.openui.layout.BorderLayout.CornerStretch;
@@ -45,6 +38,11 @@ import de.m_marvin.renderengine.vertices.RenderPrimitive;
 import de.m_marvin.renderengine.vertices.VertexFormat;
 import de.m_marvin.renderengine.windows.Window;
 import de.m_marvin.simplelogging.printing.Logger;
+import de.m_marvin.uitest.world.objects.GroundPlateObject;
+import de.m_marvin.uitest.world.objects.KorbuvaObject;
+import de.m_marvin.uitest.world.objects.MotorObject;
+import de.m_marvin.uitest.world.objects.TestBlockObject;
+import de.m_marvin.uitest.world.objects.WorldObject;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec2i;
@@ -188,40 +186,7 @@ public class UITest {
 		
 	}
 	
-	public void setup() {
-		
-		// Setup keybindings
-		inputHandler.registerBinding("movement.forward").addBinding(KeySource.getKey(GLFW.GLFW_KEY_W));
-		inputHandler.registerBinding("movement.backward").addBinding(KeySource.getKey(GLFW.GLFW_KEY_S));
-		inputHandler.registerBinding("movement.left").addBinding(KeySource.getKey(GLFW.GLFW_KEY_A));
-		inputHandler.registerBinding("movement.right").addBinding(KeySource.getKey(GLFW.GLFW_KEY_D));
-		inputHandler.registerBinding("movement.rollleft").addBinding(KeySource.getKey(GLFW.GLFW_KEY_Q));
-		inputHandler.registerBinding("movement.rollright").addBinding(KeySource.getKey(GLFW.GLFW_KEY_E));
-		inputHandler.registerBinding("movement.orientate").addBinding(KeySource.getKey(GLFW.GLFW_KEY_LEFT_ALT));
-		inputHandler.registerBinding("physic.activate").addBinding(KeySource.getKey(GLFW.GLFW_KEY_P));
-		inputHandler.registerBinding("spawn_object").addBinding(KeySource.getKey(GLFW.GLFW_KEY_O));
-		
-		// Load shader, textures and models
-		shaderLoader.loadShadersIn(WORLD_SHADER_LOCATION, SHADER_LIB_LOCATION);
-		shaderLoader.loadShadersIn(OPENUI_SHADER_LOCATION, SHADER_LIB_LOCATION);
-		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS, false, false);
-		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS_INTERPOLATED, false, true);
-		modelLoader.loadModelsIn(OBJECT_MODEL_LOCATION, OBJECT_TEXTURE_LOCATION);
-		
-		// Setup world
-		physicWorld = new RigidPhysicWorld<WorldObject>(new Vec3f(-1000F, -1000F, -1000F), new Vec3f(1000F, 1000F, 1000F), BroadphaseAlgorithm.SIMPLE);
-		physicWorld.setGravity(new Vec3f(0F, -9.8F, 0F));
-		
-		// Compile models to VAO
-		modelLoader.getCachedModels().forEach((modelName) -> compileModel(modelName));
-		
-		// Create ground plate
-		WorldObject plate = new GroundPlateObject();
-		physicWorld.addObject(plate);
-		plate.getRigidBody().setOrientation(new Quaternion(new Vec3i(1, 0, 0), 0));
-		plate.getRigidBody().setPosition(new Vec3f(0F, -1F, 0F));
-		
-		this.uiContainer = new UIContainer<>();
+	public void makeDebugScreen() {
 		this.uiContainer.getRootCompound().setLayout(new BorderLayout(CornerStretch.VERTICAL));
 		
 		Compound<ResourceLocation> b = new ButtonComponent<ResourceLocation>(Color.CYAN);
@@ -274,7 +239,46 @@ public class UITest {
 		this.uiContainer.getRootCompound().addComponent(b5);
 		this.uiContainer.getRootCompound().autoSetMinSize();
 		
-		Vec2i minSize = this.uiContainer.calculateMinSize();
+	}
+	
+	public void setup() {
+		
+		// Setup keybindings
+		inputHandler.registerBinding("movement.forward").addBinding(KeySource.getKey(GLFW.GLFW_KEY_W));
+		inputHandler.registerBinding("movement.backward").addBinding(KeySource.getKey(GLFW.GLFW_KEY_S));
+		inputHandler.registerBinding("movement.left").addBinding(KeySource.getKey(GLFW.GLFW_KEY_A));
+		inputHandler.registerBinding("movement.right").addBinding(KeySource.getKey(GLFW.GLFW_KEY_D));
+		inputHandler.registerBinding("movement.rollleft").addBinding(KeySource.getKey(GLFW.GLFW_KEY_Q));
+		inputHandler.registerBinding("movement.rollright").addBinding(KeySource.getKey(GLFW.GLFW_KEY_E));
+		inputHandler.registerBinding("movement.orientate").addBinding(KeySource.getKey(GLFW.GLFW_KEY_LEFT_ALT));
+		inputHandler.registerBinding("physic.activate").addBinding(KeySource.getKey(GLFW.GLFW_KEY_P));
+		inputHandler.registerBinding("spawn_object").addBinding(KeySource.getKey(GLFW.GLFW_KEY_O));
+		
+		// Load shader, textures and models
+		shaderLoader.loadShadersIn(WORLD_SHADER_LOCATION, SHADER_LIB_LOCATION);
+		shaderLoader.loadShadersIn(OPENUI_SHADER_LOCATION, SHADER_LIB_LOCATION);
+		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS, false, false);
+		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS_INTERPOLATED, false, true);
+		modelLoader.loadModelsIn(OBJECT_MODEL_LOCATION, OBJECT_TEXTURE_LOCATION);
+		
+		// Setup world
+		physicWorld = new RigidPhysicWorld<WorldObject>(new Vec3f(-1000F, -1000F, -1000F), new Vec3f(1000F, 1000F, 1000F), BroadphaseAlgorithm.SIMPLE);
+		physicWorld.setGravity(new Vec3f(0F, -9.8F, 0F));
+		
+		// Compile models to VAO
+		modelLoader.getCachedModels().forEach((modelName) -> compileModel(modelName));
+		
+		// Create ground plate
+		WorldObject plate = new GroundPlateObject();
+		physicWorld.addObject(plate);
+		plate.getRigidBody().setOrientation(new Quaternion(new Vec3i(1, 0, 0), 0));
+		plate.getRigidBody().setPosition(new Vec3f(0F, -1F, 0F));
+		
+		this.uiContainer = new UIContainer<>();
+		
+		//makeDebugScreen();
+		
+		Vec2i minSize = this.uiContainer.calculateMinScreenSize();
 		this.mainWindow.setMinSize(minSize.x, minSize.y);
 		
 		System.out.println(minSize);
@@ -283,10 +287,10 @@ public class UITest {
 		this.mainWindow.registerWindowListener((shouldClose, windowResize, focused, unfocused, maximized, restored) -> { if (windowResize.isPresent()) windowResized(windowResize.get()); });
 		
 	}
-	 
+	
 	public void windowResized(Vec2i screenSize) {
 		GLStateManager.resizeViewport(0, 0, screenSize.x, screenSize.y);
-		this.projectionMatrix = Matrix4f.perspective(50, screenSize.x / Math.max(1, screenSize.y), 1F, screenSize.x);
+		this.projectionMatrix = Matrix4f.perspective(50, screenSize.x / (float) Math.max(1, screenSize.y), 1F, 100F);
 		this.uiContainer.screenResize(screenSize);
 	}
 	

@@ -1,4 +1,4 @@
-package de.m_marvin.enginetest;
+package de.m_marvin.uitest;
 
 import java.io.File;
 import java.io.FileInputStream;

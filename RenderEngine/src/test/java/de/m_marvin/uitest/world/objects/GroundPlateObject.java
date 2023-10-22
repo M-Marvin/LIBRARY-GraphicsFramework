@@ -1,4 +1,4 @@
-package de.m_marvin.enginetest.world.objects;
+package de.m_marvin.uitest.world.objects;
 
 import javax.vecmath.Vector3f;
 

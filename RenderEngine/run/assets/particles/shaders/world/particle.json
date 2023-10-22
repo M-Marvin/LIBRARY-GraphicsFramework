@@ -1,0 +1,16 @@
+{
+	"VertexShaderFile": "particle",
+	"FragmentShaderFile": "particle",
+	"GeometryShaderFile": "particle",
+	"Uniforms": [
+		{ "Name": "ViewMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
+		{ "Name": "ProjMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
+		{ "Name": "TranMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
+		{ "Name": "HalfVoxelSize", "Type": "float", "Value": 1.0 }
+	],
+	"Attributes": [
+		{ "Name": "position", "Type": "float", "Count": 3, "Normalize": false },
+		{ "Name": "color", "Type": "float", "Count": 4, "Normalize": false },
+		{ "Name": "size", "Type": "float", "Count": 1, "Normalize": false }
+	]
+}

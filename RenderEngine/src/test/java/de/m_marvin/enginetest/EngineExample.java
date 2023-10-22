@@ -7,16 +7,12 @@ import java.util.Random;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL33;
 
-import de.m_marvin.enginetest.world.objects.GroundPlateObject;
-import de.m_marvin.enginetest.world.objects.KorbuvaObject;
-import de.m_marvin.enginetest.world.objects.MotorObject;
-import de.m_marvin.enginetest.world.objects.TestBlockObject;
-import de.m_marvin.enginetest.world.objects.WorldObject;
 import de.m_marvin.physicengine.d3.physic.RigidPhysicWorld;
 import de.m_marvin.physicengine.d3.util.BroadphaseAlgorithm;
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.BufferUsage;
+import de.m_marvin.renderengine.buffers.IBufferBuilder;
 import de.m_marvin.renderengine.buffers.VertexBuffer;
 import de.m_marvin.renderengine.inputbinding.UserInput;
 import de.m_marvin.renderengine.inputbinding.bindingsource.KeySource;
@@ -35,11 +31,21 @@ import de.m_marvin.renderengine.vertices.RenderPrimitive;
 import de.m_marvin.renderengine.vertices.VertexFormat;
 import de.m_marvin.renderengine.windows.Window;
 import de.m_marvin.simplelogging.printing.Logger;
+import de.m_marvin.uitest.ResourceFolders;
+import de.m_marvin.uitest.world.objects.GroundPlateObject;
+import de.m_marvin.uitest.world.objects.KorbuvaObject;
+import de.m_marvin.uitest.world.objects.MotorObject;
+import de.m_marvin.uitest.world.objects.TestBlockObject;
+import de.m_marvin.uitest.world.objects.WorldObject;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.unimat.impl.Quaternion;
+import de.m_marvin.univec.impl.Vec2i;
+import de.m_marvin.univec.impl.Vec3d;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
+import de.m_marvin.univec.impl.Vec4f;
 import de.m_marvin.voxelengine.VoxelEngine;
+import de.m_marvin.voxelengine.rendering.BufferSource;
 
 public class EngineExample {
 
@@ -54,7 +60,7 @@ public class EngineExample {
 		return instance;
 	}
 	
-	public static final String NAMESPACE = "example";
+	public static final String NAMESPACE = "particles";
 	
 	public static final ResourceLocation OBJECT_MODEL_LOCATION = new ResourceLocation(NAMESPACE, "objects");
 	public static final ResourceLocation OBJECT_TEXTURE_LOCATION = new ResourceLocation(NAMESPACE, "objects");
@@ -66,15 +72,13 @@ public class EngineExample {
 	private ResourceLoader<ResourceLocation, ResourceFolders> resourceLoader;
 	private ShaderLoader<ResourceLocation, ResourceFolders> shaderLoader;
 	private TextureLoader<ResourceLocation, ResourceFolders> textureLoader;
-	private OBJLoader<ResourceLocation, ResourceFolders> modelLoader;
 	private UserInput inputHandler;
 	
 	protected Camera mainCamera;
 	protected Matrix4f projectionMatrix = Matrix4f.perspective(50, 1000F / 600F, 1F, 1000F);
 	
-	protected RigidPhysicWorld<WorldObject> physicWorld;
-	protected Map<ResourceLocation, VertexBuffer> name2vertexMap = new HashMap<>();
-	protected final VertexFormat objectFormat = new VertexFormat().appand("position", NumberFormat.FLOAT, 3, false).appand("normal", NumberFormat.FLOAT, 3, true).appand("color", NumberFormat.FLOAT, 4, false).appand("uv", NumberFormat.FLOAT, 2, false);
+	protected Space3D physicWorld;
+	protected final VertexFormat objectFormat = new VertexFormat().appand("position", NumberFormat.FLOAT, 3, false).appand("color", NumberFormat.FLOAT, 4, false).appand("size", NumberFormat.FLOAT, 1, false);
 	
 	private Window mainWindow;
 	private long timeMillis;
@@ -95,7 +99,6 @@ public class EngineExample {
 		resourceLoader = new ResourceLoader<>();
 		shaderLoader = new ShaderLoader<ResourceLocation, ResourceFolders>(ResourceFolders.SHADERS, resourceLoader);
 		textureLoader = new TextureLoader<ResourceLocation, ResourceFolders>(ResourceFolders.TEXTURES, resourceLoader);
-		modelLoader = new OBJLoader<ResourceLocation, ResourceFolders>(ResourceFolders.MODELS, resourceLoader);
 		
 		// Setup OpenGL and GLFW natives
 		GLStateManager.initialize(System.err);
@@ -120,7 +123,6 @@ public class EngineExample {
 		// Unload all shaders, textures and models
 		shaderLoader.clearCached();
 		textureLoader.clearCached();
-		modelLoader.clearCached();
 		
 		// Destroy main window
 		mainWindow.destroy();
@@ -191,80 +193,81 @@ public class EngineExample {
 		shaderLoader.loadShadersIn(WORLD_SHADER_LOCATION, SHADER_LIB_LOCATION);
 		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS, false, false);
 		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS_INTERPOLATED, false, true);
-		modelLoader.loadModelsIn(OBJECT_MODEL_LOCATION, OBJECT_TEXTURE_LOCATION);
+
+		windowResized(new Vec2i(this.mainWindow.getSize()[0], this.mainWindow.getSize()[1]));
+		this.mainWindow.registerWindowListener((shouldClose, windowResize, focused, unfocused, maximized, restored) -> { if (windowResize.isPresent()) windowResized(windowResize.get()); });
 		
 		// Setup world
-		physicWorld = new RigidPhysicWorld<WorldObject>(new Vec3f(-1000F, -1000F, -1000F), new Vec3f(1000F, 1000F, 1000F), BroadphaseAlgorithm.SIMPLE);
-		physicWorld.setGravity(new Vec3f(0F, -9.8F, 0F));
+		physicWorld = new Space3D();
 		
-		// Compile models to VAO
-		modelLoader.getCachedModels().forEach((modelName) -> compileModel(modelName));
+		Random r = new Random();
+		int spread = 100;
+		int spread2 = 4;
 		
-		// Create ground plate
-		WorldObject plate = new GroundPlateObject();
-		physicWorld.addObject(plate);
-		plate.getRigidBody().setOrientation(new Quaternion(new Vec3i(1, 0, 0), 0));
-		plate.getRigidBody().setPosition(new Vec3f(0F, -1F, 0F));
+		physicWorld.getParticles().add(new Particle(new Vec3d(0, 0, 0), 4E13, new Vec3d(0, 1, 0), new Vec4f(0, 0, 1, 1)));
+		
+		physicWorld.getParticles().add(new Particle(new Vec3d(10, 0, 0), 1000, new Vec3d(0, 0, 3), new Vec4f(0, 0, 1, 1)));
+
+		physicWorld.getParticles().add(new Particle(new Vec3d(40, 10, -5), 4E13, new Vec3d(0, 2, 0), new Vec4f(0, 0, 1, 1)));
+		
+		physicWorld.getParticles().add(new Particle(new Vec3d(40, 10, -5), 0.001, new Vec3d(1, 1, 1), new Vec4f(0, 0, 1, 1)));
+		
+		physicWorld.getParticles().add(new Particle(new Vec3d(10, 0, 20), 99E10, new Vec3d(0, 0, -3), new Vec4f(0, 0, 1, 1)));
+		for (int i = 0; i < 30; i++) {
+
+			Vec3d pos = new Vec3d((r.nextFloat() - 0.5F) * spread, (r.nextFloat() - 0.5F) * spread, (r.nextFloat() - 0.5F) * spread);
+			Vec3d velocity = new Vec3d((r.nextFloat() - 0.5F) * spread2, (r.nextFloat() - 0.5F) * spread2, (r.nextFloat() - 0.5F) * spread2);
+			long mass = (long) (r.nextFloat() * 1000);
+			
+			physicWorld.getParticles().add(new Particle(pos, mass, velocity, new Vec4f(r.nextFloat(), r.nextFloat(), r.nextFloat(), 1)));
+			
+		}
 		
 	}
 	
-	public void compileModel(ResourceLocation name) {
-		
-		// Get loaded model
-		RawModel<ResourceLocation> model = modelLoader.getModel(name);
-		
-		// Create buffer builder
-		BufferBuilder bufferBuilder = new BufferBuilder(32000);
-		
-		// Draw model to buffer
-		bufferBuilder.begin(RenderPrimitive.QUADS, objectFormat);
-		
-		AbstractTextureMap<ResourceLocation> textureAtlas = textureLoader.getTextureMap(OBJECT_TEXTURE_ATLAS);
-		model.drawModelToBuffer((texture, vertex, normal, uv) -> {
-			textureAtlas.activateTexture(texture);
-			bufferBuilder.vertex(vertex.x, vertex.y, vertex.z).normal(normal.x, normal.y, normal.z).color(1, 1, 1, 1).uv(textureAtlas, uv.x, uv.y).endVertex();
-		});
-		
-		bufferBuilder.end();
-		
-		// Upload to VAO
-		VertexBuffer objectModel = new VertexBuffer();
-		objectModel.upload(bufferBuilder, BufferUsage.STATIC);
-		
-		// Free buffer builder
-		bufferBuilder.freeMemory();
-		
-		// Store in map
-		name2vertexMap.put(name, objectModel);
-		
+	public void windowResized(Vec2i screenSize) {
+		GLStateManager.resizeViewport(0, 0, screenSize.x, screenSize.y);
+		this.projectionMatrix = Matrix4f.perspective(50, screenSize.x / (float) Math.max(1, screenSize.y), 1F, 100F);
+		//this.uiContainer.screenResize(screenSize);
 	}
+	
+	VertexBuffer particleDrawBuffer = new VertexBuffer();
+	BufferBuilder particleBuffer = new BufferBuilder(36000);
 	
 	private void frame(float partialTick) {
 		
-		ShaderInstance shader = shaderLoader.getShader(new ResourceLocation("example:world/solid"));
+		ShaderInstance shader = shaderLoader.getShader(new ResourceLocation(NAMESPACE, "world/particle"));
 		
 		Matrix4f viewMatrix = mainCamera.getViewMatrix();
-		ITextureSampler texture = textureLoader.getTextureMap(OBJECT_TEXTURE_ATLAS);
+		//ITextureSampler texture = textureLoader.getTextureMap(OBJECT_TEXTURE_ATLAS);
 		
 		shader.useShader();
 		shader.getUniform("ProjMat").setMatrix4f(projectionMatrix);
-		shader.getUniform("ModelViewMat").setMatrix4f(viewMatrix);
-		shader.getUniform("Texture").setTextureSampler(texture);
+		shader.getUniform("ViewMat").setMatrix4f(viewMatrix);
+		shader.getUniform("HalfVoxelSize").setFloat(0.001F);
+		//shader.getUniform("Texture").setTextureSampler(texture);
 		
 		GLStateManager.enable(GL33.GL_DEPTH_TEST);
 		GLStateManager.enable(GL33.GL_BLEND);
 		GLStateManager.enable(GL33.GL_CULL_FACE);
 		
-		this.physicWorld.getObjectList().forEach((worldObject) -> {
+		particleBuffer.begin(RenderPrimitive.POINTS, objectFormat);
+		
+		for (Particle particle : this.physicWorld.getParticles()) {
 			
-			shader.getUniform("ObjectMat").setMatrix4f(worldObject.getModelTranslation());
+			particleBuffer.vertex((float) particle.getPosition().x, (float) particle.getPosition().y, (float) particle.getPosition().z);
+			particleBuffer.color(particle.getColor().x, particle.getColor().y, particle.getColor().z, particle.getColor().w);
+			particleBuffer.nextElement().putFloat(particle.getSize());
+			particleBuffer.endVertex();
 			
-			VertexBuffer objectModel = name2vertexMap.get(worldObject.getModel());
-			objectModel.bind();
-			objectModel.drawAll(RenderPrimitive.TRIANGLES);
-			objectModel.unbind();
-			
-		});
+		}
+		
+		particleBuffer.end();
+		
+		particleDrawBuffer.upload(particleBuffer, BufferUsage.DYNAMIC);
+		particleDrawBuffer.bind();
+		particleDrawBuffer.drawAll(RenderPrimitive.POINTS);
+		particleDrawBuffer.unbind();
 		
 		mainWindow.glSwapFrames();
 		
@@ -291,20 +294,16 @@ public class EngineExample {
 		
 		if (inputHandler.isBindingActive("spawn_object")) {
 			
-			WorldObject object = new Random().nextBoolean() ? new TestBlockObject() : new Random().nextBoolean() ? new MotorObject() : new KorbuvaObject();
-			physicWorld.addObject(object);
-			object.getRigidBody().setOrientation(new Quaternion(new Vec3i(1, 0, 0), 0));
-			object.getRigidBody().setPosition(this.mainCamera.getPosition());
+//			WorldObject object = new Random().nextBoolean() ? new TestBlockObject() : new Random().nextBoolean() ? new MotorObject() : new KorbuvaObject();
+//			physicWorld.addObject(object);
+//			object.getRigidBody().setOrientation(new Quaternion(new Vec3i(1, 0, 0), 0));
+//			object.getRigidBody().setPosition(this.mainCamera.getPosition());
 			
 		}
 		
 		mainCamera.upadteViewMatrix();
 
-		physicWorld.stepPhysic(tickTime / 1000F, 0, 0);
-		
-		for (WorldObject object : physicWorld.getObjectList()) {
-			if (object.getRigidBody().getPosition().y < -100) object.getRigidBody().setPosition(object.getRigidBody().getPosition().add(0F, 200F, 0F));
-		}
+		physicWorld.stepPhysic(tickTime / 1000F);
 		
 	}
 	
@@ -318,10 +317,6 @@ public class EngineExample {
 	
 	public TextureLoader<ResourceLocation, ResourceFolders> getTextureLoader() {
 		return textureLoader;
-	}
-	
-	public OBJLoader<ResourceLocation, ResourceFolders> getModelLoader() {
-		return modelLoader;
 	}
 	
 	public Window getMainWindow() {

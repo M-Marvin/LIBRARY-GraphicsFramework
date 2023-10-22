@@ -6,7 +6,6 @@ import java.io.IOException;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL33;
 
-import de.m_marvin.enginetest.ResourceFolders;
 import de.m_marvin.openui.dep.ScreenUI;
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.inputbinding.UserInput;
@@ -22,6 +21,7 @@ import de.m_marvin.renderengine.windows.Window;
 import de.m_marvin.simplelogging.filehandling.LogFileHandler;
 import de.m_marvin.simplelogging.printing.LogType;
 import de.m_marvin.simplelogging.printing.Logger;
+import de.m_marvin.uitest.ResourceFolders;
 import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
