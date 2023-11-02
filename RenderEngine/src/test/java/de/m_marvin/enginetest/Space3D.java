@@ -48,7 +48,6 @@ public class Space3D {
 	public Vec3d calculateWeakNuclearForce(Particle p1, Particle p2) {
 		double r = p1.getPosition().dist(p2.getPosition());
 		if (r > this.rangeWeakForce) return new Vec3d();
-		System.out.println(r);
 		double d = (p1.getWeakCharge() * p2.getWeakCharge()) / r;
 		double a = (this.h / (2 * Math.PI)) * this.lightSpeed * this.couplingParameterWeakForce;
 		return p2.getPosition().sub(p1.getPosition()).normalize().mul(a * d);

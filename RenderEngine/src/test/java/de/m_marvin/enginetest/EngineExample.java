@@ -23,13 +23,11 @@ import de.m_marvin.renderengine.vertices.RenderPrimitive;
 import de.m_marvin.renderengine.vertices.VertexFormat;
 import de.m_marvin.renderengine.windows.Window;
 import de.m_marvin.simplelogging.printing.Logger;
-import de.m_marvin.uitest.ResourceFolders;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.univec.impl.Vec2i;
 import de.m_marvin.univec.impl.Vec3d;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
-import de.m_marvin.voxelengine.VoxelEngine;
 
 public class EngineExample {
 
@@ -77,7 +75,7 @@ public class EngineExample {
 		Logger.setDefaultLogger(new Logger());
 
 		// Redirect run folder (since all resources are located in the test folder)
-		ResourceLoader.redirectRuntimeFolder(VoxelEngine.class.getClassLoader().getResource("").getPath().replace("bin/main/", "run/"));
+		ResourceLoader.redirectRuntimeFolder(EngineExample.class.getClassLoader().getResource("").getPath().replace("bin/main/", "run/assets/"));
 		
 		// Setup resource loaders
 		resourceLoader = new ResourceLoader<>();
@@ -183,7 +181,7 @@ public class EngineExample {
 		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS_INTERPOLATED, false, true);
 
 		windowResized(new Vec2i(this.mainWindow.getSize()[0], this.mainWindow.getSize()[1]));
-		this.mainWindow.registerWindowListener((shouldClose, windowResize, focused, unfocused, maximized, restored) -> { if (windowResize.isPresent()) windowResized(windowResize.get()); });
+		this.mainWindow.registerWindowListener((windowResize, type) -> { if (windowResize.isPresent()) windowResized(windowResize.get()); });
 		
 		// Setup world
 		physicWorld = new Space3D();

@@ -29,6 +29,10 @@ public class Window {
 	protected List<WindowEventConsumer> windowListeners = new ArrayList<>();
 	protected List<FileDropConsumer> fileDropWindowListeners = new ArrayList<>();
 	
+	public static enum WindowEventType {
+		CLOSED,RESIZED,FOCUSED,UNFOCUSED,MAXIMIZED,MINIMIZED,RESTORED,REFRESH;
+	}
+	
 	@FunctionalInterface
 	public static interface CourserEventConsumer {
 		public void courserEvent(Vec2d pos, boolean entered, boolean leaved);
@@ -36,12 +40,17 @@ public class Window {
 
 	@FunctionalInterface
 	public static interface WindowEventConsumer {
-		public void windowEvent(boolean shouldClose, Optional<Vec2i> windowResize, boolean focused, boolean unfocused, boolean maximized, boolean restored);
+		public void windowEvent(Optional<Vec2i> windowResize, WindowEventType type);
 	}
 	
 	@FunctionalInterface
 	public static interface FileDropConsumer {
 		public void fileDropEvent(String[] files);
+	}
+	
+	@FunctionalInterface
+	public static interface WindowRefreshConsumer {
+		public void windowRefresh();
 	}
 	
 	/**
@@ -50,10 +59,11 @@ public class Window {
 	protected void setCallbacks() {
 		GLFW.glfwSetCursorPosCallback(glWindow, (window, xpos, ypos) -> this.courserListeners.forEach((listener) -> listener.courserEvent(new Vec2d(xpos, ypos), false, false)));
 		GLFW.glfwSetCursorEnterCallback(glWindow, (window, entered) -> this.courserListeners.forEach((listener) -> listener.courserEvent(new Vec2d(0, 0), entered, !entered)));
-		GLFW.glfwSetWindowCloseCallback(glWindow, window -> this.windowListeners.forEach((listener) -> listener.windowEvent(true, Optional.empty(), false, false, false, false)));
-		GLFW.glfwSetFramebufferSizeCallback(glWindow, (window, width, height) -> this.windowListeners.forEach((listener) -> listener.windowEvent(false, Optional.of(new Vec2i(width, height)), false, false, false, false)));
-		GLFW.glfwSetWindowFocusCallback(glWindow, (window, focused) -> this.windowListeners.forEach((listener) -> listener.windowEvent(false, Optional.empty(), focused, !focused, false, false)));
-		GLFW.glfwSetWindowMaximizeCallback(glWindow, (window, maximized) -> this.windowListeners.forEach((listener) -> listener.windowEvent(false, Optional.empty(), false, false, maximized, !maximized)));
+		GLFW.glfwSetWindowCloseCallback(glWindow, window -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.empty(), WindowEventType.CLOSED)));
+		GLFW.glfwSetFramebufferSizeCallback(glWindow, (window, width, height) -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.of(new Vec2i(width, height)), WindowEventType.RESIZED)));
+		GLFW.glfwSetWindowFocusCallback(glWindow, (window, focused) -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.empty(), focused ? WindowEventType.FOCUSED : WindowEventType.UNFOCUSED)));
+		GLFW.glfwSetWindowMaximizeCallback(glWindow, (window, maximized) -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.empty(), maximized ? WindowEventType.MAXIMIZED : WindowEventType.MINIMIZED)));
+		GLFW.glfwSetWindowRefreshCallback(glWindow, (window) -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.empty(), WindowEventType.REFRESH)));
 		GLFW.glfwSetDropCallback(glWindow, (window, count, names) -> {
 			String[] fileNames = new String[count];
 			for (int i = 0; i < count; i++) fileNames[i] = GLFWDropCallback.getName(names, i);

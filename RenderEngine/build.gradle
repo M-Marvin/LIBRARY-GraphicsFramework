@@ -7,22 +7,9 @@
  */
 
 apply plugin: 'java'
-apply plugin: 'maven-publish'
 
 project.ext.lwjglVersion = "3.3.1"
 project.ext.lwjglNatives = "natives-windows"
-
-tasks.named('jar') {
-    manifest {
-        attributes('Implementation-Title': project.name,
-                   'Implementation-Version': '1.0',
-                   'Author': 'M_Marvin')
-    }
-}
-
-java {
-    withSourcesJar()
-}
 
 repositories {
 	mavenCentral()
@@ -30,36 +17,38 @@ repositories {
 }
 
 dependencies {
-	implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
-
-	implementation "org.lwjgl:lwjgl"
-	implementation "org.lwjgl:lwjgl-assimp"
-	implementation "org.lwjgl:lwjgl-glfw"
-	implementation "org.lwjgl:lwjgl-openal"
-	implementation "org.lwjgl:lwjgl-opengl"
-	implementation "org.lwjgl:lwjgl-stb"
-	implementation "org.lwjgl:lwjgl-jawt"
-	runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
-	runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
-	runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
-	runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
-	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
-	runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
 	
-	implementation 'com.github.M-Marvin:LIBRARY-UnifiedVectors:0c5578b6d4'
+	// LWJGL
+	implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+	implementation "org.lwjgl:lwjgl"
+	implementation "org.lwjgl:lwjgl-glfw"
+	implementation "org.lwjgl:lwjgl-opengl"
+	runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+	
+	// CommandLineParser
+	implementation 'com.github.M-Marvin:LIBRARY-CommandLineParser:d527412'
+	
+	// UniVec
+	implementation 'com.github.M-Marvin:LIBRARY-UnifiedVectors:0c5578b'
+	
+	// GSON
+	implementation "com.google.code.gson:gson:2.9.1"
+	
+	// SimpleLogging
 	implementation 'com.github.M-Marvin:LIBRARY-SimpleLogging:6da9e66783af7dd5d60188bbfc09648fd35fbf60'
 	
-	implementation "com.google.code.gson:gson:2.9.1"
-	implementation "com.google.guava:guava:16+"
+	//implementation "com.google.guava:guava:16+"
 	
 	implementation "cz.advel.jbullet:jbullet:20101010-1"
 	
 }
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-			from components.java
-        }
+jar {
+    manifest {
+        attributes 'Implementation-Version': '0.1 - alpha'
+        attributes 'Implementation-Title': 'RenderEngine'
+        attributes 'Implementation-Vendor-Id': 'de.m_marvin'
     }
 }

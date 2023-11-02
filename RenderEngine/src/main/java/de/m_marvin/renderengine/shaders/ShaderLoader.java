@@ -146,6 +146,20 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	}
 	
 	/**
+	 * Returns the shader cached under the given name or tries to load it if no shader is found under the name.
+	 * 
+	 * @param shaderName The shader name
+	 * @param libFolderLocation The location of the source folder containing the GLSL library files
+	 * @return The shader under the given name or null if no shader was found
+	 */
+	public ShaderInstance getOrLoadShader(R shaderName, R libFolderLocation, Optional<VertexFormat> format) {
+		if (!this.shaderCache.containsKey(shaderName)) {
+			return loadShader(shaderName, libFolderLocation, shaderName, format);
+		}
+		return this.shaderCache.get(shaderName);
+	}
+	
+	/**
 	 * Returns the shader cached under the given name.
 	 * 
 	 * @param shaderName The shader name

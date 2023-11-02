@@ -1,0 +1,19 @@
+{
+	"VertexShaderFile": "solid",
+	"FragmentShaderFile": "solid",
+	"Uniforms": [
+		{ "Name": "AnimMat", "Type": "matrix3x3", "Value": [ 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0 ] },
+		{ "Name": "AnimMatLast", "Type": "matrix3x3", "Value": [ 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0 ] },
+		{ "Name": "Interpolation", "Type": "float", "Value": 0.0 },
+		{ "Name": "Texture", "Type": "sampler2D", "Value": 0 },
+		{ "Name": "ProjMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
+		{ "Name": "ModelViewMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
+		{ "Name": "ObjectMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] }
+	],
+	"Attributes": [
+		{ "Name": "position", "Type": "float", "Count": 3, "Normalize": false },
+		{ "Name": "normal", "Type": "float", "Count": 3, "Normalize": true },
+		{ "Name": "color", "Type": "float", "Count": 4, "Normalize": false },
+		{ "Name": "uv", "Type": "float", "Count": 2, "Normalize": false }
+	]
+}

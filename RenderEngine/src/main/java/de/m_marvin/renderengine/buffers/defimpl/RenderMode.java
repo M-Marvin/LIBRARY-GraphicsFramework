@@ -13,6 +13,7 @@ public record RenderMode<R extends IResourceProvider<R>>(
 		RenderPrimitive primitive, 
 		VertexFormat vertexFormat, 
 		R shader,
+		R shaderLibs,
 		BiConsumer<ShaderInstance, TextureLoader<R, ? extends ISourceFolder>> setupRenderMode
 ) {
 	public void setupRenderMode(ShaderInstance shader, TextureLoader<R, ? extends ISourceFolder> textureLoader) {

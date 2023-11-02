@@ -1,11 +1,10 @@
 package de.m_marvin.renderengine.buffers;
 
 import java.nio.ByteBuffer;
+import java.util.LinkedList;
 import java.util.Queue;
 
 import org.lwjgl.system.MemoryUtil;
-
-import com.google.common.collect.Queues;
 
 import de.m_marvin.renderengine.utility.NumberFormat;
 import de.m_marvin.renderengine.vertices.IVertexConsumer;
@@ -44,7 +43,7 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 	 **/
 	public BufferBuilder(int bufferSize) {
 		this.buffer = MemoryUtil.memAlloc(bufferSize);
-		this.drawStates = Queues.newArrayDeque();
+		this.drawStates = new LinkedList<>();
 	}
 	
 	private void ensureCapacity(int size) {
