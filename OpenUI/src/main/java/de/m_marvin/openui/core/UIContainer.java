@@ -1,4 +1,4 @@
-package de.m_marvin.openui;
+package de.m_marvin.openui.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,12 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import de.m_marvin.openui.components.Compound;
+import de.m_marvin.openui.core.components.Compound;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.BufferUsage;
 import de.m_marvin.renderengine.buffers.VertexBuffer;
 import de.m_marvin.renderengine.buffers.defimpl.RenderMode;
 import de.m_marvin.renderengine.buffers.defimpl.SimpleBufferSource;
+import de.m_marvin.renderengine.inputbinding.UserInput;
 import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.shaders.ShaderInstance;
@@ -26,22 +27,25 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	
 	public static final int DEFAULT_INITIAL_BUFFER_SIZE = 3600;
 	
-	
 	protected Compound<R> compound;
+	protected Compound<R> focused;
 	protected SimpleBufferSource<R> bufferSource;
 	protected Map<RenderMode<R>, Map<Compound<R>, List<VertexBuffer>>> vertexBuffers;
 	protected List<VertexBuffer> emptyVAOs = new ArrayList<>();
 	protected Matrix4f projectionMatrix;
 	protected PoseStack matrixStack;
+	protected final UserInput userInput;
 	
-	public UIContainer() {
-		this(DEFAULT_INITIAL_BUFFER_SIZE);
+	public UIContainer(UserInput userInput) {
+		this(DEFAULT_INITIAL_BUFFER_SIZE, userInput);
 	}
 	
-	public UIContainer(int initalBufferSize) {
+	public UIContainer(int initalBufferSize, UserInput userInput) {
+		this.userInput = userInput;
 		this.bufferSource = new SimpleBufferSource<R>(initalBufferSize);
 		this.vertexBuffers = new HashMap<>();
 		this.compound = new Compound<R>();
+		this.compound.setContainer(this);
 		this.compound.setOffset(new Vec2i(0, 0));
 		this.compound.setMargin(0, 0, 0, 0);
 		this.compound.setLayout(null);
@@ -65,6 +69,18 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	
 	public Vec2i calculateMinScreenSize() {
 		return compound.calculateMinSize();
+	}
+	
+	public void setFocusedComponent(Compound<R> component) {
+		this.focused = component;
+	}
+	
+	public Compound<R> getFocusedComponent() {
+		return this.focused;
+	}
+	
+	public UserInput getUserInput() {
+		return userInput;
 	}
 	
 	/* Rendering */
@@ -152,7 +168,7 @@ public class UIContainer<R extends IResourceProvider<R>> {
 			
 			Map<Compound<R>, List<VertexBuffer>> bufferMap = this.vertexBuffers.get(renderMode);
 			
-			ShaderInstance shader = shaderLoader.getOrLoadShader(renderMode.shader(), renderMode.shaderLibs(), Optional.of(renderMode.vertexFormat()));
+			ShaderInstance shader = shaderLoader.getOrLoadShader(renderMode.shader(), Optional.of(renderMode.vertexFormat()));
 			shader.useShader();
 			shader.getUniform("ProjMat").setMatrix4f(this.projectionMatrix);
 			renderMode.setupRenderMode(shader, textureLoader);

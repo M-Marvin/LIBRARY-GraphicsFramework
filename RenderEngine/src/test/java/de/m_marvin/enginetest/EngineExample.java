@@ -48,9 +48,8 @@ public class EngineExample {
 	public static final ResourceLocation OBJECT_TEXTURE_LOCATION = new ResourceLocation(NAMESPACE, "objects");
 	public static final ResourceLocation OBJECT_TEXTURE_ATLAS = new ResourceLocation(NAMESPACE, "object_atlas");
 	public static final ResourceLocation OBJECT_TEXTURE_ATLAS_INTERPOLATED = new ResourceLocation(NAMESPACE, "object_atlas_interpolated");
-	public static final ResourceLocation SHADER_LIB_LOCATION = new ResourceLocation(NAMESPACE, "glsl");
 	public static final ResourceLocation WORLD_SHADER_LOCATION = new ResourceLocation(NAMESPACE, "world");
-		
+	
 	private ResourceLoader<ResourceLocation, ResourceFolders> resourceLoader;
 	private ShaderLoader<ResourceLocation, ResourceFolders> shaderLoader;
 	private TextureLoader<ResourceLocation, ResourceFolders> textureLoader;
@@ -176,7 +175,7 @@ public class EngineExample {
 		inputHandler.registerBinding("spawn_object").addBinding(KeySource.getKey(GLFW.GLFW_KEY_O));
 		
 		// Load shader, textures and models
-		shaderLoader.loadShadersIn(WORLD_SHADER_LOCATION, SHADER_LIB_LOCATION);
+		shaderLoader.loadShadersIn(WORLD_SHADER_LOCATION);
 		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS, false, false);
 		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS_INTERPOLATED, false, true);
 

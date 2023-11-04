@@ -1,6 +1,6 @@
 #version 150
 
-#include math
+#include ..\glsl\math
 
 in GS_OUT {
 	vec4 color;

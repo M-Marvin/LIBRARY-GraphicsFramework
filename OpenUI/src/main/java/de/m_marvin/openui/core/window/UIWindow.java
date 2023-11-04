@@ -1,6 +1,6 @@
-package de.m_marvin.openui.window;
+package de.m_marvin.openui.core.window;
 
-import de.m_marvin.openui.UIContainer;
+import de.m_marvin.openui.core.UIContainer;
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.inputbinding.UserInput;
 import de.m_marvin.renderengine.resources.IResourceProvider;
@@ -139,6 +139,7 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 				frameCount++;
 				frame(0);
 				mainWindow.pollEvents();
+				inputHandler.update();
 			}
 
 			if (timeMillis - secondTimer > 1000) {
@@ -153,7 +154,7 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 
 	protected void setup() {
 		
-		this.uiContainer = new UIContainer<>();
+		this.uiContainer = new UIContainer<>(this.inputHandler);
 		
 		initUI();
 		autoSetMinSize();

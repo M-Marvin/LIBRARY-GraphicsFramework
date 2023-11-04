@@ -1,20 +1,18 @@
-package de.m_marvin.openui.components;
+package de.m_marvin.openui.design1.components;
 
-import de.m_marvin.openui.rendering.UIRenderModes;
+import de.m_marvin.openui.core.components.Compound;
+import de.m_marvin.openui.design1.UIRenderModes;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
-import de.m_marvin.renderengine.buffers.defimpl.RenderMode;
 import de.m_marvin.renderengine.buffers.defimpl.SimpleBufferSource;
-import de.m_marvin.renderengine.resources.IResourceProvider;
-import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
+import de.m_marvin.renderengine.resources.defimpl.ResourcePath;
 import de.m_marvin.renderengine.translation.PoseStack;
 
-public class GroupBox<R extends IResourceProvider<R>> extends Compound<R> {
+public class GroupBox extends Compound<ResourcePath> {
 	
 	@Override
-	public void drawBackground(SimpleBufferSource<R> bufferSource, PoseStack matrixStack) {
-
-		@SuppressWarnings("unchecked")
-		BufferBuilder buffer = bufferSource.startBuffer((RenderMode<R>) UIRenderModes.solidPlane(new ResourceLocation("uitest:openui/solidPlane"), new ResourceLocation("example:glsl")));
+	public void drawBackground(SimpleBufferSource<ResourcePath> bufferSource, PoseStack matrixStack) {
+		
+		BufferBuilder buffer = bufferSource.startBuffer(UIRenderModes.solidPlane(UIRenderModes.UI_SHADER_LOCATION));
 		
 		matrixStack.push();
 		matrixStack.translate(this.offset.x, this.offset.y, 0);

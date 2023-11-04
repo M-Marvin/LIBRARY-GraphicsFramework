@@ -45,6 +45,10 @@ dependencies {
 	
 }
 
+java {
+    withSourcesJar()
+}
+
 jar {
     manifest {
         attributes 'Implementation-Version': '0.1 - alpha'

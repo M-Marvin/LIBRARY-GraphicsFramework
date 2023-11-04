@@ -1,6 +1,6 @@
 #version 150
 
-#include math
+#include ..\glsl\math
 
 uniform mat3 AnimMat;
 uniform mat3 AnimMatLast;

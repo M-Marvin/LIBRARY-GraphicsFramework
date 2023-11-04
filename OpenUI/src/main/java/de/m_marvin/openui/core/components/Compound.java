@@ -1,12 +1,12 @@
-package de.m_marvin.openui.components;
+package de.m_marvin.openui.core.components;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.m_marvin.openui.UIContainer;
-import de.m_marvin.openui.layout.Layout;
-import de.m_marvin.openui.layout.Layout.LayoutData;
+import de.m_marvin.openui.core.UIContainer;
+import de.m_marvin.openui.core.layout.Layout;
+import de.m_marvin.openui.core.layout.Layout.LayoutData;
 import de.m_marvin.renderengine.buffers.defimpl.SimpleBufferSource;
 import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.renderengine.translation.PoseStack;
@@ -55,10 +55,19 @@ public class Compound<R extends IResourceProvider<R>> {
 		this.needsRedraw = true;
 	}
 	
-	protected void setContainer(UIContainer<R> container) {
+	public void setContainer(UIContainer<R> container) {
+		if (this.container != null) this.cleanup();
 		this.container = container;
+		if (container != null) this.setup();
 		for (Compound<R> c : this.childComponents) c.setContainer(container);
 	}
+	
+	public UIContainer<R> getContainer() {
+		return container;
+	}
+	
+	public void setup() {}
+	public void cleanup() {}
 	
 	public void addComponent(Compound<R> childComponent) {
 		this.childComponents.add(childComponent);
@@ -194,13 +203,25 @@ public class Compound<R extends IResourceProvider<R>> {
 		}
 		return minSize;
 	}
+
+	public Vec2i calculateMaxSize() {
+		updateLayout();
+		Vec2i maxSize = this.getSizeMax();
+		if (this.layout != null) {
+			return maxSize.max(this.layout.getMaxSizeRequired());
+		}
+		return maxSize;
+	}
 	
 	public void autoSetMinSize() {
 		this.setSizeMin(new Vec2i());
 		this.setSizeMin(calculateMinSize());
 	}
-	
-	// TODO autoSetMaxSize for centered objects
+
+	public void autoSetMaxSize() {
+		this.setSizeMax(new Vec2i());
+		this.setSizeMax(calculateMinSize());
+	}
 	
 	public void drawBackground(SimpleBufferSource<R> bufferSource, PoseStack matrixStack) {}
 	public void drawForeground(SimpleBufferSource<R> bufferSource, PoseStack matrixStack) {}

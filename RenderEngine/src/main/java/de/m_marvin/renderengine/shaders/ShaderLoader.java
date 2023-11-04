@@ -51,6 +51,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	
 	/**
 	 * Creates a new shader loader.
+	 * 
 	 * @param sourceFolder The source folder
 	 * @param resourceLoader The resource loader used for the file access
 	 */
@@ -67,12 +68,12 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	
 	/**
 	 * Loads all shaders in the given folder and caches them.
+	 * 
 	 * @param shaderFolderLocation The location of the folder
-	 * @param libFolderLocation The location of the source folder containing the GLSL library files
 	 */
-	public void loadShadersIn(R shaderFolderLocation, R libFolderLocation) {
+	public void loadShadersIn(R shaderFolderLocation) {
 		try {
-			loadShadersIn0(shaderFolderLocation, libFolderLocation);
+			loadShadersIn0(shaderFolderLocation);
 		} catch (IOException e) {
 			Logger.defaultLogger().logWarn("Failed to load some of the shaders from " + shaderFolderLocation.toString() + "!");
 			Logger.defaultLogger().printException(LogType.WARN, e);
@@ -84,16 +85,16 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	 * Non-catch-block version of {@link #loadShadersIn(IResourceProvider)}.
 	 * 
 	 * @param shaderFolderLocation The location of the folder
-	 * @param libFolderLocation The location of the source folder containing the GLSL library files
 	 * @throws IOException If an error occurs in the loading of a shader
 	 */
-	public void loadShadersIn0(R shaderFolderLocation, R libFolderLocation) throws IOException {
+	public void loadShadersIn0(R shaderFolderLocation) throws IOException {
 		
 		// FIXME Rework all "loadIn" methods
 		for (String shaderName : resourceLoader.listFilesIn(sourceFolder, shaderFolderLocation)) {
 			
+			if (!shaderName.endsWith(".json")) continue;
 			R locationName = shaderFolderLocation.locationOfFile(shaderName.split("\\.")[0]);
-			loadShader(locationName, libFolderLocation, locationName, Optional.empty());
+			loadShader(locationName, locationName, Optional.empty());
 			
 		}
 		
@@ -106,10 +107,9 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	 * @return A list of all shader names in the folder
 	 * @throws FileNotFoundException if the path is not valid
 	 */
-	protected static List<String> listShaderNames(File shaderFolder) throws FileNotFoundException {
-		if (!shaderFolder.isDirectory()) throw new FileNotFoundException("The shader folder path '" + shaderFolder + "' ist not valid!");
+	protected List<String> listShaderNames(R shaderFolder) throws FileNotFoundException {
 		List<String> shaderNames = new ArrayList<>();
-		for (String fileName : shaderFolder.list()) {
+		for (String fileName : resourceLoader.listFilesIn(sourceFolder, shaderFolder)) {
 			String[] fileNameParts = fileName.split("\\.");
 			if (fileNameParts[fileNameParts.length - 1].equals(SHADER_LIB_FORMAT)) continue;
 			if (fileNameParts.length > 1) {
@@ -127,15 +127,14 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	 * This allows loading a shader multiple times with different vertex formats.
 	 * 
 	 * @param shaderLocation The location of the shader JSON file
-	 * @param libFolderLocation The location of the source folder containing the GLSL library files
 	 * @param shaderName The name under which the shader instance gets cached
 	 * @param format The vertex format applied to the shader instance
 	 * @return The loaded and cached shader instance
 	 */
-	public ShaderInstance loadShader(R shaderLocation, R libFolderLocation, R shaderName, Optional<VertexFormat> format) {
+	public ShaderInstance loadShader(R shaderLocation, R shaderName, Optional<VertexFormat> format) {
 		if (!shaderCache.containsKey(shaderName)) {
 			try {
-				shaderCache.put(shaderName, load(shaderLocation, libFolderLocation, format));
+				shaderCache.put(shaderName, load(shaderLocation, format));
 			} catch (IOException e) {
 				Logger.defaultLogger().logWarn("Failed to load shader " + shaderLocation.toString());
 				Logger.defaultLogger().printException(LogType.WARN, e);
@@ -149,12 +148,11 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	 * Returns the shader cached under the given name or tries to load it if no shader is found under the name.
 	 * 
 	 * @param shaderName The shader name
-	 * @param libFolderLocation The location of the source folder containing the GLSL library files
 	 * @return The shader under the given name or null if no shader was found
 	 */
-	public ShaderInstance getOrLoadShader(R shaderName, R libFolderLocation, Optional<VertexFormat> format) {
+	public ShaderInstance getOrLoadShader(R shaderName, Optional<VertexFormat> format) {
 		if (!this.shaderCache.containsKey(shaderName)) {
-			return loadShader(shaderName, libFolderLocation, shaderName, format);
+			return loadShader(shaderName, shaderName, format);
 		}
 		return this.shaderCache.get(shaderName);
 	}
@@ -183,12 +181,11 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	 * If no vertex format is specified the default from the shader JSON is applied.
 	 * 
 	 * @param shaderLocation The path to the shader JSON (without the .json ending)
-	 * @param libFolderLocation The path to the source folder containing the GLSL library files
 	 * @param vertexFormat The (optional) applied vertex format
 	 * @return The loaded uncached shader instance
 	 * @throws IOException If an error occurs accessing the files
 	 */
-	public ShaderInstance load(R shaderLocation, R libFolderLocation, Optional<VertexFormat> vertexFormat) throws IOException {
+	public ShaderInstance load(R shaderLocation, Optional<VertexFormat> vertexFormat) throws IOException {
 		
 		try {
 
@@ -200,9 +197,9 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 			String vertexShaderFile = json.get("VertexShaderFile").getAsString();
 			String fragmentShaderFile = json.get("FragmentShaderFile").getAsString();
 			Optional<String> geometryShaderFile = json.has("GeometryShaderFile") ? Optional.of(json.get("GeometryShaderFile").getAsString()) : Optional.empty();
-			String vertexShaderSource = loadGLSLFile(libFolderLocation, shaderLocation.getParent().locationOfFile(vertexShaderFile + "." + VERTEX_SHADER_FORMAT));
-			String fragmentShaderSource = loadGLSLFile(libFolderLocation, shaderLocation.getParent().locationOfFile(fragmentShaderFile + "." + FRAGMENT_SHADER_FORMAT));
-			Optional<String> geometryShaderSource = geometryShaderFile.isPresent() ? Optional.of(loadGLSLFile(libFolderLocation, shaderLocation.getParent().locationOfFile(geometryShaderFile.get() + "." + GEOMETRY_SHADER_FORMAT))) : Optional.empty();
+			String vertexShaderSource = loadGLSLFile(shaderLocation.getParent().locationOfFile(vertexShaderFile + "." + VERTEX_SHADER_FORMAT));
+			String fragmentShaderSource = loadGLSLFile(shaderLocation.getParent().locationOfFile(fragmentShaderFile + "." + FRAGMENT_SHADER_FORMAT));
+			Optional<String> geometryShaderSource = geometryShaderFile.isPresent() ? Optional.of(loadGLSLFile(shaderLocation.getParent().locationOfFile(geometryShaderFile.get() + "." + GEOMETRY_SHADER_FORMAT))) : Optional.empty();
 			
 			VertexFormat attributeFormat = vertexFormat.isPresent() ? vertexFormat.get() : null;
 			if (vertexFormat.isEmpty()) {
@@ -256,18 +253,17 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	 * Resolves any #includes in the library file.
 	 * Used by {@link #load(File, Optional)}.
 	 * 
-	 * @param libFolderLocation The folder containing the library files
 	 * @param fileLocation The name of the library to load
 	 * @return The GLSL code of the library with all #includes resolved
 	 * @throws IOException If an error occurs accessing the files
 	 */
-	protected String loadGLSLFile(R libFolderLocation, R fileLocation) throws IOException {
+	protected String loadGLSLFile(R fileLocation) throws IOException {
 		String line;
 		BufferedReader vertexShaderInputStream = new BufferedReader(new InputStreamReader(resourceLoader.getAsStream(sourceFolder, fileLocation)));
 		StringBuilder stringBuilder = new StringBuilder();
 		while ((line = vertexShaderInputStream.readLine()) != null) {
 			if (line.startsWith(INCLUDE_LINE)) {
-				String includeCode = loadGLSLFile(libFolderLocation, libFolderLocation.locationOfFile(line.substring(INCLUDE_LINE.length()) + "." + SHADER_LIB_FORMAT));
+				String includeCode = loadGLSLFile(fileLocation.getParent().locationOfFile(line.substring(INCLUDE_LINE.length()) + "." + SHADER_LIB_FORMAT));
 				stringBuilder.append(includeCode);
 			} else {
 				stringBuilder.append(line + "\n");

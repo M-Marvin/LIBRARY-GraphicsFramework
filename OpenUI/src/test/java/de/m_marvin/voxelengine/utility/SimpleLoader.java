@@ -1,6 +1,5 @@
 package de.m_marvin.voxelengine.utility;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,20 +45,18 @@ public abstract class SimpleLoader<R extends IResourceProvider<R>, FE extends IS
 	
 	public void loadAllIn0(R folderLocation) throws IOException {
 		
-		File path = resourceLoader.resolveLocation(sourceFolder, folderLocation);
-		for (String name : listNames(path)) {
+		for (String name : listNames(folderLocation)) {
 			
 			R locationName = folderLocation.locationOfFile(name);
-			load(locationName);
+			load0(locationName);
 			
 		}
 		
 	}
 	
-	protected static List<String> listNames(File folder) throws FileNotFoundException {
-		if (!folder.isDirectory()) throw new FileNotFoundException("The folder path '" + folder + "' ist not valid!");
+	protected List<String> listNames(R folderLocation) throws FileNotFoundException {
 		List<String> names = new ArrayList<>();
-		for (String fileName : folder.list()) {
+		for (String fileName : resourceLoader.listFilesIn(sourceFolder, folderLocation)) {
 			String[] fileNameParts = fileName.split("\\.");
 			if (fileNameParts.length > 1) {
 				int formatEndingLength = fileNameParts[fileNameParts.length - 1].length() + 1;
@@ -70,11 +67,10 @@ public abstract class SimpleLoader<R extends IResourceProvider<R>, FE extends IS
 		return names;
 	}
 	
-	public T load(R location) {
+	public T load0(R location) {
 		if (!cache.containsKey(location)) {
-			File path = resourceLoader.resolveLocation(sourceFolder, location);
 			try {
-				cache.put(location, load(path));
+				cache.put(location, load(location));
 			} catch (IOException e) {
 				Logger.defaultLogger().logWarn("Failed to load " + location.toString());
 				Logger.defaultLogger().printException(LogType.WARN, e);
@@ -84,10 +80,9 @@ public abstract class SimpleLoader<R extends IResourceProvider<R>, FE extends IS
 		return cache.get(location);
 	}
 	
-	public boolean save(R location, T object) {
-		File path = resourceLoader.resolveLocation(sourceFolder, location);
+	public boolean save0(R location, T object) {
 		try {
-			if (save(path, object)) {
+			if (save(location, object)) {
 				cache.put(location, object);
 				return true;
 			} else {
@@ -102,18 +97,18 @@ public abstract class SimpleLoader<R extends IResourceProvider<R>, FE extends IS
 	}
 	
 	public T get(R name) {
-		return activeLoading ? load(name) : this.cache.get(name);
+		return activeLoading ? load0(name) : this.cache.get(name);
 	}
 	
 	public void store(R name, T object) {
-		save(name, object);
+		save0(name, object);
 	}
 	
 	public Set<R> getCached() {
 		return this.cache.keySet();
 	}
 	
-	public abstract T load(File path) throws IOException;
-	public abstract boolean save(File path, T object) throws IOException;
+	public abstract T load(R location) throws IOException;
+	public abstract boolean save(R location, T object) throws IOException;
 	
 }

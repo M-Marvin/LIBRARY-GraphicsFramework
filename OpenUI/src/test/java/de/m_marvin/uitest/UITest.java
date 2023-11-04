@@ -1,21 +1,22 @@
 package de.m_marvin.uitest;
 
-import de.m_marvin.renderengine.resources.ResourceLoader;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.simplelogging.printing.Logger;
-import de.m_marvin.voxelengine.VoxelEngine;
 
 public class UITest {
 
-	public static void main(String... args) {
-
+	public static void main(String... args) throws URISyntaxException, IOException {
+		
 		// Start new logger
 		Logger.setDefaultLogger(new Logger());
 		
 		// Redirect run folder (since all resources are located in the test folder)
-		ResourceLoader.redirectRuntimeFolder(VoxelEngine.class.getClassLoader().getResource("").getPath().replace("bin/main/", "run/"));
+		//ResourceLoader.redirectRuntimeFolder(VoxelEngine.class.getClassLoader().getResource("").getPath().replace("bin/main/", "run/"));
 		
-		new TestWindow(ResourceFolders.SHADERS, ResourceFolders.TEXTURES, "Test").start();
+		new TestWindow().start();
 		
 		/** TODO
 		 * - Minimize/Maximize methods

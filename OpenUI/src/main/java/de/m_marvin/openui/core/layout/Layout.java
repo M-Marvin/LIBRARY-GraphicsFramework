@@ -1,10 +1,10 @@
-package de.m_marvin.openui.layout;
+package de.m_marvin.openui.core.layout;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.stream.Stream;
 
-import de.m_marvin.openui.components.Compound;
+import de.m_marvin.openui.core.components.Compound;
 import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.univec.impl.Vec2i;
 
@@ -13,6 +13,7 @@ public abstract class Layout<T extends Layout.LayoutData> {
 	public static class LayoutData {}
 
 	public abstract Vec2i getMinSizeRequired();
+	public abstract Vec2i getMaxSizeRequired();
 	public abstract <R extends IResourceProvider<R>> void rearange(Compound<R> compound, List<Compound<R>> childComponents);
 
 	public abstract Class<T> getDataClass();
@@ -75,6 +76,13 @@ public abstract class Layout<T extends Layout.LayoutData> {
 		int min = 0;
 		for (int[] minAndMax : sizeMinAndMax) min += minAndMax[0];
 		return min;
+	}
+
+	public static int maxSizeRequired(int[]... sizeMinAndMax) {
+		if (sizeMinAndMax.length == 0) return 0;
+		int max = 0;
+		for (int[] minAndMax : sizeMinAndMax) max += minAndMax[1];
+		return max;
 	}
 	
 }

@@ -1,6 +1,6 @@
 #version 150
 
-#include math
+#include ..\glsl\math
 
 in vec3 position;
 in vec4 color;

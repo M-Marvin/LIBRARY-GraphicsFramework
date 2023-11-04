@@ -46,7 +46,7 @@ public class ResourcePath implements IResourceProvider<ResourcePath> {
 
 	@Override
 	public String getNamespace() {
-		throw new UnsupportedOperationException("ResourcePath does not have a namespace!");
+		return null;
 	}
 	
 	@Override

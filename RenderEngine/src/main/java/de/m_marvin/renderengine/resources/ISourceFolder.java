@@ -1,7 +1,7 @@
 package de.m_marvin.renderengine.resources;
 
-import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -21,7 +21,7 @@ public interface ISourceFolder {
 	 * @param namespace The namespace requesting its resource folder
 	 * @return The full path to the resource folder
 	 */
-	public File getPath(ResourceLoader<?, ?> loader, String namespace);
+	public String getPath(ResourceLoader<?, ?> loader, String namespace);
 
 	/**
 	 * Loads an InputStream of the given resource.
@@ -30,7 +30,7 @@ public interface ISourceFolder {
 	 * @return An InputStream of the given resource
 	 * @throws FileNotFoundException if the resource does not exist
 	 */
-	public InputStream getAsStream(String path) throws FileNotFoundException;
+	public InputStream getAsStream(String path) throws IOException;
 	
 	/**
 	 * Lists all files contained in the given folder.
@@ -40,5 +40,14 @@ public interface ISourceFolder {
 	 * @return A list of files contained in the given folder
 	 */
 	public String[] listFiles(String path);
+	
+	/**
+	 * Lists all sub-folders contained in the given folder.
+	 * Returns an empty array if the folder does not exist.
+	 * 
+	 * @param path  The path to the folder
+	 * @return A list of sub-folders contained in the given folder
+	 */
+	public String[] listFolders(String path);
 	
 }

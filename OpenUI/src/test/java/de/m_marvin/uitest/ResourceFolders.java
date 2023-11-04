@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
 import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.resources.ResourceLoader;
@@ -23,8 +24,8 @@ public enum ResourceFolders implements ISourceFolder {
 	}
 	
 	@Override
-	public File getPath(ResourceLoader<?, ?> loader, String namespace) {
-		return this.pathResolver.apply(loader, namespace);
+	public String getPath(ResourceLoader<?, ?> loader, String namespace) {
+		return this.pathResolver.apply(loader, namespace).toString();
 	}
 	
 	@Override
@@ -35,7 +36,14 @@ public enum ResourceFolders implements ISourceFolder {
 	@Override
 	public String[] listFiles(String path) {
 		File folder = new File(path);
-		if (folder.isDirectory()) return folder.list();
+		if (folder.isDirectory()) return Stream.of(folder.list()).filter(s -> new File(folder, s).isFile()).toArray(i -> new String[i]);
+		return new String[] {};
+	}
+
+	@Override
+	public String[] listFolders(String path) {
+		File folder = new File(path);
+		if (folder.isDirectory()) return Stream.of(folder.list()).filter(s -> new File(folder, s).isDirectory()).toArray(i -> new String[i]);
 		return new String[] {};
 	}
 	

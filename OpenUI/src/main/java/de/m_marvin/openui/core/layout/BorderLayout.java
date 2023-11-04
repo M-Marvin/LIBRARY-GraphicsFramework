@@ -1,10 +1,10 @@
-package de.m_marvin.openui.layout;
+package de.m_marvin.openui.core.layout;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.m_marvin.openui.components.Compound;
+import de.m_marvin.openui.core.components.Compound;
 import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.univec.impl.Vec2i;
 
@@ -76,6 +76,7 @@ public class BorderLayout extends Layout<BorderLayout.BorderLayoutData> {
 	}
 	
 	protected Vec2i minSizeRequired = new Vec2i();
+	protected Vec2i maxSizeRequired = new Vec2i();
 	
 	@Override
 	public <R extends IResourceProvider<R>> void rearange(Compound<R> compound, List<Compound<R>> childComponents) {
@@ -125,6 +126,7 @@ public class BorderLayout extends Layout<BorderLayout.BorderLayoutData> {
 		int[] heights = fitSizes(compound.getSize().y, heightsMinMax);
 
 		this.minSizeRequired = new Vec2i(minSizeRequired(widthsMinMax), minSizeRequired(heightsMinMax));
+		this.maxSizeRequired = new Vec2i(maxSizeRequired(widthsMinMax), maxSizeRequired(heightsMinMax));
 		
 		boolean leftTop = false;
 		boolean leftBottom = false;
@@ -185,6 +187,11 @@ public class BorderLayout extends Layout<BorderLayout.BorderLayoutData> {
 	@Override
 	public Vec2i getMinSizeRequired() {
 		return this.minSizeRequired;
+	}
+
+	@Override
+	public Vec2i getMaxSizeRequired() {
+		return this.maxSizeRequired;
 	}
 
 }

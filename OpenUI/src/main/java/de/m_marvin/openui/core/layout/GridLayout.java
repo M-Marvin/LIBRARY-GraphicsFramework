@@ -1,9 +1,9 @@
-package de.m_marvin.openui.layout;
+package de.m_marvin.openui.core.layout;
 
 import java.util.List;
 import java.util.stream.IntStream;
 
-import de.m_marvin.openui.components.Compound;
+import de.m_marvin.openui.core.components.Compound;
 import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.univec.impl.Vec2i;
 
@@ -54,6 +54,7 @@ public class GridLayout extends Layout<GridLayout.GridLayoutData> {
 	}
 	
 	protected Vec2i minSizeRquired = new Vec2i();
+	protected Vec2i maxSizeRquired = new Vec2i();
 	
 	@Override
 	public <R extends IResourceProvider<R>> void rearange(Compound<R> compound, List<Compound<R>> childComponents) {
@@ -92,6 +93,7 @@ public class GridLayout extends Layout<GridLayout.GridLayoutData> {
 		int[] heights = fitSizes(compound.getSize().y, heightsMinMax);
 		
 		this.minSizeRquired = new Vec2i(minSizeRequired(widthsMinMax), minSizeRequired(heightsMinMax));
+		this.maxSizeRquired = new Vec2i(maxSizeRequired(widthsMinMax), maxSizeRequired(heightsMinMax));
 		
 		for (Compound<R> component : childComponents) {
 			GridLayoutData data = component.getLayoutData(this);
@@ -108,6 +110,11 @@ public class GridLayout extends Layout<GridLayout.GridLayoutData> {
 	@Override
 	public Vec2i getMinSizeRequired() {
 		return this.minSizeRquired;
+	}
+	
+	@Override
+	public Vec2i getMaxSizeRequired() {
+		return this.maxSizeRquired;
 	}
 
 }

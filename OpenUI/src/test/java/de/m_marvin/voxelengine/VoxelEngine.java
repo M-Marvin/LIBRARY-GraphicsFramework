@@ -11,6 +11,7 @@ import de.m_marvin.renderengine.inputbinding.UserInput;
 import de.m_marvin.renderengine.inputbinding.bindingsource.KeySource;
 import de.m_marvin.renderengine.inputbinding.bindingsource.MouseSource;
 import de.m_marvin.renderengine.models.OBJLoader;
+import de.m_marvin.renderengine.resources.FileUtility;
 import de.m_marvin.renderengine.resources.ResourceLoader;
 import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.renderengine.shaders.ShaderLoader;
@@ -27,12 +28,14 @@ import de.m_marvin.univec.impl.Vec3i;
 import de.m_marvin.voxelengine.deprecated.ScreenUI;
 import de.m_marvin.voxelengine.rendering.GameRenderer;
 import de.m_marvin.voxelengine.rendering.RenderStage;
+import de.m_marvin.voxelengine.rendering.RenderType;
 import de.m_marvin.voxelengine.resources.ReloadState;
 import de.m_marvin.voxelengine.screens.ComponentEditorScreen;
 import de.m_marvin.voxelengine.utility.VoxelComponentLoader;
 import de.m_marvin.voxelengine.utility.VoxelMaterialRegistry;
 import de.m_marvin.voxelengine.world.ClientLevel;
 import de.m_marvin.voxelengine.world.VoxelComponent;
+import de.m_marvin.voxelengine.world.VoxelMaterial;
 import de.m_marvin.voxelengine.world.VoxelStructure;
 
 public class VoxelEngine {
@@ -331,9 +334,9 @@ public class VoxelEngine {
 		// Setup world
 		level = new ClientLevel();
 		
-		//VoxelMaterial m_test = materialRegistry.registerMaterial(new ResourceLocation(NAMESPACE, "test"), new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/ground_anim"), 0.5F));
-		//VoxelMaterial m_metal = materialRegistry.registerMaterial(new ResourceLocation(NAMESPACE, "metal"), new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/metal"), 1F));
-		//VoxelMaterial m_dirt = materialRegistry.registerMaterial(new ResourceLocation(NAMESPACE, "dirt"), new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/dirt"), 1F));
+		materialRegistry.registerMaterial(new ResourceLocation(NAMESPACE, "test"), new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/ground_anim"), 0.5F));
+		materialRegistry.registerMaterial(new ResourceLocation(NAMESPACE, "metal"), new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/metal"), 1F));
+		materialRegistry.registerMaterial(new ResourceLocation(NAMESPACE, "dirt"), new VoxelMaterial(RenderType.voxelSolid(), new ResourceLocation("example:materials/dirt"), 1F));
 		
 		// Testing
 		VoxelComponent c = voxelLoader.get(new ResourceLocation("example:test")); //
@@ -380,15 +383,14 @@ public class VoxelEngine {
 				modelLoader.clearCached();
 				
 				// Load shaders
-				ResourceLocation shaderLibLocation = new ResourceLocation(NAMESPACE, "glsl");
-				Utility.executeForEachFolder(resourceLoader.getResourceFolderPath(ResourceFolders.SHADERS, NAMESPACE), 
-						(folder) -> shaderLoader.loadShadersIn(new ResourceLocation(NAMESPACE, folder), shaderLibLocation));
+				FileUtility.executeForEachFolder(resourceLoader, ResourceFolders.SHADERS, new ResourceLocation(NAMESPACE, ""), 
+						(folder) -> shaderLoader.loadShadersIn(folder));
 				
 				// Load textures
-				Utility.executeForEachFolder(resourceLoader.getResourceFolderPath(ResourceFolders.TEXTURES, NAMESPACE),
+				FileUtility.executeForEachFolder(resourceLoader, ResourceFolders.TEXTURES, new ResourceLocation(NAMESPACE, ""),
 						(folder) -> {
-							textureLoader.buildAtlasMapFromTextures(new ResourceLocation(NAMESPACE, folder), new ResourceLocation(NAMESPACE, folder), false, false);
-							textureLoader.buildAtlasMapFromTextures(new ResourceLocation(NAMESPACE, folder), new ResourceLocation(NAMESPACE, folder + "_interpolated"), false, true);
+							textureLoader.buildAtlasMapFromTextures(folder, folder, false, false);
+							textureLoader.buildAtlasMapFromTextures(folder, new ResourceLocation(NAMESPACE, folder.getPath() + "_interpolated"), false, true);
 						});
 				
 				gameRenderer.resetRenderCache();

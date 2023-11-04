@@ -74,7 +74,7 @@ public class VoxelComponentLoader<R extends IResourceProvider<R>, FE extends ISo
 	
 	public VoxelComponent get(R location) {
 		try {
-			return load(new File(resourceLoader.resolveLocation(sourceFolder, location).getPath() + "." + VOXEL_COMPONENT_FORMAT));
+			return load(new File(resourceLoader.resolveLocation(sourceFolder, location) + "." + VOXEL_COMPONENT_FORMAT));
 		} catch (IOException e) {
 			Logger.defaultLogger().logError("Failed to load component '" + location.nameString() + "'!");
 			Logger.defaultLogger().printException(LogType.ERROR, e);
@@ -84,7 +84,7 @@ public class VoxelComponentLoader<R extends IResourceProvider<R>, FE extends ISo
 
 	public boolean store(R location, VoxelComponent component) {
 		try {
-			return save(new File(resourceLoader.resolveLocation(sourceFolder, location).getPath() + "." + VOXEL_COMPONENT_FORMAT), component);
+			return save(new File(resourceLoader.resolveLocation(sourceFolder, location) + "." + VOXEL_COMPONENT_FORMAT), component);
 		} catch (IOException e) {
 			Logger.defaultLogger().logError("Failed to save component '" + location.nameString() + "'!");
 			Logger.defaultLogger().printException(LogType.ERROR, e);

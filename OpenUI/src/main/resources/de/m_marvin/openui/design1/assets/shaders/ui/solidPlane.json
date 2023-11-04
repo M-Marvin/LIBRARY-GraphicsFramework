@@ -1,0 +1,11 @@
+{
+	"VertexShaderFile": "solidPlane",
+	"FragmentShaderFile": "solidPlane",
+	"Uniforms": [
+		{ "Name": "ProjMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] }
+	],
+	"Attributes": [
+		{ "Name": "position", "Type": "float", "Count": 3, "Normalize": false },
+		{ "Name": "color", "Type": "float", "Count": 4, "Normalize": false }
+	]
+}
