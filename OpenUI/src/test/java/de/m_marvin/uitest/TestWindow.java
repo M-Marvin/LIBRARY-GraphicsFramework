@@ -19,7 +19,7 @@ public class TestWindow extends Window {
 	
 	@Override
 	protected void initUI() {
-		this.uiContainer.getRootCompound().setLayout(new BorderLayout(CornerStretch.VERTICAL));
+		this.getRootComponent().setLayout(new BorderLayout(CornerStretch.VERTICAL));
 		
 		GroupBox b = new GroupBox(Color.CYAN);
 		b.setSizeMin(new Vec2i(100, 100));
@@ -64,12 +64,12 @@ public class TestWindow extends Window {
 		
 		b5.autoSetMinSize();
 		
-		this.uiContainer.getRootCompound().addComponent(b);
-		this.uiContainer.getRootCompound().addComponent(b1);
-		this.uiContainer.getRootCompound().addComponent(b2);
-		this.uiContainer.getRootCompound().addComponent(b3);
-		this.uiContainer.getRootCompound().addComponent(b5);
-		this.uiContainer.getRootCompound().autoSetMinSize();
+		this.getRootComponent().addComponent(b);
+		this.getRootComponent().addComponent(b1);
+		this.getRootComponent().addComponent(b2);
+		this.getRootComponent().addComponent(b3);
+		this.getRootComponent().addComponent(b5);
+		this.getRootComponent().autoSetMinSize();
 		
 	}
 	

@@ -1,6 +1,7 @@
 package de.m_marvin.openui.core.window;
 
 import de.m_marvin.openui.core.UIContainer;
+import de.m_marvin.openui.core.components.Compound;
 import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.inputbinding.UserInput;
 import de.m_marvin.renderengine.resources.IResourceProvider;
@@ -58,17 +59,17 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 	protected String windowName;
 	protected final boolean clearCachesOnClose;
 	
-	private ResourceLoader<R, S> resourceLoader;
-	private ShaderLoader<R, S> shaderLoader;
-	private TextureLoader<R, S> textureLoader;
-	private UserInput inputHandler;
+	private final ResourceLoader<R, S> resourceLoader;
+	private final ShaderLoader<R, S> shaderLoader;
+	private final TextureLoader<R, S> textureLoader;
+	private final UserInput inputHandler;
 
-	protected Thread renderThread;
+	private Thread renderThread;
 	private Window mainWindow;
 	protected UIContainer<R> uiContainer;
 	private int framesPerSecond;
 	private int frameTime;
-	protected boolean shouldClose;
+	private boolean shouldClose;
 	
 	public boolean isOpen() {
 		return !this.shouldClose;
@@ -92,8 +93,9 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 		try {
 
 			// Setup OpenGL and GLFW natives
-			GLStateManager.initialize(System.err);
-
+			if (!GLStateManager.initialize(System.err))
+				throw new IllegalStateException("Unable to initialize GLFW and OpenGL!");
+			
 			// Setup main window
 			mainWindow = new Window(1000, 600, this.windowName);
 			mainWindow.makeContextCurrent();
@@ -106,28 +108,34 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 			frameTime = 16; // ~60 FPS
 			setup();
 			startLoop();
-
-			if (this.clearCachesOnClose) {
-
-				// Unload all shaders, textures and models
-				shaderLoader.clearCached();
-				textureLoader.clearCached();
-
-			}
-
-			// Detach input handler
-			inputHandler.detachWindow(mainWindow.windowId());
 			
-			// Destroy main window
-			mainWindow.destroy();
-
-			// Terminate OpenGL and GLFW natives
-			GLStateManager.terminate();
-
 		} catch (Exception e) {
 			this.stop();
 			throw e;
 		}
+
+		if (this.clearCachesOnClose) {
+
+			// Unload all shaders, textures and models
+			shaderLoader.clearCached();
+			textureLoader.clearCached();
+
+		}
+
+		if (this.mainWindow != null) {
+			
+			// Detach input handler
+			inputHandler.detachWindow(mainWindow.windowId());
+
+			// Destroy main window
+			mainWindow.destroy();
+			
+		}
+		
+		// Terminate OpenGL and GLFW natives
+		GLStateManager.terminate();
+		
+		this.renderThread = null;
 		
 	}
 
@@ -149,7 +157,7 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 			if (deltaFrame >= 1) {
 				deltaFrame--;
 				frameCount++;
-				frame(0);
+				frame();
 				mainWindow.pollEvents();
 				inputHandler.update();
 			}
@@ -191,7 +199,7 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 		this.uiContainer.screenResize(screenSize);
 	}
 
-	protected void frame(float partialTick) {
+	protected void frame() {
 
 		this.uiContainer.updateOutdatedVAOs();
 		this.uiContainer.renderVAOs(shaderLoader, textureLoader);
@@ -228,6 +236,10 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 	public void setWindowName(String windowName) {
 		this.windowName = windowName;
 		this.mainWindow.setTitle(windowName);
+	}
+	
+	public Compound<R> getRootComponent() {
+		return this.uiContainer.getRootCompound();
 	}
 	
 }

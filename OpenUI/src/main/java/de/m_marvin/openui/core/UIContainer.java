@@ -27,16 +27,16 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	
 	public static final int DEFAULT_INITIAL_BUFFER_SIZE = 3600;
 	
-	protected Compound<R> compound;
-	protected Compound<R> focused;
-	protected SimpleBufferSource<R, UIRenderMode<R>> bufferSource;
-	protected Map<UIRenderMode<R>, Map<Compound<R>, List<VertexBuffer>>> vertexBuffers;
-	protected List<VertexBuffer> emptyVAOs = new ArrayList<>();
-	protected Matrix4f projectionMatrix;
-	protected PoseStack matrixStack;
-	protected final UserInput userInput;
-	protected Vec2f cursorPosition = new Vec2f(-1, -1);
-	protected Compound<R> topComponentUnderCursor = null;
+	private final Compound<R> compound;
+	private final SimpleBufferSource<R, UIRenderMode<R>> bufferSource;
+	private final Map<UIRenderMode<R>, Map<Compound<R>, List<VertexBuffer>>> vertexBuffers;
+	private final List<VertexBuffer> emptyVAOs = new ArrayList<>();
+	private final UserInput userInput;
+	private Compound<R> focused;
+	private Matrix4f projectionMatrix;
+	private PoseStack matrixStack;
+	private Vec2f cursorPosition = new Vec2f(-1, -1);
+	private Compound<R> topComponentUnderCursor = null;
 	
 	public UIContainer(UserInput userInput) {
 		this(DEFAULT_INITIAL_BUFFER_SIZE, userInput);
@@ -116,11 +116,15 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	}
 	
 	/**
-	 * Check if any components need to be redrawn, and update the VAOs.
+	 * Check if any components need to be redrawn, and update the VAOs.<br>
+	 * <b>NEEDS TO BE CALLED ON RENDER THREAD</b>
 	 */
 	public void updateOutdatedVAOs() {
-		this.matrixStack = new PoseStack();
+		if (this.matrixStack == null || !this.matrixStack.cleared()) this.matrixStack = new PoseStack();
+		this.matrixStack.push();
 		this.compound.updateOutdatedVAOs(this, new Vec2i(0, 0), this.matrixStack);
+		this.matrixStack.pop();
+		this.matrixStack.assertCleared();	
 	}
 	
 	public void updateVAOs(Compound<R> component, Vec2i offset) {

@@ -3,6 +3,7 @@ package de.m_marvin.renderengine.translation;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.m_marvin.renderengine.TranslationStackException;
 import de.m_marvin.renderengine.vertices.IVertexConsumer;
 import de.m_marvin.unimat.impl.Matrix3f;
 import de.m_marvin.unimat.impl.Matrix4f;
@@ -85,6 +86,11 @@ public class PoseStack {
 	
 	public boolean cleared() {
 		return this.poseStack.size() == 1;
+	}
+	
+	public void assertCleared() {
+		if (!cleared())
+			throw new TranslationStackException("PoseStack not cleared!");
 	}
 	
 }
