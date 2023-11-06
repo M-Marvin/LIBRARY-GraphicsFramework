@@ -8,7 +8,7 @@ import de.m_marvin.simplelogging.printing.Logger;
 
 public class UITest {
 
-	public static void main(String... args) throws URISyntaxException, IOException {
+	public static void main(String... args) throws URISyntaxException, IOException, InterruptedException {
 		
 		// Start new logger
 		Logger.setDefaultLogger(new Logger());
@@ -16,7 +16,7 @@ public class UITest {
 		// Redirect run folder (since all resources are located in the test folder)
 		//ResourceLoader.redirectRuntimeFolder(VoxelEngine.class.getClassLoader().getResource("").getPath().replace("bin/main/", "run/"));
 		
-		new TestWindow().start();
+		TestWindow window = new TestWindow();
 		
 		/** TODO
 		 * - Minimize/Maximize methods
@@ -24,7 +24,11 @@ public class UITest {
 		 * - 
 		 */
 		
-		while (true);
+		window.start();
+		
+		while (window.isOpen()) {
+			Thread.sleep(1000);
+		};
 	}
 	
 	private static UITest instance;

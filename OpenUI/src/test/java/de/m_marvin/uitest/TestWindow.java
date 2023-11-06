@@ -2,14 +2,13 @@ package de.m_marvin.uitest;
 
 import java.awt.Color;
 
-import de.m_marvin.openui.core.components.Compound;
 import de.m_marvin.openui.core.layout.BorderLayout;
 import de.m_marvin.openui.core.layout.BorderLayout.BorderSection;
 import de.m_marvin.openui.core.layout.BorderLayout.CornerStretch;
+import de.m_marvin.openui.core.layout.GridLayout;
 import de.m_marvin.openui.design1.Window;
 import de.m_marvin.openui.design1.components.ButtonComponent;
-import de.m_marvin.openui.core.layout.GridLayout;
-import de.m_marvin.renderengine.resources.defimpl.ResourcePath;
+import de.m_marvin.openui.design1.components.GroupBox;
 import de.m_marvin.univec.impl.Vec2i;
 
 public class TestWindow extends Window {
@@ -22,27 +21,27 @@ public class TestWindow extends Window {
 	protected void initUI() {
 		this.uiContainer.getRootCompound().setLayout(new BorderLayout(CornerStretch.VERTICAL));
 		
-		Compound<ResourcePath> b = new ButtonComponent(Color.CYAN);
+		GroupBox b = new GroupBox(Color.CYAN);
 		b.setSizeMin(new Vec2i(100, 100));
 		b.setSizeMax(new Vec2i(150, 0));
 		b.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.LEFT));
 		
-		ButtonComponent b1 = new ButtonComponent(Color.RED);
+		GroupBox b1 = new GroupBox(Color.RED);
 		b1.setSizeMin(new Vec2i(100, 100));
 		b1.setSizeMax(new Vec2i(0, 150));
 		b1.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.TOP));
 		
-		ButtonComponent b2 = new ButtonComponent(Color.GREEN);
+		GroupBox b2 = new GroupBox(Color.GREEN);
 		b2.setSize(new Vec2i(100, 0));
 		b2.fixSize();
 		b2.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.RIGHT));
 		
-		ButtonComponent b3 = new ButtonComponent(Color.BLUE);
+		GroupBox b3 = new GroupBox(Color.BLUE);
 		b3.setSizeMin(new Vec2i(100, 100));
 		b3.setSizeMax(new Vec2i(0, 150));
 		b3.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.BOTTOM));
 		
-		ButtonComponent b5 = new ButtonComponent(new Color(1, 0, 1));
+		GroupBox b5 = new GroupBox(new Color(1, 0, 1));
 		b5.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.CENTERED));
 		b5.setLayout(new GridLayout());
 		b5.setSizeMin(new Vec2i(10 * 60, 10 * 20));
@@ -51,7 +50,7 @@ public class TestWindow extends Window {
 			for (int t = 0; t < 10; t++) {
 				
 				Color color = Color.GRAY;
-				if (!(i == 0 || i == 9 || t == 0 || t == 9)) color = Color.WHITE;
+				if (!(i == 0 || i == 9 || t == 0 || t == 9)) color = Color.GREEN;
 				
 				ButtonComponent b6 = new ButtonComponent(color);
 				b6.setLayoutData(new GridLayout.GridLayoutData(i, t));

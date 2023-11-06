@@ -11,7 +11,6 @@ import de.m_marvin.openui.core.components.Compound;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.BufferUsage;
 import de.m_marvin.renderengine.buffers.VertexBuffer;
-import de.m_marvin.renderengine.buffers.defimpl.RenderMode;
 import de.m_marvin.renderengine.buffers.defimpl.SimpleBufferSource;
 import de.m_marvin.renderengine.inputbinding.UserInput;
 import de.m_marvin.renderengine.resources.IResourceProvider;
@@ -21,6 +20,7 @@ import de.m_marvin.renderengine.shaders.ShaderLoader;
 import de.m_marvin.renderengine.textures.utility.TextureLoader;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.unimat.impl.Matrix4f;
+import de.m_marvin.univec.impl.Vec2f;
 import de.m_marvin.univec.impl.Vec2i;
 
 public class UIContainer<R extends IResourceProvider<R>> {
@@ -29,12 +29,14 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	
 	protected Compound<R> compound;
 	protected Compound<R> focused;
-	protected SimpleBufferSource<R> bufferSource;
-	protected Map<RenderMode<R>, Map<Compound<R>, List<VertexBuffer>>> vertexBuffers;
+	protected SimpleBufferSource<R, UIRenderMode<R>> bufferSource;
+	protected Map<UIRenderMode<R>, Map<Compound<R>, List<VertexBuffer>>> vertexBuffers;
 	protected List<VertexBuffer> emptyVAOs = new ArrayList<>();
 	protected Matrix4f projectionMatrix;
 	protected PoseStack matrixStack;
 	protected final UserInput userInput;
+	protected Vec2f cursorPosition = new Vec2f(-1, -1);
+	protected Compound<R> topComponentUnderCursor = null;
 	
 	public UIContainer(UserInput userInput) {
 		this(DEFAULT_INITIAL_BUFFER_SIZE, userInput);
@@ -42,7 +44,7 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	
 	public UIContainer(int initalBufferSize, UserInput userInput) {
 		this.userInput = userInput;
-		this.bufferSource = new SimpleBufferSource<R>(initalBufferSize);
+		this.bufferSource = new SimpleBufferSource<R, UIRenderMode<R>>(initalBufferSize);
 		this.vertexBuffers = new HashMap<>();
 		this.compound = new Compound<R>();
 		this.compound.setContainer(this);
@@ -50,6 +52,22 @@ public class UIContainer<R extends IResourceProvider<R>> {
 		this.compound.setMargin(0, 0, 0, 0);
 		this.compound.setLayout(null);
 		screenResize(new Vec2i(1000, 600));
+		
+		this.userInput.addCursorListener((position, entered, leaved) -> {
+			this.cursorPosition = new Vec2f(position);
+			this.topComponentUnderCursor = findTopComponentUnder(new Vec2i(position));
+		});
+	}
+	
+	public Compound<R> findTopComponentUnder(Vec2i position) {
+		return findTopComponentUnder0(this.getRootCompound(), position);
+	}
+
+	private Compound<R> findTopComponentUnder0(Compound<R> c, Vec2i position) {
+		for (Compound<R> cc : c.getChildComponents()) {
+			if (cc.isInComponent(position.sub(c.getOffset()))) return findTopComponentUnder0(cc, position);
+		}
+		return c;
 	}
 	
 	/**
@@ -83,7 +101,19 @@ public class UIContainer<R extends IResourceProvider<R>> {
 		return userInput;
 	}
 	
+	public Vec2f getCursorPosition() {
+		return cursorPosition;
+	}
+	
+	public Compound<R> getTopComponentUnderCursor() {
+		return topComponentUnderCursor;
+	}
+	
 	/* Rendering */
+	
+	public Matrix4f getProjectionMatrix() {
+		return projectionMatrix;
+	}
 	
 	/**
 	 * Check if any components need to be redrawn, and update the VAOs.
@@ -104,7 +134,7 @@ public class UIContainer<R extends IResourceProvider<R>> {
 		removeOutdatedVAOs(component);
 		uploadNewVAOs(bufferSource, component);
 		
-		Iterator<RenderMode<R>> it = this.vertexBuffers.keySet().iterator();
+		Iterator<UIRenderMode<R>> it = this.vertexBuffers.keySet().iterator();
 		while (it.hasNext()) {
 			if (this.vertexBuffers.get(it.next()).isEmpty()) it.remove();
 		}
@@ -138,8 +168,8 @@ public class UIContainer<R extends IResourceProvider<R>> {
 		}
 	}
 	
-	protected void uploadNewVAOs(SimpleBufferSource<R> bufferSource, Compound<R> component) {
-		for (RenderMode<R> renderMode : bufferSource.getBufferTypes()) {
+	protected void uploadNewVAOs(SimpleBufferSource<R, UIRenderMode<R>> bufferSource, Compound<R> component) {
+		for (UIRenderMode<R> renderMode : bufferSource.getBufferTypes()) {
 			if (!this.vertexBuffers.containsKey(renderMode)) this.vertexBuffers.put(renderMode, new HashMap<>());
 			Map<Compound<R>, List<VertexBuffer>> componentMap = this.vertexBuffers.get(renderMode);
 			
@@ -164,14 +194,13 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	 */
 	public void renderVAOs(ShaderLoader<R, ? extends ISourceFolder> shaderLoader, TextureLoader<R, ? extends ISourceFolder> textureLoader) {
 		
-		for (RenderMode<R> renderMode : this.vertexBuffers.keySet()) {
+		for (UIRenderMode<R> renderMode : this.vertexBuffers.keySet()) {
 			
 			Map<Compound<R>, List<VertexBuffer>> bufferMap = this.vertexBuffers.get(renderMode);
 			
 			ShaderInstance shader = shaderLoader.getOrLoadShader(renderMode.shader(), Optional.of(renderMode.vertexFormat()));
 			shader.useShader();
-			shader.getUniform("ProjMat").setMatrix4f(this.projectionMatrix);
-			renderMode.setupRenderMode(shader, textureLoader);
+			renderMode.setupRenderMode(shader, textureLoader, this);
 			
 			for (List<VertexBuffer> bufferList : bufferMap.values()) {
 				for (VertexBuffer buffer : bufferList) {

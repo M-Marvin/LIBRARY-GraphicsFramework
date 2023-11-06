@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.m_marvin.openui.core.UIContainer;
+import de.m_marvin.openui.core.UIRenderMode;
 import de.m_marvin.openui.core.layout.Layout;
 import de.m_marvin.openui.core.layout.Layout.LayoutData;
 import de.m_marvin.renderengine.buffers.defimpl.SimpleBufferSource;
@@ -18,6 +19,7 @@ public class Compound<R extends IResourceProvider<R>> {
 	protected Vec2i sizeMax;
 	protected Vec2i size;
 	protected Vec2i offset;
+	protected Vec2i parentOffset;
 	protected int marginLeft;
 	protected int marginRight;
 	protected int marginTop;
@@ -34,6 +36,7 @@ public class Compound<R extends IResourceProvider<R>> {
 		this.sizeMax = new Vec2i(1000, 1000);
 		this.size = new Vec2i(30, 30);
 		this.offset = new Vec2i(0, 0);
+		this.parentOffset = new Vec2i(0, 0);
 		this.marginLeft = 0;
 		this.marginRight = 0;
 		this.marginTop = 0;
@@ -49,6 +52,11 @@ public class Compound<R extends IResourceProvider<R>> {
 		}
 		for (Compound<R> c : this.childComponents) c.updateLayout();
 		this.redraw();
+	}
+
+	public boolean isInComponent(Vec2i position) {
+		return	this.offset.x <= position.x && this.offset.y <= position.y &&
+				this.offset.x + this.size.x >= position.x && this.offset.y + this.size.y >= position.y; 
 	}
 	
 	public void redraw() {
@@ -139,16 +147,34 @@ public class Compound<R extends IResourceProvider<R>> {
 		return sizeMin.add(new Vec2i(sizeMin.x > 0 ? marginLeft + marginRight : 0, sizeMin.y > 0 ? marginTop + marginBottom : 0));
 	}
 	
+	protected void setParentOffset(Vec2i parentOffset) {
+		this.parentOffset = parentOffset;
+	}
+	
+	protected Vec2i getParentOffset() {
+		return parentOffset;
+	}
+	
 	public void setOffset(Vec2i offset) {
 		this.offset = offset;
+		for (Compound<R> child : this.childComponents) {
+			child.setParentOffset(this.offset);
+		}
 	}
 
 	public void setOffsetMargin(Vec2i offset) {
 		this.offset = offset.add(new Vec2i(marginLeft, marginTop));
+		for (Compound<R> child : this.childComponents) {
+			child.setParentOffset(this.offset);
+		}
 	}
 	
 	public Vec2i getOffset() {
 		return offset;
+	}
+	
+	public Vec2i getAbsoluteOffset() {
+		return this.offset.add(this.parentOffset);
 	}
 	
 	public void setSize(Vec2i size) {
@@ -223,8 +249,8 @@ public class Compound<R extends IResourceProvider<R>> {
 		this.setSizeMax(calculateMinSize());
 	}
 	
-	public void drawBackground(SimpleBufferSource<R> bufferSource, PoseStack matrixStack) {}
-	public void drawForeground(SimpleBufferSource<R> bufferSource, PoseStack matrixStack) {}
+	public void drawBackground(SimpleBufferSource<R, UIRenderMode<R>> bufferSource, PoseStack matrixStack) {}
+	public void drawForeground(SimpleBufferSource<R, UIRenderMode<R>> bufferSource, PoseStack matrixStack) {}
 	
 	public void updateOutdatedVAOs(UIContainer<R> container, Vec2i offset, PoseStack matrixStack) {
 		if (this.needsRedraw) {

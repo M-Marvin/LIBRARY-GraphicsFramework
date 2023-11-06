@@ -1,0 +1,13 @@
+{
+	"VertexShaderFile": "clickableHoverable",
+	"FragmentShaderFile": "clickableHoverable",
+	"Uniforms": [
+		{ "Name": "ProjMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
+		{ "Name": "CursorPos", "Type": "vec2f", "Value": [ -1.0, -1.0 ] }
+	],
+	"Attributes": [
+		{ "Name": "position", "Type": "float", "Count": 3, "Normalize": false },
+		{ "Name": "color", "Type": "float", "Count": 4, "Normalize": false },
+		{ "Name": "pressed", "Type": "byte", "Count": 1, "Normalize": false }
+	]
+}

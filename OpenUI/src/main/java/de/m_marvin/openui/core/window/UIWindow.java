@@ -70,9 +70,14 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 	private int frameTime;
 	protected boolean shouldClose;
 	
+	public boolean isOpen() {
+		return !this.shouldClose;
+	}
+	
 	public void start() {
 		if (this.renderThread != null)
 			return;
+		this.shouldClose = false;
 		this.renderThread = new Thread(this::init, "RenderThread[" + this.windowName + "]");
 		this.renderThread.setDaemon(true);
 		this.renderThread.start();
@@ -83,40 +88,47 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 	}
 	
 	private void init() {
-
-		// Setup OpenGL and GLFW natives
-		GLStateManager.initialize(System.err);
-
-		// Setup main window
-		mainWindow = new Window(1000, 600, this.windowName);
-		mainWindow.makeContextCurrent();
-		GLStateManager.clearColor(1, 0, 1, 1);
-
-		// Setup input handler
-		inputHandler.attachToWindow(mainWindow.windowId());
-
-		// Setup and start game loop
-		frameTime = 16; // ~60 FPS
-		setup();
-		startLoop();
-
-		if (this.clearCachesOnClose) {
-
-			// Unload all shaders, textures and models
-			shaderLoader.clearCached();
-			textureLoader.clearCached();
-
-		}
-
-		// Detach input handler
-		inputHandler.detachWindow(mainWindow.windowId());
 		
-		// Destroy main window
-		mainWindow.destroy();
+		try {
 
-		// Terminate OpenGL and GLFW natives
-		GLStateManager.terminate();
+			// Setup OpenGL and GLFW natives
+			GLStateManager.initialize(System.err);
 
+			// Setup main window
+			mainWindow = new Window(1000, 600, this.windowName);
+			mainWindow.makeContextCurrent();
+			GLStateManager.clearColor(1, 0, 1, 1);
+
+			// Setup input handler
+			inputHandler.attachToWindow(mainWindow.windowId());
+
+			// Setup and start game loop
+			frameTime = 16; // ~60 FPS
+			setup();
+			startLoop();
+
+			if (this.clearCachesOnClose) {
+
+				// Unload all shaders, textures and models
+				shaderLoader.clearCached();
+				textureLoader.clearCached();
+
+			}
+
+			// Detach input handler
+			inputHandler.detachWindow(mainWindow.windowId());
+			
+			// Destroy main window
+			mainWindow.destroy();
+
+			// Terminate OpenGL and GLFW natives
+			GLStateManager.terminate();
+
+		} catch (Exception e) {
+			this.stop();
+			throw e;
+		}
+		
 	}
 
 	private void startLoop() {
@@ -149,6 +161,8 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 			}
 
 		}
+		
+		this.shouldClose = true;
 
 	}
 

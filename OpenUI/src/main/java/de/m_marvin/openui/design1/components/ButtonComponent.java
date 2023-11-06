@@ -2,16 +2,19 @@ package de.m_marvin.openui.design1.components;
 
 import java.awt.Color;
 
+import de.m_marvin.openui.core.UIRenderMode;
 import de.m_marvin.openui.core.components.Component;
 import de.m_marvin.openui.design1.UIRenderModes;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.defimpl.SimpleBufferSource;
 import de.m_marvin.renderengine.resources.defimpl.ResourcePath;
 import de.m_marvin.renderengine.translation.PoseStack;
+import de.m_marvin.univec.impl.Vec2i;
 
 public class ButtonComponent extends Component<ResourcePath> {
 	
 	protected Color color;
+	protected boolean pressed = false;
 	
 	public ButtonComponent(Color color) {
 		this.marginLeft = this.marginRight = this.marginTop = this.marginBottom = 5;
@@ -23,9 +26,28 @@ public class ButtonComponent extends Component<ResourcePath> {
 	}
 	
 	@Override
-	public void drawBackground(SimpleBufferSource<ResourcePath> bufferSource, PoseStack matrixStack) {
+	public void onClicked(int button, boolean pressed, boolean repeated) {
+		if (button == 0) {
+			if (this.pressed == true && pressed == false) {
+				System.out.println("Clicked");
+			}
+			this.pressed = pressed;
+			this.redraw();
+		}
+	}
+	
+	@Override
+	public void onCursorMoveOver(Vec2i position, boolean leaved) {
+		if (leaved) {
+			this.pressed = false;
+			this.redraw();
+		}
+	}
+	
+	@Override
+	public void drawBackground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
 		
-		BufferBuilder buffer = bufferSource.startBuffer(UIRenderModes.solidPlane(UIRenderModes.UI_SHADER_LOCATION));
+		BufferBuilder buffer = bufferSource.startBuffer(UIRenderModes.clickableHoverable());
 		
 		matrixStack.push();
 		matrixStack.translate(this.offset.x, this.offset.y, 0);
@@ -34,13 +56,14 @@ public class ButtonComponent extends Component<ResourcePath> {
 		float g = this.color.getGreen() / 255F;
 		float b = this.color.getBlue() / 255F;
 		float a = this.color.getAlpha() / 255F;
+		byte p = (byte) (this.pressed ? 1 : 0);
 		
-		buffer.vertex(matrixStack, this.size.x, 0, 0).color(r, g, b, a).endVertex();
-		buffer.vertex(matrixStack, 0, 0, 0).color(r, g, b, a).endVertex();
-		buffer.vertex(matrixStack, this.size.x, this.size.y, 0).color(r, g, b, a).endVertex();
-		buffer.vertex(matrixStack, this.size.x, this.size.y, 0).color(r, g, b, a).endVertex();
-		buffer.vertex(matrixStack, 0, 0, 0).color(r, g, b, a).endVertex();
-		buffer.vertex(matrixStack, 0, this.size.y, 0).color(r, g, b, a).endVertex();
+		buffer.vertex(matrixStack, this.size.x, 0, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, 0, 0, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, this.size.x, this.size.y, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, this.size.x, this.size.y, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, 0, 0, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, 0, this.size.y, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
 		
 		buffer.end();
 		

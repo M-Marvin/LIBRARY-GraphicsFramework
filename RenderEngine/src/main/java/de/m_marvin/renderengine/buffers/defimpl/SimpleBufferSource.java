@@ -8,10 +8,10 @@ import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.IBufferSource;
 import de.m_marvin.renderengine.resources.IResourceProvider;
 
-public class SimpleBufferSource<R extends IResourceProvider<R>> implements IBufferSource<RenderMode<R>> {
+public class SimpleBufferSource<R extends IResourceProvider<R>, RM extends IRenderMode> implements IBufferSource<RM> {
 	
 	protected final int initialBufferSize;
-	protected Map<RenderMode<R>, BufferBuilder> buffers;
+	protected Map<RM, BufferBuilder> buffers;
 	
 	public SimpleBufferSource(int initialBufferSize) {
 		this.initialBufferSize = initialBufferSize;
@@ -19,7 +19,7 @@ public class SimpleBufferSource<R extends IResourceProvider<R>> implements IBuff
 	}
 	
 	@Override
-	public BufferBuilder getBuffer(RenderMode<R> renderLayer) {
+	public BufferBuilder getBuffer(RM renderLayer) {
 		BufferBuilder buffer = buffers.get(renderLayer);
 		if (buffer == null) {
 			buffer = new BufferBuilder(initialBufferSize);
@@ -29,14 +29,14 @@ public class SimpleBufferSource<R extends IResourceProvider<R>> implements IBuff
 	}
 	
 	@Override
-	public BufferBuilder startBuffer(RenderMode<R> renderLayer) {
+	public BufferBuilder startBuffer(RM renderLayer) {
 		BufferBuilder buffer = getBuffer(renderLayer);
 		buffer.begin(renderLayer.primitive(), renderLayer.vertexFormat());
 		return buffer;
 	}
 	
 	@Override
-	public Set<RenderMode<R>> getBufferTypes() {
+	public Set<RM> getBufferTypes() {
 		return this.buffers.keySet();
 	}
 	

@@ -25,11 +25,26 @@ public class Component<R extends IResourceProvider<R>> extends Compound<R> {
 	}
 	
 	public void cursorMove(Vec2d position, boolean entered, boolean leaved) {
-		this.cursorOverComponent = isInComponent(new Vec2i(position));
-		System.out.println("tEST");
+		boolean overComponent = this.container.getTopComponentUnderCursor() == this;
+		if (overComponent != this.cursorOverComponent || this.cursorOverComponent) {
+			this.cursorOverComponent = overComponent;
+			this.onCursorMoveOver(new Vec2i(position).sub(this.getParentOffset()), !overComponent);
+		}
 	}
 	
-	public void mouseEvent(Optional<Vec2d> scroll, int button, boolean pressed, boolean repeated) {}
+	public void mouseEvent(Optional<Vec2d> scroll, int button, boolean pressed, boolean repeated) {
+		if (this.cursorOverComponent) {
+			if (scroll.isPresent()) {
+				this.onScroll(scroll.get());
+			} else {
+				this.onClicked(button, pressed, repeated);
+			}
+		}
+	}
+	
+	public void onCursorMoveOver(Vec2i position, boolean leaved) {}
+	public void onClicked(int button, boolean pressed, boolean repeated) {}
+	public void onScroll(Vec2d scroll) {}
 	
 	public boolean isFocused() {
 		return this.container.getFocusedComponent() == this;
@@ -37,11 +52,6 @@ public class Component<R extends IResourceProvider<R>> extends Compound<R> {
 	
 	public void setFocused(boolean focus) {
 		this.container.setFocusedComponent(focus ? this : null);
-	}
-	
-	public boolean isInComponent(Vec2i position) {
-		return	this.offset.x <= position.x && this.offset.y <= position.y &&
-				this.offset.x + this.size.x >= position.x && this.offset.y + this.size.y >= position.y; 
 	}
 	
 	public boolean isCursorOverComponent() {
