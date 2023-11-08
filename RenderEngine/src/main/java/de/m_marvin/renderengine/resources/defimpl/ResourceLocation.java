@@ -72,7 +72,7 @@ public class ResourceLocation implements IResourceProvider<ResourceLocation> {
 	public int hashCode() {
 		return Objects.hash(namespace, path);
 	}
-
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

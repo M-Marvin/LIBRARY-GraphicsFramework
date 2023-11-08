@@ -13,6 +13,8 @@ import de.m_marvin.univec.impl.Vec2i;
 
 public class ButtonComponent extends Component<ResourcePath> {
 	
+	public static final Color BUTTON_COLOR_GRAY = new Color(0, 0, 0);
+	 
 	protected Color color;
 	protected boolean pressed = false;
 	
@@ -47,7 +49,7 @@ public class ButtonComponent extends Component<ResourcePath> {
 	@Override
 	public void drawBackground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
 		
-		BufferBuilder buffer = bufferSource.startBuffer(UIRenderModes.clickableHoverable());
+		BufferBuilder buffer = bufferSource.startBuffer(UIRenderModes.clickableHoverable(new ResourcePath("ui/test")));
 		
 		matrixStack.push();
 		matrixStack.translate(this.offset.x, this.offset.y, 0);
@@ -58,12 +60,12 @@ public class ButtonComponent extends Component<ResourcePath> {
 		float a = this.color.getAlpha() / 255F;
 		byte p = (byte) (this.pressed ? 1 : 0);
 		
-		buffer.vertex(matrixStack, this.size.x, 0, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, 0, 0, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, this.size.x, this.size.y, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, this.size.x, this.size.y, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, 0, 0, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, 0, this.size.y, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, this.size.x, 0, 0)			.uv(1, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, 0, 0, 0)						.uv(0, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, this.size.x, this.size.y, 0)	.uv(1, 1).color(r, g, b, a).putByte(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, this.size.x, this.size.y, 0)	.uv(1, 1).color(r, g, b, a).putByte(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, 0, 0, 0)						.uv(0, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, 0, this.size.y, 0)			.uv(0, 1).color(r, g, b, a).putByte(p).nextElement().endVertex();
 		
 		buffer.end();
 		

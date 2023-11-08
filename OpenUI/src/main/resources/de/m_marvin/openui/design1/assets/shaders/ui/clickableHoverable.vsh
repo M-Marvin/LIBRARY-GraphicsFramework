@@ -3,9 +3,11 @@
 uniform mat4 ProjMat;
 
 in vec3 position;
+in vec2 uv;
 in vec4 color;
 in uint pressed;
 
+out vec2 vs_uv;
 out vec2 vs_pos;
 out vec4 vs_color;
 flat out uint vs_pressed;
@@ -13,6 +15,7 @@ flat out uint vs_pressed;
 void main() {
 	
 	gl_Position = ProjMat * vec4(position, 1);
+	vs_uv = uv;
 	vs_pos = position.xy;
 	vs_color = color;
 	vs_pressed = pressed;

@@ -1,6 +1,7 @@
 package de.m_marvin.renderengine.resources.defimpl;
 
 import java.io.File;
+import java.util.Objects;
 
 import de.m_marvin.renderengine.resources.IResourceProvider;
 
@@ -29,6 +30,11 @@ public class ResourcePath implements IResourceProvider<ResourcePath> {
 	 */
 	public String getPath() {
 		return path;
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.path.hashCode();
 	}
 	
 	@Override

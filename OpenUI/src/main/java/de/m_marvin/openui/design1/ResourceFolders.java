@@ -1,5 +1,6 @@
 package de.m_marvin.openui.design1;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -26,12 +27,15 @@ public enum ResourceFolders implements ISourceFolder {
 
 	@Override
 	public InputStream getAsStream(String path) throws IOException {
-		return this.getClass().getClassLoader().getResourceAsStream(path);
+		InputStream is = this.getClass().getClassLoader().getResourceAsStream(path);
+		if (is == null) throw new FileNotFoundException("Could not find resource " + path + "!");
+		return is;
 	}
 
 	@Override
 	public String[] listFiles(String path) {
 		// FIXME
+		//return new String[] {"test.png"};
 		throw new UnsupportedOperationException();
 	}
 
