@@ -65,7 +65,8 @@ public class ResourceLocation implements IResourceProvider<ResourceLocation> {
 
 	@Override
 	public ResourceLocation getParent() {
-		return new ResourceLocation(this.namespace, new File(this.path).getParent());
+		String parent = new File(this.path).getParent();
+		return new ResourceLocation(this.namespace, parent == null ? "" : parent);
 	}
 	
 	@Override

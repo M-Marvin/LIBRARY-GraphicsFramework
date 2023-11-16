@@ -16,6 +16,7 @@ import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.textures.AbstractTextureMap;
 import de.m_marvin.renderengine.textures.utility.TextureLoader;
 import de.m_marvin.renderengine.translation.PoseStack;
+import de.m_marvin.renderengine.utility.Utility;
 import de.m_marvin.simplelogging.printing.Logger;
 import de.m_marvin.univec.impl.Vec2i;
 
@@ -27,9 +28,6 @@ public class FontRenderer {
 	}
 	
 	public static <R extends IResourceProvider<R>, T extends IRenderMode> void renderString(String string, Color color, FontAtlasMap<R> fontAtlas, Function<R, T> renderModeSupplier, IBufferSource<T> bufferSource, PoseStack matrixStack) {
-		
-		matrixStack.push();
-		matrixStack.translate(0, 0, -0.01F);
 		
 		int wo = 0;
 		
@@ -62,8 +60,15 @@ public class FontRenderer {
 			
 		}
 		
-		matrixStack.pop();
-		
+	}
+	
+	public static <R extends IResourceProvider<R>> int calculateStringWidth(String string, Font font) {
+		int width = 0;
+		FontMetrics metrics = fontMetricsFactory.apply(font);
+		for (int i = 0; i < string.length(); i++) {
+			width += metrics.charWidth(string.charAt(i));
+		}
+		return width;
 	}
 	
 	public static String getFontAtlasName(Font font) {
@@ -88,15 +93,21 @@ public class FontRenderer {
 		
 	}
 	
-	private static <R extends IResourceProvider<R>, S extends ISourceFolder> void loadFont(TextureLoader<R, S> textureLoader, Font font, boolean antialiasing, R fontAtlasName) {
+	private static Function<Font, FontMetrics> fontMetricsFactory = Utility.memorize(font -> {
 		
 		// Get font metrics, only accessible trough an graphics object
 		BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = image.createGraphics();
-		if (antialiasing) g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setFont(font);
 		FontMetrics metrics = g.getFontMetrics();
 		g.dispose();
+		return metrics;
+		
+	});
+	
+	private static <R extends IResourceProvider<R>, S extends ISourceFolder> void loadFont(TextureLoader<R, S> textureLoader, Font font, boolean antialiasing, R fontAtlasName) {
+		
+		FontMetrics metrics = fontMetricsFactory.apply(font);
 		
 		// Make atlas by printing each character onto the image
 		FontAtlasMap<R> fontAtlas = new FontAtlasMap<R>(fontAtlasName);

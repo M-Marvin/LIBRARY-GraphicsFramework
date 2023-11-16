@@ -69,7 +69,8 @@ public class ResourcePath implements IResourceProvider<ResourcePath> {
 	
 	@Override
 	public ResourcePath getParent() {
-		return new ResourcePath(new File(this.path).getParent());
+		String parent = new File(this.path).getParent();
+		return new ResourcePath(parent == null ? "" : parent);
 	}
 	
 	@Override

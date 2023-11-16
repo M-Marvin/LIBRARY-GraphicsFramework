@@ -63,6 +63,14 @@ public class Compound<R extends IResourceProvider<R>> {
 		this.needsRedraw = true;
 	}
 	
+	public boolean checkRedraw() {
+		if (this.needsRedraw) {
+			this.needsRedraw = false;
+			return true;
+		}
+		return false;
+	}
+	
 	public void setContainer(UIContainer<R> container) {
 		if (this.container != null) this.cleanup();
 		this.container = container;
@@ -251,15 +259,5 @@ public class Compound<R extends IResourceProvider<R>> {
 	
 	public void drawBackground(SimpleBufferSource<R, UIRenderMode<R>> bufferSource, PoseStack matrixStack) {}
 	public void drawForeground(SimpleBufferSource<R, UIRenderMode<R>> bufferSource, PoseStack matrixStack) {}
-	
-	public void updateOutdatedVAOs(UIContainer<R> container, Vec2i offset, PoseStack matrixStack) {
-		if (this.needsRedraw) {
-			this.needsRedraw = false;
-			container.updateVAOs(this, offset);
-		}
-		Vec2i offset2 = offset.add(this.getOffset());
-		matrixStack.translate(0, 0, -0.001F);
-		for (Compound<R> c : this.childComponents) c.updateOutdatedVAOs(container, offset2, matrixStack);
-	}
 	
 }

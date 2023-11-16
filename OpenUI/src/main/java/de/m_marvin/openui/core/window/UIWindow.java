@@ -202,7 +202,7 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 
 	protected void frame() {
 
-		this.uiContainer.updateOutdatedVAOs(textureLoader);
+		this.uiContainer.updateComponentVAOs(textureLoader);
 		this.uiContainer.renderVAOs(shaderLoader, textureLoader);
 		mainWindow.glSwapFrames();
 

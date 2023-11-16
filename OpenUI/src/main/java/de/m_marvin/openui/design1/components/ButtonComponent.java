@@ -70,10 +70,7 @@ public class ButtonComponent extends Component<ResourcePath> {
 	@Override
 	public void drawBackground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
 		
-		BufferBuilder buffer = bufferSource.startBuffer(UIRenderModes.plainClickable());
-		
 		matrixStack.push();
-		matrixStack.translate(this.offset.x, this.offset.y, 0);
 		
 		float r = this.color.getRed() / 255F;
 		float g = this.color.getGreen() / 255F;
@@ -81,6 +78,7 @@ public class ButtonComponent extends Component<ResourcePath> {
 		float a = this.color.getAlpha() / 255F;
 		byte p = (byte) (this.pressed ? 2 : (this.cursorOverComponent ? 1 : 0));
 		
+		BufferBuilder buffer = bufferSource.startBuffer(UIRenderModes.plainClickable());
 		buffer.vertex(matrixStack, this.size.x, 0, 0)			.vec2f(this.size.x, 0)				.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
 		buffer.vertex(matrixStack, 0, 0, 0)						.vec2f(0, 0)						.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
 		buffer.vertex(matrixStack, this.size.x, this.size.y, 0)	.vec2f(this.size.x, this.size.y)	.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
@@ -90,9 +88,22 @@ public class ButtonComponent extends Component<ResourcePath> {
 		
 		buffer.end();
 		
-		if (this.title != null) FontRenderer.renderString(title, Color.GREEN, FONT, new ResourcePath("ui/font"), UIRenderModes::texturedSolid, this.getContainer().getActiveTexureLoader(), bufferSource, matrixStack);
-		
 		matrixStack.pop();
+		
+	}
+	
+	@Override
+	public void drawForeground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
+		
+		if (this.title != null) {
+			
+			matrixStack.push();
+			int width = FontRenderer.calculateStringWidth(title, FONT);
+			matrixStack.translate((this.size.x / 2) - (width / 2), 0, 0);
+			FontRenderer.renderString(title, new Color(0, 0, 0, 255), FONT, new ResourcePath("ui/font"), UIRenderModes::texturedSolid, this.getContainer().getActiveTexureLoader(), bufferSource, matrixStack);
+			matrixStack.pop();
+			
+		}
 		
 	}
 	

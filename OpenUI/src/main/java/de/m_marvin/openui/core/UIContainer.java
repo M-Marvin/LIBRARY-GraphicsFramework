@@ -2,7 +2,7 @@ package de.m_marvin.openui.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,10 +26,12 @@ import de.m_marvin.univec.impl.Vec2i;
 public class UIContainer<R extends IResourceProvider<R>> {
 	
 	public static final int DEFAULT_INITIAL_BUFFER_SIZE = 3600;
+	public static final float LAYER_Z_SHIFT = -0.001F;
 	
 	private final Compound<R> compound;
 	private final SimpleBufferSource<R, UIRenderMode<R>> bufferSource;
-	private final Map<UIRenderMode<R>, Map<Compound<R>, List<VertexBuffer>>> vertexBuffers;
+	private final Map<VertexBuffer, UIRenderMode<R>> vertexBuffers;
+	private final Map<Compound<R>, List<VertexBuffer>> component2bufferMap;
 	private final List<VertexBuffer> emptyVAOs = new ArrayList<>();
 	private final UserInput userInput;
 	private Compound<R> focused;
@@ -45,7 +47,8 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	public UIContainer(int initalBufferSize, UserInput userInput) {
 		this.userInput = userInput;
 		this.bufferSource = new SimpleBufferSource<R, UIRenderMode<R>>(initalBufferSize);
-		this.vertexBuffers = new HashMap<>();
+		this.vertexBuffers = new LinkedHashMap<>();
+		this.component2bufferMap = new HashMap<>();
 		this.compound = new Compound<R>();
 		this.compound.setContainer(this);
 		this.compound.setOffset(new Vec2i(0, 0));
@@ -119,30 +122,51 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	 * Check if any components need to be redrawn, and update the VAOs.<br>
 	 * <b>NEEDS TO BE CALLED ON RENDER THREAD</b>
 	 */
-	public void updateOutdatedVAOs(TextureLoader<R, ? extends ISourceFolder> textureLoader) {
+	public void updateComponentVAOs(TextureLoader<R, ? extends ISourceFolder> textureLoader) {
 		this.activeTexureLoader = textureLoader;
 		if (this.matrixStack == null || !this.matrixStack.cleared()) this.matrixStack = new PoseStack();
 		this.matrixStack.push();
-		this.compound.updateOutdatedVAOs(this, new Vec2i(0, 0), this.matrixStack);
+		
+		List<Compound<R>> nextLayerComponents = new ArrayList<>();
+		nextLayerComponents.add(this.compound);
+		
+		boolean redrawAbove = false;
+		while (nextLayerComponents.size() > 0) {
+			List<Compound<R>> nextLayer = new ArrayList<>();
+			boolean redrawAll = redrawAbove;
+			for (Compound<R> component : nextLayerComponents) {
+				if (component.checkRedraw() || redrawAll) {
+					updateVAOs(component);
+					redrawAbove = true;
+				}
+				
+				nextLayer.addAll(component.getChildComponents());
+			}
+			nextLayerComponents = nextLayer;
+			matrixStack.translate(0, 0, -0.1F);
+		}
+		
 		this.matrixStack.pop();
 		this.matrixStack.assertCleared();	
 	}
 	
-	public void updateVAOs(Compound<R> component, Vec2i offset) {
+	protected void updateVAOs(Compound<R> component) {
 		
 		matrixStack.push();
-		matrixStack.translate(offset.x, offset.y, 0);
+		matrixStack.translate(component.getAbsoluteOffset().x, component.getAbsoluteOffset().y, 0);
+		removeOutdatedVAOs(component);
 		component.drawBackground(this.bufferSource, this.matrixStack);
+		uploadNewVAOs(bufferSource, component);
+		matrixStack.translate(0, 0, LAYER_Z_SHIFT);
 		component.drawForeground(this.bufferSource, this.matrixStack);
+		uploadNewVAOs(bufferSource, component);
 		matrixStack.pop();
 		
-		removeOutdatedVAOs(component);
-		uploadNewVAOs(bufferSource, component);
-		
-		Iterator<UIRenderMode<R>> it = this.vertexBuffers.keySet().iterator();
-		while (it.hasNext()) {
-			if (this.vertexBuffers.get(it.next()).isEmpty()) it.remove();
-		}
+//		// Remove empty render mode buffers
+//		Iterator<UIRenderMode<R>> it = this.vertexBuffers.keySet().iterator();
+//		while (it.hasNext()) {
+//			if (this.vertexBuffers.get(it.next()).isEmpty()) it.remove();
+//		}
 		
 	}
 
@@ -152,40 +176,31 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	}
 	
 	protected void removeOutdatedVAOs(Compound<R> component) {
-		for (Map<Compound<R>, List<VertexBuffer>> map : vertexBuffers.values()) {
-			if (map.containsKey(component)) {
-				for (VertexBuffer buffer : map.get(component)) {
-					this.emptyVAOs.add(buffer);
-				}
-				map.get(component).clear();
-			}
+		List<VertexBuffer> removed = this.component2bufferMap.get(component);
+		if (removed != null) {
+			for (VertexBuffer r : removed) this.vertexBuffers.remove(r);
+			this.emptyVAOs.addAll(removed);
+			removed.clear();
 		}
 	}
 	
 	public void deleteVAOs(Compound<R> component) {
-		for (Map<Compound<R>, List<VertexBuffer>> map : vertexBuffers.values()) {
-			if (map.containsKey(component)) {
-				for (VertexBuffer buffer : map.get(component)) {
-					this.emptyVAOs.add(buffer);
-				}
-				map.remove(component);
-			}
-		}
+		List<VertexBuffer> removed = this.component2bufferMap.remove(component);
+		for (VertexBuffer r : removed) this.vertexBuffers.remove(r);
+		this.emptyVAOs.addAll(removed);
 	}
 	
 	protected void uploadNewVAOs(SimpleBufferSource<R, UIRenderMode<R>> bufferSource, Compound<R> component) {
+		
 		for (UIRenderMode<R> renderMode : bufferSource.getBufferTypes()) {
-			if (!this.vertexBuffers.containsKey(renderMode)) this.vertexBuffers.put(renderMode, new HashMap<>());
-			Map<Compound<R>, List<VertexBuffer>> componentMap = this.vertexBuffers.get(renderMode);
-			
-			if (!componentMap.containsKey(component)) componentMap.put(component, new ArrayList<>());
-			List<VertexBuffer> bufferList = componentMap.get(component);
+			if (!this.component2bufferMap.containsKey(component)) this.component2bufferMap.put(component, new ArrayList<>());
 			
 			BufferBuilder bufferBuilder = bufferSource.getBuffer(renderMode);
-			for (int i = 0; i < bufferBuilder.completedBuffers(); i++) {
+			while (bufferBuilder.completedBuffers() > 0) {
 				VertexBuffer buffer = getEmptyVAO();
-				buffer.upload(bufferBuilder, BufferUsage.DYNAMIC);
-				bufferList.add(buffer);
+				buffer.upload(bufferBuilder, BufferUsage.STATIC);
+				this.component2bufferMap.get(component).add(buffer);
+				this.vertexBuffers.put(buffer, renderMode);
 			}
 		}
 	}
@@ -201,22 +216,23 @@ public class UIContainer<R extends IResourceProvider<R>> {
 		
 		this.activeTexureLoader = textureLoader;
 		
-		for (UIRenderMode<R> renderMode : this.vertexBuffers.keySet()) {
+		UIRenderMode<R> activeMode = null;
+		
+		for (VertexBuffer buffer : this.vertexBuffers.keySet()) {
+
+			UIRenderMode<R> renderMode = this.vertexBuffers.get(buffer);
 			
-			Map<Compound<R>, List<VertexBuffer>> bufferMap = this.vertexBuffers.get(renderMode);
-			
-			ShaderInstance shader = shaderLoader.getOrLoadShader(renderMode.shader(), Optional.of(renderMode.vertexFormat()));
-			shader.useShader();
-			renderMode.setupRenderMode(shader, this);
-			
-			for (List<VertexBuffer> bufferList : bufferMap.values()) {
-				for (VertexBuffer buffer : bufferList) {
-					
-					buffer.bind();
-					buffer.drawAll(renderMode.primitive());
-					
-				}
+			if (activeMode != renderMode) {
+				activeMode = renderMode;
+				
+				ShaderInstance shader = shaderLoader.getOrLoadShader(renderMode.shader(), Optional.of(renderMode.vertexFormat()));
+				shader.useShader();
+				renderMode.setupRenderMode(shader, this);
+				
 			}
+
+			buffer.bind();
+			buffer.drawAll(renderMode.primitive());
 			
 		}
 		
