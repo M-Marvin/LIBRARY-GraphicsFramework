@@ -1,4 +1,4 @@
-package de.m_marvin.fontrenderer;
+package de.m_marvin.renderengine.fontrendering;
 
 import java.awt.image.BufferedImage;
 import java.util.HashMap;

@@ -46,8 +46,8 @@ public class TestWindow extends Window {
 		b5.setLayout(new GridLayout());
 		b5.setSizeMin(new Vec2i(10 * 60, 10 * 20));
 		
-		for (int i = 0; i < 1; i++) {
-			for (int t = 0; t < 1; t++) {
+		for (int i = 0; i < 10; i++) {
+			for (int t = 0; t < 10; t++) {
 				
 				Color color = Color.WHITE;
 				//if (!(i == 0 || i == 9 || t == 0 || t == 9)) color = Color.GREEN;

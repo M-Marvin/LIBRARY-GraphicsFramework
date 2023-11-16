@@ -1,4 +1,4 @@
-package de.m_marvin.fontrenderer;
+package de.m_marvin.renderengine.fontrendering;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -62,13 +62,18 @@ public class FontRenderer {
 		
 	}
 	
-	public static <R extends IResourceProvider<R>> int calculateStringWidth(String string, Font font) {
+	public static int calculateStringWidth(String string, Font font) {
 		int width = 0;
 		FontMetrics metrics = fontMetricsFactory.apply(font);
 		for (int i = 0; i < string.length(); i++) {
 			width += metrics.charWidth(string.charAt(i));
 		}
 		return width;
+	}
+	
+	public static int getFontHeight(Font font) {
+		FontMetrics metrics = fontMetricsFactory.apply(font);
+		return metrics.getHeight();
 	}
 	
 	public static String getFontAtlasName(Font font) {

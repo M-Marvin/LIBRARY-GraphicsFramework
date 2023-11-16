@@ -3,9 +3,9 @@ package de.m_marvin.openui.design1.components;
 import java.awt.Color;
 import java.awt.Font;
 
-import de.m_marvin.fontrenderer.FontRenderer;
 import de.m_marvin.openui.core.UIRenderMode;
 import de.m_marvin.openui.core.components.Component;
+import de.m_marvin.openui.design1.TextRenderer;
 import de.m_marvin.openui.design1.UIRenderModes;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.defimpl.SimpleBufferSource;
@@ -15,17 +15,21 @@ import de.m_marvin.univec.impl.Vec2i;
 
 public class ButtonComponent extends Component<ResourcePath> {
 	
-	public static final Color BUTTON_COLOR_WHITE = new Color(255, 255, 255);
-	
 	protected Color color;
+	protected Color textColor;
 	protected String title = null;
 	
 	protected boolean pressed = false;
 	
-	public ButtonComponent(String title, Color color) {
+	public ButtonComponent(String title, Color color, Color invertColor) {
 		this.marginLeft = this.marginRight = this.marginTop = this.marginBottom = 5;
 		this.color = color;
+		this.textColor = invertColor;
 		this.title = title;
+	}
+
+	public ButtonComponent(String title, Color color) {
+		this(title, color, Color.BLACK);
 	}
 	
 	public Color getColor() {
@@ -97,11 +101,7 @@ public class ButtonComponent extends Component<ResourcePath> {
 		
 		if (this.title != null) {
 			
-			matrixStack.push();
-			int width = FontRenderer.calculateStringWidth(title, FONT);
-			matrixStack.translate((this.size.x / 2) - (width / 2), 0, 0);
-			FontRenderer.renderString(title, new Color(0, 0, 0, 255), FONT, new ResourcePath("ui/font"), UIRenderModes::texturedSolid, this.getContainer().getActiveTexureLoader(), bufferSource, matrixStack);
-			matrixStack.pop();
+			TextRenderer.renderTextCentered(this.size.x / 2, this.size.y / 2, title, FONT, this.pressed ? this.color : this.textColor, container.getActiveTexureLoader(), bufferSource, matrixStack);
 			
 		}
 		

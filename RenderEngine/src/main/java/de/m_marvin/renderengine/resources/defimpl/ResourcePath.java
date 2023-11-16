@@ -1,7 +1,6 @@
 package de.m_marvin.renderengine.resources.defimpl;
 
 import java.io.File;
-import java.util.Objects;
 
 import de.m_marvin.renderengine.resources.IResourceProvider;
 
