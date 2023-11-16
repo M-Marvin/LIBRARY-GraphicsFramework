@@ -280,7 +280,7 @@ public interface IVertexConsumer {
 	public IVertexConsumer putFloat(float f);
 	
 	/**
-	 * Accepts a float byte for the current attribute.
+	 * Accepts a byte for the current attribute.
 	 * @param b The value
 	 * @return This consumer to apply more draw calls
 	 */

@@ -25,7 +25,7 @@ public class GroupBox extends Compound<ResourcePath> {
 	@Override
 	public void drawBackground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
 		
-		BufferBuilder buffer = bufferSource.startBuffer(UIRenderModes.solidPlane());
+		BufferBuilder buffer = bufferSource.startBuffer(UIRenderModes.plainSolid());
 		
 		matrixStack.push();
 		matrixStack.translate(this.offset.x, this.offset.y, 0);

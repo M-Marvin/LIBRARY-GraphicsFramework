@@ -37,6 +37,9 @@ dependencies {
 	// UniVec
 	implementation 'com.github.M-Marvin:LIBRARY-UnifiedVectors:0c5578b'
 	
+	// ArchiveUtility
+	implementation 'com.github.M-Marvin:LIBRARY-ArchiveUtility:1d7ec8abeb'
+	
 	// GSON
 	implementation "com.google.code.gson:gson:2.9.1"
 	

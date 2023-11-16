@@ -1,7 +1,9 @@
 package de.m_marvin.openui.design1.components;
 
 import java.awt.Color;
+import java.awt.Font;
 
+import de.m_marvin.fontrenderer.FontRenderer;
 import de.m_marvin.openui.core.UIRenderMode;
 import de.m_marvin.openui.core.components.Component;
 import de.m_marvin.openui.design1.UIRenderModes;
@@ -13,18 +15,35 @@ import de.m_marvin.univec.impl.Vec2i;
 
 public class ButtonComponent extends Component<ResourcePath> {
 	
-	public static final Color BUTTON_COLOR_GRAY = new Color(0, 0, 0);
-	 
+	public static final Color BUTTON_COLOR_WHITE = new Color(255, 255, 255);
+	
 	protected Color color;
+	protected String title = null;
+	
 	protected boolean pressed = false;
 	
-	public ButtonComponent(Color color) {
+	public ButtonComponent(String title, Color color) {
 		this.marginLeft = this.marginRight = this.marginTop = this.marginBottom = 5;
 		this.color = color;
+		this.title = title;
 	}
 	
 	public Color getColor() {
 		return color;
+	}
+	
+	public void setColor(Color color) {
+		this.color = color;
+		this.redraw();
+	}
+	
+	public String getTitle() {
+		return title;
+	}
+	
+	public void setTitle(String title) {
+		this.title = title;
+		this.redraw();
 	}
 	
 	@Override
@@ -46,10 +65,12 @@ public class ButtonComponent extends Component<ResourcePath> {
 		}
 	}
 	
+	public static final Font FONT = new Font("arial", Font.PLAIN, 16);
+	
 	@Override
 	public void drawBackground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
 		
-		BufferBuilder buffer = bufferSource.startBuffer(UIRenderModes.clickableHoverable(new ResourcePath("ui/test")));
+		BufferBuilder buffer = bufferSource.startBuffer(UIRenderModes.plainClickable());
 		
 		matrixStack.push();
 		matrixStack.translate(this.offset.x, this.offset.y, 0);
@@ -58,16 +79,18 @@ public class ButtonComponent extends Component<ResourcePath> {
 		float g = this.color.getGreen() / 255F;
 		float b = this.color.getBlue() / 255F;
 		float a = this.color.getAlpha() / 255F;
-		byte p = (byte) (this.pressed ? 1 : 0);
+		byte p = (byte) (this.pressed ? 2 : (this.cursorOverComponent ? 1 : 0));
 		
-		buffer.vertex(matrixStack, this.size.x, 0, 0)			.uv(1, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, 0, 0, 0)						.uv(0, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, this.size.x, this.size.y, 0)	.uv(1, 1).color(r, g, b, a).putByte(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, this.size.x, this.size.y, 0)	.uv(1, 1).color(r, g, b, a).putByte(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, 0, 0, 0)						.uv(0, 0).color(r, g, b, a).putByte(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, 0, this.size.y, 0)			.uv(0, 1).color(r, g, b, a).putByte(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, this.size.x, 0, 0)			.vec2f(this.size.x, 0)				.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, 0, 0, 0)						.vec2f(0, 0)						.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, this.size.x, this.size.y, 0)	.vec2f(this.size.x, this.size.y)	.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, this.size.x, this.size.y, 0)	.vec2f(this.size.x, this.size.y)	.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, 0, 0, 0)						.vec2f(0, 0)						.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, 0, this.size.y, 0)			.vec2f(0, this.size.y)				.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
 		
 		buffer.end();
+		
+		if (this.title != null) FontRenderer.renderString(title, Color.GREEN, FONT, new ResourcePath("ui/font"), UIRenderModes::texturedSolid, this.getContainer().getActiveTexureLoader(), bufferSource, matrixStack);
 		
 		matrixStack.pop();
 		

@@ -228,6 +228,29 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	}
 
 	/**
+	 * Manually adds an texture map to the cached textures.
+	 * This is mostly used by external texture loaders, like the font manager.
+	 * 
+	 * @param atlasName The name under which the atlas should be cached
+	 * @param textureMap The atlas's texture map
+	 */
+	public void cacheTextureMap(R atlasName, AbstractTextureMap<R> textureMap) {
+		this.textureMapNames.add(atlasName);
+		this.textureCache.put(atlasName, textureMap);
+	}
+
+	/**
+	 * Manually links an texture name with the given map.
+	 * This is mostly used by external texture loaders, like the font manager.
+	 * 
+	 * @param textureName The name under which the texture should be cached
+	 * @param textureMap The textures's texture map
+	 */
+	public void cacheTexture(R textureName, AbstractTextureMap<R> textureMap) {
+		this.textureCache.put(textureName, textureMap);
+	}
+	
+	/**
 	 * Lists all texture names found in the given folder.
 	 * Does not search in sub-folders.
 	 * 

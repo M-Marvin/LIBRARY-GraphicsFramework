@@ -119,7 +119,8 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	 * Check if any components need to be redrawn, and update the VAOs.<br>
 	 * <b>NEEDS TO BE CALLED ON RENDER THREAD</b>
 	 */
-	public void updateOutdatedVAOs() {
+	public void updateOutdatedVAOs(TextureLoader<R, ? extends ISourceFolder> textureLoader) {
+		this.activeTexureLoader = textureLoader;
 		if (this.matrixStack == null || !this.matrixStack.cleared()) this.matrixStack = new PoseStack();
 		this.matrixStack.push();
 		this.compound.updateOutdatedVAOs(this, new Vec2i(0, 0), this.matrixStack);
@@ -198,13 +199,15 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	 */
 	public void renderVAOs(ShaderLoader<R, ? extends ISourceFolder> shaderLoader, TextureLoader<R, ? extends ISourceFolder> textureLoader) {
 		
+		this.activeTexureLoader = textureLoader;
+		
 		for (UIRenderMode<R> renderMode : this.vertexBuffers.keySet()) {
 			
 			Map<Compound<R>, List<VertexBuffer>> bufferMap = this.vertexBuffers.get(renderMode);
 			
 			ShaderInstance shader = shaderLoader.getOrLoadShader(renderMode.shader(), Optional.of(renderMode.vertexFormat()));
 			shader.useShader();
-			renderMode.setupRenderMode(shader, textureLoader, this);
+			renderMode.setupRenderMode(shader, this);
 			
 			for (List<VertexBuffer> bufferList : bufferMap.values()) {
 				for (VertexBuffer buffer : bufferList) {
@@ -217,6 +220,12 @@ public class UIContainer<R extends IResourceProvider<R>> {
 			
 		}
 		
+	}
+	
+	private TextureLoader<R, ? extends ISourceFolder> activeTexureLoader;
+	
+	public TextureLoader<R, ? extends ISourceFolder> getActiveTexureLoader() {
+		return activeTexureLoader;
 	}
 	
 }

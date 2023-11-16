@@ -1,6 +1,6 @@
 {
-	"VertexShaderFile": "solidPlane",
-	"FragmentShaderFile": "solidPlane",
+	"VertexShaderFile": "plain_solid",
+	"FragmentShaderFile": "plain_solid",
 	"Uniforms": [
 		{ "Name": "ProjMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] }
 	],

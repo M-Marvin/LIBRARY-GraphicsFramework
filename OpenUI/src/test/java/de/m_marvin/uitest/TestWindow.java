@@ -49,10 +49,10 @@ public class TestWindow extends Window {
 		for (int i = 0; i < 10; i++) {
 			for (int t = 0; t < 10; t++) {
 				
-				Color color = Color.GRAY;
-				if (!(i == 0 || i == 9 || t == 0 || t == 9)) color = Color.GREEN;
+				Color color = Color.WHITE;
+				//if (!(i == 0 || i == 9 || t == 0 || t == 9)) color = Color.GREEN;
 				
-				ButtonComponent b6 = new ButtonComponent(color);
+				ButtonComponent b6 = new ButtonComponent("Test", color);
 				b6.setLayoutData(new GridLayout.GridLayoutData(i, t));
 				//b6.setMargin(0, 0, 0, 0);
 				b6.setSize(new Vec2i(60, 20));

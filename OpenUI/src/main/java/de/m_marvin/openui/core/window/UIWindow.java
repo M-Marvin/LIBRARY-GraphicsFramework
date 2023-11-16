@@ -110,6 +110,7 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 			startLoop();
 			
 		} catch (Exception e) {
+			e.printStackTrace();
 			this.stop();
 			throw e;
 		}
@@ -201,7 +202,7 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 
 	protected void frame() {
 
-		this.uiContainer.updateOutdatedVAOs();
+		this.uiContainer.updateOutdatedVAOs(textureLoader);
 		this.uiContainer.renderVAOs(shaderLoader, textureLoader);
 		mainWindow.glSwapFrames();
 

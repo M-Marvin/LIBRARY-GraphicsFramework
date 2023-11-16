@@ -27,7 +27,10 @@ public class Component<R extends IResourceProvider<R>> extends Compound<R> {
 	public void cursorMove(Vec2d position, boolean entered, boolean leaved) {
 		boolean overComponent = this.container.getTopComponentUnderCursor() == this;
 		if (overComponent != this.cursorOverComponent || this.cursorOverComponent) {
-			this.cursorOverComponent = overComponent;
+			if (overComponent != this.cursorOverComponent) {
+				this.cursorOverComponent = overComponent;
+				this.redraw();
+			}
 			this.onCursorMoveOver(new Vec2i(position).sub(this.getParentOffset()), !overComponent);
 		}
 	}
