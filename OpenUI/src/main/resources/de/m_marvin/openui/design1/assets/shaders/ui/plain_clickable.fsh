@@ -7,7 +7,7 @@ flat in ivec2 vs_pxsize;
 in vec4 vs_color;
 flat in int vs_pressed;
 
-out vec4 gl_Color;
+out vec4 glColor;
 
 void main() {
 	
@@ -21,11 +21,11 @@ void main() {
 			vs_pxpos.x >= vs_pxsize.x - BorderWidth || 
 			vs_pxpos.y >= vs_pxsize.y - BorderWidth;
 		
-		gl_Color = borderPixel ? color : vec4(0, 0, 0, 0);
+		glColor = borderPixel ? color : vec4(0, 0, 0, 0);
 		
 	} else {
 		
-		gl_Color = color;
+		glColor = color;
 		
 	}
 	

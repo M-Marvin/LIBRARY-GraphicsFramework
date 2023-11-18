@@ -2,10 +2,10 @@
 
 in vec4 vs_color;
 
-out vec4 gl_Color;
+out vec4 glColor;
 
 void main() {
 	
-	gl_Color = vs_color;
+	glColor = vs_color;
 	
 }
