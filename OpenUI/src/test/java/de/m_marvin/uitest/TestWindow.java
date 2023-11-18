@@ -8,8 +8,10 @@ import de.m_marvin.openui.core.layout.BorderLayout.BorderSection;
 import de.m_marvin.openui.core.layout.BorderLayout.CornerStretch;
 import de.m_marvin.openui.core.layout.GridLayout;
 import de.m_marvin.openui.design1.Window;
+import de.m_marvin.openui.design1.components.BarComponent;
 import de.m_marvin.openui.design1.components.ButtonComponent;
 import de.m_marvin.openui.design1.components.GroupBox;
+import de.m_marvin.openui.design1.components.ScrollBarComponent;
 import de.m_marvin.openui.design1.components.TextFieldComponent;
 import de.m_marvin.openui.design1.components.ToggleButtonComponent;
 import de.m_marvin.univec.impl.Vec2i;
@@ -28,6 +30,10 @@ public class TestWindow extends Window {
 		b.setSizeMin(new Vec2i(100, 100));
 		b.setSizeMax(new Vec2i(150, 0));
 		b.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.LEFT));
+		
+		ScrollBarComponent scrollbar1 = new ScrollBarComponent(false, 200, 60);
+		scrollbar1.setOffset(new Vec2i(40, 40));
+		b.addComponent(scrollbar1);
 		
 		GroupBox b1 = new GroupBox();
 		b1.setSizeMin(new Vec2i(100, 100));
@@ -49,17 +55,31 @@ public class TestWindow extends Window {
 			}
 		}
 		
-		
-		
 		GroupBox b2 = new GroupBox();
 		b2.setSize(new Vec2i(100, 0));
 		b2.fixSize();
 		b2.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.RIGHT));
 		
+		BarComponent bar2 = new BarComponent(false);
+		bar2.setValue(70);
+		bar2.setSize(new Vec2i(20, 300));
+		bar2.setOffset(new Vec2i(30, 40));
+		b2.addComponent(bar2);
+		
 		GroupBox b3 = new GroupBox();
 		b3.setSizeMin(new Vec2i(100, 100));
 		b3.setSizeMax(new Vec2i(0, 150));
 		b3.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.BOTTOM));
+
+		ScrollBarComponent scrollbar2 = new ScrollBarComponent(true, 200, 60);
+		scrollbar2.setOffset(new Vec2i(40, 40));
+		b3.addComponent(scrollbar2);
+		
+		BarComponent bar1 = new BarComponent();
+		bar1.setValue(70);
+		bar1.setSize(new Vec2i(300, 20));
+		bar1.setOffset(new Vec2i(240, 40));
+		b3.addComponent(bar1);
 		
 		GroupBox b5 = new GroupBox();
 		b5.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.CENTERED));

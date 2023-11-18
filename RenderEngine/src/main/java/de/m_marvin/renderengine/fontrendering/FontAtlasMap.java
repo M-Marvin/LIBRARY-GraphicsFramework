@@ -119,6 +119,7 @@ public class FontAtlasMap<R extends IResourceProvider<R>> extends AbstractTextur
 
 	@Override
 	public Vec4f getUV() {
+		if (!character2uv.containsKey(activeCharacter)) return new Vec4f(0, 0, 0, 0);
 		return character2uv.get(activeCharacter);
 	}
 	

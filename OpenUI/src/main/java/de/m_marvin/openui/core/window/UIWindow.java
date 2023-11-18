@@ -100,10 +100,10 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 			mainWindow = new Window(1000, 600, this.windowName);
 			mainWindow.makeContextCurrent();
 			GLStateManager.clearColor(1, 0, 1, 1);
-
+			
 			// Setup input handler
 			inputHandler.attachToWindow(mainWindow.windowId());
-
+			
 			// Setup and start game loop
 			frameTime = 16; // ~60 FPS
 			setup();

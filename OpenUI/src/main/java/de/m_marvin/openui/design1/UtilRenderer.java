@@ -7,10 +7,9 @@ import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.IBufferSource;
 import de.m_marvin.renderengine.resources.defimpl.ResourcePath;
 import de.m_marvin.renderengine.translation.PoseStack;
-import de.m_marvin.univec.impl.Vec2i;
 
 public class UtilRenderer {
-
+	
 	public static void renderRectangle(int x, int y, int w, int h, Color color, IBufferSource<UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
 		matrixStack.push();
 		matrixStack.translate(x, y, 0);

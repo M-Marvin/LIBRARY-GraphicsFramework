@@ -23,7 +23,7 @@ public class ToggleButtonComponent extends Component<ResourcePath> {
 	protected Color color;
 	protected Color textColor;
 	protected String title;
-	protected Font font = new Font("arial", Font.BOLD, 16);
+	protected Font font = DEFAULT_FONT;
 	protected Consumer<Boolean> toggleAction = (state) -> {};
 	
 	protected boolean state = false;
@@ -104,7 +104,7 @@ public class ToggleButtonComponent extends Component<ResourcePath> {
 	}
 	
 	@Override
-	public void onClicked(int button, boolean pressed, boolean repeated) {
+	protected void onClicked(int button, boolean pressed, boolean repeated) {
 		if (button == 0) {
 			if (this.pressed == true && pressed == false) {
 				this.state = !this.state;
@@ -116,7 +116,7 @@ public class ToggleButtonComponent extends Component<ResourcePath> {
 	}
 	
 	@Override
-	public void onCursorMoveOver(Vec2i position, boolean leaved) {
+	protected void onCursorMoveOver(Vec2i position, boolean leaved) {
 		if (leaved) {
 			this.pressed = false;
 			this.redraw();
@@ -126,14 +126,12 @@ public class ToggleButtonComponent extends Component<ResourcePath> {
 	@Override
 	public void drawBackground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
 		
-		matrixStack.push();
-		
 		float r = this.color.getRed() / 255F;
 		float g = this.color.getGreen() / 255F;
 		float b = this.color.getBlue() / 255F;
 		float a = this.color.getAlpha() / 255F;
-		byte pb = (byte) (this.pressed ? 2 : (this.cursorOverComponent ? 1 : 0));
-		byte pa = (byte) (!this.state ? 2 : (this.cursorOverComponent ? 1 : 0));
+		byte pa = (byte) (this.pressed ? 2 : (this.cursorOverComponent ? 1 : 0));
+		byte pb = (byte) (!this.state ? 2 : (this.cursorOverComponent ? 1 : 0));
 		
 		float fla = TOGGLE_WIDTH;
 		float flb = BUTTON_MARGIN;
@@ -165,8 +163,6 @@ public class ToggleButtonComponent extends Component<ResourcePath> {
 		
 		buffer.end();
 		
-		matrixStack.pop();
-		
 	}
 	
 	@Override
@@ -175,7 +171,7 @@ public class ToggleButtonComponent extends Component<ResourcePath> {
 		if (this.title != null) {
 			
 			String title = FontRenderer.limitStringWidth(this.title, this.font, this.size.x - BUTTON_MARGIN * 2 - 2);
-			TextRenderer.renderTextCentered(this.size.x / 2, this.size.y / 2, title, this.font, this.pressed ? this.color : this.textColor, container.getActiveTexureLoader(), bufferSource, matrixStack);
+			TextRenderer.renderTextCentered(this.size.x / 2, this.size.y / 2, title, this.font, !this.state ? this.color : this.textColor, container.getActiveTextureLoader(), bufferSource, matrixStack);
 			
 		}
 		

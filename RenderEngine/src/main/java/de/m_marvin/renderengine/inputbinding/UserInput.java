@@ -76,7 +76,7 @@ public class UserInput {
 		DEL(GLFW.GLFW_KEY_DELETE),
 		END(GLFW.GLFW_KEY_END),
 		INSERT(GLFW.GLFW_KEY_INSERT),
-		POS1(-1), // FIXME Could not find any information about the GLFW id of this key
+		POS1(GLFW.GLFW_KEY_HOME),
 		PAGE_UP(GLFW.GLFW_KEY_PAGE_UP),
 		PAGE_DOWN(GLFW.GLFW_KEY_PAGE_DOWN),
 		KEY_RIGHT(GLFW.GLFW_KEY_RIGHT),
@@ -85,7 +85,9 @@ public class UserInput {
 		KEY_DOWN(GLFW.GLFW_KEY_DOWN),
 		LEFT_SHIFT(GLFW.GLFW_KEY_LEFT_SHIFT),
 		RIGHT_SHIFT(GLFW.GLFW_KEY_LEFT_SHIFT),
-		CAPS_LOCK(GLFW.GLFW_KEY_CAPS_LOCK);
+		CAPS_LOCK(GLFW.GLFW_KEY_CAPS_LOCK),
+		CONTROL_LEFT(GLFW.GLFW_KEY_LEFT_CONTROL),
+		CONTROL_RIGHT(GLFW.GLFW_KEY_RIGHT_CONTROL);
 		
 		private final int glkey;
 		
@@ -304,6 +306,19 @@ public class UserInput {
 	public boolean isKeyPressed(int key) {
 		for (long windowId : this.attachedWindows) {
 			if (GLFW.glfwGetKey(windowId, key) == GLFW.GLFW_PRESS) return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns true if the specified mouse button is pressed.
+	 * 
+	 * @param key The button code of the button
+	 * @return true if the button is pressed
+	 */
+	public boolean isMouseButtonPressed(int button) {
+		for (long windowId : this.attachedWindows) {
+			if (GLFW.glfwGetMouseButton(windowId, button) == GLFW.GLFW_PRESS) return true;
 		}
 		return false;
 	}

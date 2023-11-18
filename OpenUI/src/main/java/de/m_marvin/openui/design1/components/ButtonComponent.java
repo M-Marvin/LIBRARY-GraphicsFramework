@@ -19,7 +19,7 @@ public class ButtonComponent extends Component<ResourcePath> {
 	protected Color color;
 	protected Color textColor;
 	protected String title;
-	protected Font font = new Font("arial", Font.BOLD, 16);
+	protected Font font = DEFAULT_FONT;
 	protected Runnable action = () -> {};
 	
 	protected boolean pressed = false;
@@ -91,7 +91,7 @@ public class ButtonComponent extends Component<ResourcePath> {
 	}
 	
 	@Override
-	public void onClicked(int button, boolean pressed, boolean repeated) {
+	protected void onClicked(int button, boolean pressed, boolean repeated) {
 		if (button == 0) {
 			if (this.pressed == true && pressed == false) {
 				this.action.run();
@@ -102,7 +102,7 @@ public class ButtonComponent extends Component<ResourcePath> {
 	}
 	
 	@Override
-	public void onCursorMoveOver(Vec2i position, boolean leaved) {
+	protected void onCursorMoveOver(Vec2i position, boolean leaved) {
 		if (leaved) {
 			this.pressed = false;
 			this.redraw();
@@ -112,13 +112,11 @@ public class ButtonComponent extends Component<ResourcePath> {
 	@Override
 	public void drawBackground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
 		
-		matrixStack.push();
-		
 		float r = this.color.getRed() / 255F;
 		float g = this.color.getGreen() / 255F;
 		float b = this.color.getBlue() / 255F;
 		float a = this.color.getAlpha() / 255F;
-		byte p = (byte) (this.pressed ? 2 : (this.cursorOverComponent ? 1 : 0));
+		int p = this.pressed ? 2 : (this.cursorOverComponent ? 1 : 0);
 		
 		BufferBuilder buffer = bufferSource.startBuffer(UIRenderModes.plainClickable());
 		buffer.vertex(matrixStack, this.size.x, 0, 0)				.vec2f(this.size.x, 0)				.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
@@ -130,8 +128,6 @@ public class ButtonComponent extends Component<ResourcePath> {
 		
 		buffer.end();
 		
-		matrixStack.pop();
-		
 	}
 	
 	@Override
@@ -140,7 +136,7 @@ public class ButtonComponent extends Component<ResourcePath> {
 		if (this.title != null) {
 			
 			String title = FontRenderer.limitStringWidth(this.title, this.font, this.size.x - 2);
-			TextRenderer.renderTextCentered(this.size.x / 2, this.size.y / 2, title, this.font, this.pressed ? this.color : this.textColor, container.getActiveTexureLoader(), bufferSource, matrixStack);
+			TextRenderer.renderTextCentered(this.size.x / 2, this.size.y / 2, title, this.font, this.pressed ? this.color : this.textColor, container.getActiveTextureLoader(), bufferSource, matrixStack);
 			
 		}
 		

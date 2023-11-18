@@ -52,10 +52,10 @@ public class UIRenderModes {
 					.appand("color", NumberFormat.FLOAT, 4, false),
 				SHADER_TEXTURED_SOLID,
 				(shader, container) -> {
-					UITextureHandler.ensureSingleTexturesLoaded(container.getActiveTexureLoader(), texture);
+					UITextureHandler.ensureSingleTexturesLoaded(container.getActiveTextureLoader(), texture);
 					
 					shader.getUniform("ProjMat").setMatrix4f(container.getProjectionMatrix());
-					shader.getUniform("Texture").setTextureSampler(container.getActiveTexureLoader().getTexture(texture));
+					shader.getUniform("Texture").setTextureSampler(container.getActiveTextureLoader().getTexture(texture));
 					GLStateManager.enable(GL33.GL_DEPTH_TEST);
 					GLStateManager.enable(GL33.GL_BLEND);
 					GLStateManager.blendFunc(GL33.GL_SRC_ALPHA, GL33.GL_ONE_MINUS_SRC_ALPHA);

@@ -248,14 +248,14 @@ public class UIContainer<R extends IResourceProvider<R>> {
 		long time = System.currentTimeMillis();
 		Optional<Long> timeToExecute = this.scheduleTicks.keySet().stream().filter(t -> t < time).findAny();
 		if (timeToExecute.isPresent()) {
-			this.scheduleTicks.remove(timeToExecute.get()).forEach(s -> s.component().tick(s.arg()));
+			this.scheduleTicks.remove(timeToExecute.get()).forEach(s -> s.component().scheduledTick(s.arg()));
 		}
 		
 	}
 	
 	private TextureLoader<R, ? extends ISourceFolder> activeTexureLoader;
 	
-	public TextureLoader<R, ? extends ISourceFolder> getActiveTexureLoader() {
+	public TextureLoader<R, ? extends ISourceFolder> getActiveTextureLoader() {
 		return activeTexureLoader;
 	}
 	

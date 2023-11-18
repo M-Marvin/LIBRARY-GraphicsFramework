@@ -1,4 +1,4 @@
-package de.m_marvin.openui.core;
+package de.m_marvin.renderengine.inputbinding;
 
 public class KeyCodes {
 	
