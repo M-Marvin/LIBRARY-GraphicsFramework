@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import de.m_marvin.openui.core.components.Component;
 import de.m_marvin.openui.core.components.Compound;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.BufferUsage;
@@ -39,6 +40,8 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	private PoseStack matrixStack;
 	private Vec2f cursorPosition = new Vec2f(-1, -1);
 	private Compound<R> topComponentUnderCursor = null;
+	private Map<Long, List<ScheduleComponentTick<R>>> scheduleTicks = new LinkedHashMap<>();	
+	protected record ScheduleComponentTick<R extends IResourceProvider<R>>(Component<R> component, int arg) {}
 	
 	public UIContainer(UserInput userInput) {
 		this(DEFAULT_INITIAL_BUFFER_SIZE, userInput);
@@ -93,7 +96,11 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	}
 	
 	public void setFocusedComponent(Compound<R> component) {
+		if (component == this.focused) return;
+		Compound<R> unfocused = this.focused;
 		this.focused = component;
+		if (unfocused instanceof Component<R> c) c.onChangeFocus();
+		if (this.focused instanceof Component<R> c) c.onChangeFocus();
 	}
 	
 	public Compound<R> getFocusedComponent() {
@@ -110,6 +117,13 @@ public class UIContainer<R extends IResourceProvider<R>> {
 	
 	public Compound<R> getTopComponentUnderCursor() {
 		return topComponentUnderCursor;
+	}
+	
+	public void scheduleTick(long delay, Component<R> component, int arg) {
+		long timeOfExecution = System.currentTimeMillis() + delay;
+		List<ScheduleComponentTick<R>> tasks = this.scheduleTicks.getOrDefault(timeOfExecution, new ArrayList<>());
+		tasks.add(new ScheduleComponentTick<>(component, arg));
+		this.scheduleTicks.put(timeOfExecution, tasks);	
 	}
 	
 	/* Rendering */
@@ -161,12 +175,6 @@ public class UIContainer<R extends IResourceProvider<R>> {
 		component.drawForeground(this.bufferSource, this.matrixStack);
 		uploadNewVAOs(bufferSource, component);
 		matrixStack.pop();
-		
-//		// Remove empty render mode buffers
-//		Iterator<UIRenderMode<R>> it = this.vertexBuffers.keySet().iterator();
-//		while (it.hasNext()) {
-//			if (this.vertexBuffers.get(it.next()).isEmpty()) it.remove();
-//		}
 		
 	}
 
@@ -234,6 +242,13 @@ public class UIContainer<R extends IResourceProvider<R>> {
 			buffer.bind();
 			buffer.drawAll(renderMode.primitive());
 			
+		}
+		
+		// Trigger schedule ticks
+		long time = System.currentTimeMillis();
+		Optional<Long> timeToExecute = this.scheduleTicks.keySet().stream().filter(t -> t < time).findAny();
+		if (timeToExecute.isPresent()) {
+			this.scheduleTicks.remove(timeToExecute.get()).forEach(s -> s.component().tick(s.arg()));
 		}
 		
 	}

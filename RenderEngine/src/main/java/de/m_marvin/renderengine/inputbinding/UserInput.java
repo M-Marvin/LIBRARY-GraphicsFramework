@@ -296,6 +296,19 @@ public class UserInput {
 	}
 	
 	/**
+	 * Returns true if the specified key is pressed.
+	 * 
+	 * @param key The keycode of the key
+	 * @return true if the key is pressed
+	 */
+	public boolean isKeyPressed(int key) {
+		for (long windowId : this.attachedWindows) {
+			if (GLFW.glfwGetKey(windowId, key) == GLFW.GLFW_PRESS) return true;
+		}
+		return false;
+	}
+	
+	/**
 	 * Checks if caps-lock is activated.
 	 * @return True if caps-lock is activated
 	 */

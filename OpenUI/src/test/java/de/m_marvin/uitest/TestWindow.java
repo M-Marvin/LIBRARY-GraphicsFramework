@@ -1,6 +1,7 @@
 package de.m_marvin.uitest;
 
 import java.awt.Color;
+import java.util.Random;
 
 import de.m_marvin.openui.core.layout.BorderLayout;
 import de.m_marvin.openui.core.layout.BorderLayout.BorderSection;
@@ -9,6 +10,8 @@ import de.m_marvin.openui.core.layout.GridLayout;
 import de.m_marvin.openui.design1.Window;
 import de.m_marvin.openui.design1.components.ButtonComponent;
 import de.m_marvin.openui.design1.components.GroupBox;
+import de.m_marvin.openui.design1.components.TextFieldComponent;
+import de.m_marvin.openui.design1.components.ToggleButtonComponent;
 import de.m_marvin.univec.impl.Vec2i;
 
 public class TestWindow extends Window {
@@ -21,27 +24,44 @@ public class TestWindow extends Window {
 	protected void initUI() {
 		this.getRootComponent().setLayout(new BorderLayout(CornerStretch.VERTICAL));
 		
-		GroupBox b = new GroupBox(Color.CYAN);
+		GroupBox b = new GroupBox();
 		b.setSizeMin(new Vec2i(100, 100));
 		b.setSizeMax(new Vec2i(150, 0));
 		b.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.LEFT));
 		
-		GroupBox b1 = new GroupBox(Color.RED);
+		GroupBox b1 = new GroupBox();
 		b1.setSizeMin(new Vec2i(100, 100));
 		b1.setSizeMax(new Vec2i(0, 150));
 		b1.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.TOP));
+		b1.setLayout(new GridLayout());
+
+		String[] titles = new String[] {"Test", "Button", "12345", "!?\\@Ä", "ABCDEFGHIJKLMNOP"};
+		Random r = new Random();
 		
-		GroupBox b2 = new GroupBox(Color.GREEN);
+		for (int i = 0; i < 4; i++) {
+			for (int t = 0; t < 2; t++) {
+				
+				TextFieldComponent b6 = new TextFieldComponent();
+				b6.setText(titles[r.nextInt(titles.length)]);
+				b6.setLayoutData(new GridLayout.GridLayoutData(i, t + 10));
+				b1.addComponent(b6);
+				
+			}
+		}
+		
+		
+		
+		GroupBox b2 = new GroupBox();
 		b2.setSize(new Vec2i(100, 0));
 		b2.fixSize();
 		b2.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.RIGHT));
 		
-		GroupBox b3 = new GroupBox(Color.BLUE);
+		GroupBox b3 = new GroupBox();
 		b3.setSizeMin(new Vec2i(100, 100));
 		b3.setSizeMax(new Vec2i(0, 150));
 		b3.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.BOTTOM));
 		
-		GroupBox b5 = new GroupBox(new Color(1, 0, 1));
+		GroupBox b5 = new GroupBox();
 		b5.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.CENTERED));
 		b5.setLayout(new GridLayout());
 		b5.setSizeMin(new Vec2i(10 * 60, 10 * 20));
@@ -50,17 +70,31 @@ public class TestWindow extends Window {
 			for (int t = 0; t < 10; t++) {
 				
 				Color color = Color.WHITE;
-				//if (!(i == 0 || i == 9 || t == 0 || t == 9)) color = Color.GREEN;
+				if (!(i == 0 || i == 9 || t == 0 || t == 9)) color = Color.RED;
 				
-				ButtonComponent b6 = new ButtonComponent("Test", color);
+				ButtonComponent b6 = new ButtonComponent(titles[r.nextInt(titles.length)], color);
 				b6.setLayoutData(new GridLayout.GridLayoutData(i, t));
-				//b6.setMargin(0, 0, 0, 0);
-				b6.setSize(new Vec2i(60, 20));
-				b6.fixSize();
+				int a = i;
+				int c = t;
+				b6.setAction(() -> System.out.println("Clicked on " + a + "/" + c));
 				b5.addComponent(b6);
 				
 			}
 		}
+		
+		for (int i = 0; i < 10; i++) {
+			for (int t = 0; t < 2; t++) {
+				
+				ToggleButtonComponent b6 = new ToggleButtonComponent(titles[r.nextInt(titles.length)]);
+				b6.setLayoutData(new GridLayout.GridLayoutData(i, t + 10));
+				int a = i;
+				int c = t;
+				b6.setAction((state) -> System.out.println("Toggle " + (state ? "on" : "off") + " " + a + "/" + c));
+				b5.addComponent(b6);
+				
+			}
+		}
+		
 		
 		b5.autoSetMinSize();
 		

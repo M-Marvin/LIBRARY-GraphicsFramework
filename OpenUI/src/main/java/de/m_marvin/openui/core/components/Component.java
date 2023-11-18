@@ -40,6 +40,7 @@ public class Component<R extends IResourceProvider<R>> extends Compound<R> {
 			if (scroll.isPresent()) {
 				this.onScroll(scroll.get());
 			} else {
+				this.setFocused(true);
 				this.onClicked(button, pressed, repeated);
 			}
 		}
@@ -48,6 +49,12 @@ public class Component<R extends IResourceProvider<R>> extends Compound<R> {
 	public void onCursorMoveOver(Vec2i position, boolean leaved) {}
 	public void onClicked(int button, boolean pressed, boolean repeated) {}
 	public void onScroll(Vec2d scroll) {}
+	public void onChangeFocus() {}
+	public void tick(int arg) {}
+	
+	public void scheduleTick(int delay, int arg) {
+		this.container.scheduleTick(delay, this, arg);
+	}
 	
 	public boolean isFocused() {
 		return this.container.getFocusedComponent() == this;

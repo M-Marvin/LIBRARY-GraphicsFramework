@@ -62,6 +62,16 @@ public class FontRenderer {
 		
 	}
 	
+	public static String limitStringWidth(String string, Font font, int maxWidth) {
+		int width = 0;
+		FontMetrics metrics = fontMetricsFactory.apply(font);
+		for (int i = 0; i < string.length(); i++) {
+			width += metrics.charWidth(string.charAt(i));
+			if (width > maxWidth) return string.substring(0, i);
+		}
+		return string;
+	}
+	
 	public static int calculateStringWidth(String string, Font font) {
 		int width = 0;
 		FontMetrics metrics = fontMetricsFactory.apply(font);

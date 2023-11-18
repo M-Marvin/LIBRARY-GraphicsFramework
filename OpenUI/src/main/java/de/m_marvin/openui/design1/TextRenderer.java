@@ -40,5 +40,5 @@ public class TextRenderer {
 		renderTextCentered(text, font, color, textureLoader, bufferSource, matrixStack);
 		matrixStack.pop();
 	}
-	
+		
 }

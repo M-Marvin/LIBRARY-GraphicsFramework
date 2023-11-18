@@ -9,6 +9,7 @@ import de.m_marvin.openui.design1.TextRenderer;
 import de.m_marvin.openui.design1.UIRenderModes;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.defimpl.SimpleBufferSource;
+import de.m_marvin.renderengine.fontrendering.FontRenderer;
 import de.m_marvin.renderengine.resources.defimpl.ResourcePath;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.univec.impl.Vec2i;
@@ -17,19 +18,28 @@ public class ButtonComponent extends Component<ResourcePath> {
 	
 	protected Color color;
 	protected Color textColor;
-	protected String title = null;
+	protected String title;
+	protected Font font = new Font("arial", Font.BOLD, 16);
+	protected Runnable action = () -> {};
 	
 	protected boolean pressed = false;
 	
 	public ButtonComponent(String title, Color color, Color invertColor) {
-		this.marginLeft = this.marginRight = this.marginTop = this.marginBottom = 5;
 		this.color = color;
 		this.textColor = invertColor;
 		this.title = title;
+		
+		setMargin(5, 5, 5, 5);
+		setSize(new Vec2i(80, FontRenderer.getFontHeight(this.font) + 2));
+		fixSize();
 	}
 
 	public ButtonComponent(String title, Color color) {
 		this(title, color, Color.BLACK);
+	}
+
+	public ButtonComponent(String title) {
+		this(title, Color.WHITE);
 	}
 	
 	public Color getColor() {
@@ -37,7 +47,18 @@ public class ButtonComponent extends Component<ResourcePath> {
 	}
 	
 	public void setColor(Color color) {
+		assert color != null : "Argument can not be null!";
 		this.color = color;
+		this.redraw();
+	}
+	
+	public Color getTextColor() {
+		return textColor;
+	}
+	
+	public void setTextColor(Color textColor) {
+		assert textColor != null : "Argument can not be null!";
+		this.textColor = textColor;
 		this.redraw();
 	}
 	
@@ -50,11 +71,30 @@ public class ButtonComponent extends Component<ResourcePath> {
 		this.redraw();
 	}
 	
+	public Font getFont() {
+		return font;
+	}
+	
+	public void setFont(Font font) {
+		assert font != null : "Argument can not be null!";
+		this.font = font;
+		this.redraw();
+	}
+	
+	public void setAction(Runnable action) {
+		assert action != null : "Argument can not be null!";
+		this.action = action;
+	}
+	
+	public Runnable getAction() {
+		return action;
+	}
+	
 	@Override
 	public void onClicked(int button, boolean pressed, boolean repeated) {
 		if (button == 0) {
 			if (this.pressed == true && pressed == false) {
-				System.out.println("Clicked");
+				this.action.run();
 			}
 			this.pressed = pressed;
 			this.redraw();
@@ -69,8 +109,6 @@ public class ButtonComponent extends Component<ResourcePath> {
 		}
 	}
 	
-	public static final Font FONT = new Font("arial", Font.PLAIN, 16);
-	
 	@Override
 	public void drawBackground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
 		
@@ -83,12 +121,12 @@ public class ButtonComponent extends Component<ResourcePath> {
 		byte p = (byte) (this.pressed ? 2 : (this.cursorOverComponent ? 1 : 0));
 		
 		BufferBuilder buffer = bufferSource.startBuffer(UIRenderModes.plainClickable());
-		buffer.vertex(matrixStack, this.size.x, 0, 0)			.vec2f(this.size.x, 0)				.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, 0, 0, 0)						.vec2f(0, 0)						.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, this.size.x, this.size.y, 0)	.vec2f(this.size.x, this.size.y)	.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, this.size.x, this.size.y, 0)	.vec2f(this.size.x, this.size.y)	.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, 0, 0, 0)						.vec2f(0, 0)						.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, 0, this.size.y, 0)			.vec2f(0, this.size.y)				.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, this.size.x, 0, 0)				.vec2f(this.size.x, 0)				.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, 0, 0, 0)							.vec2f(0, 0)						.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, this.size.x, this.size.y, 0)		.vec2f(this.size.x, this.size.y)	.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, this.size.x, this.size.y, 0)		.vec2f(this.size.x, this.size.y)	.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, 0, 0, 0)							.vec2f(0, 0)						.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
+		buffer.vertex(matrixStack, 0, this.size.y, 0)				.vec2f(0, this.size.y)				.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
 		
 		buffer.end();
 		
@@ -101,7 +139,8 @@ public class ButtonComponent extends Component<ResourcePath> {
 		
 		if (this.title != null) {
 			
-			TextRenderer.renderTextCentered(this.size.x / 2, this.size.y / 2, title, FONT, this.pressed ? this.color : this.textColor, container.getActiveTexureLoader(), bufferSource, matrixStack);
+			String title = FontRenderer.limitStringWidth(this.title, this.font, this.size.x - 2);
+			TextRenderer.renderTextCentered(this.size.x / 2, this.size.y / 2, title, this.font, this.pressed ? this.color : this.textColor, container.getActiveTexureLoader(), bufferSource, matrixStack);
 			
 		}
 		
