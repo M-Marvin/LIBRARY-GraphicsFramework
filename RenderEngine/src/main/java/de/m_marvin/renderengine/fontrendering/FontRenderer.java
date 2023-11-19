@@ -102,7 +102,7 @@ public class FontRenderer {
 		if (textureMap instanceof FontAtlasMap<R> fontMap) {
 			return fontMap;
 		} else {
-			Logger.defaultLogger().logError("The font atlas for the font '" + font.toString() + "' is cached under the wrong format!");
+			Logger.defaultLogger().logError("The font atlas for the font '" + fontToString(font) + "' is cached under the wrong format!");
 			return null;
 		}
 		
@@ -132,7 +132,7 @@ public class FontRenderer {
 		// Cache the fonts texture atlas in the texture loader
 		textureLoader.cacheTextureMap(fontAtlasName, fontAtlas);
 		
-		Logger.defaultLogger().logInfo("Loaded and cached font " + font.toString() + "!");
+		Logger.defaultLogger().logInfo("Loaded and cached font " + fontToString(font) + "!");
 		
 	}
 	
@@ -143,6 +143,11 @@ public class FontRenderer {
 		for (int i = first; i <= last; i++) {
 			
 			int characterWidth = metrics.charWidth((char) i);
+			
+			if (characterWidth <= 0) {
+				Logger.defaultLogger().logError("Character width for char '" + String.valueOf((char) i) + "' in font " + fontToString(font) + " is <= 0!");
+				continue;
+			}
 			
 			BufferedImage charImage = new BufferedImage(characterWidth, characterHeight, BufferedImage.TYPE_INT_ARGB);
 			Graphics2D graphics = charImage.createGraphics();
@@ -159,6 +164,10 @@ public class FontRenderer {
 			
 		}
 		
+	}
+	
+	public static String fontToString(Font font) {
+		return font.toString().replace("java.awt.", "");
 	}
 	
 }

@@ -6,14 +6,14 @@ import java.util.Random;
 import de.m_marvin.openui.core.layout.BorderLayout;
 import de.m_marvin.openui.core.layout.BorderLayout.BorderSection;
 import de.m_marvin.openui.core.layout.BorderLayout.CornerStretch;
+import de.m_marvin.openui.flatmono.Window;
+import de.m_marvin.openui.flatmono.components.BarComponent;
+import de.m_marvin.openui.flatmono.components.ButtonComponent;
+import de.m_marvin.openui.flatmono.components.GroupBox;
+import de.m_marvin.openui.flatmono.components.ScrollBarComponent;
+import de.m_marvin.openui.flatmono.components.TextFieldComponent;
+import de.m_marvin.openui.flatmono.components.ToggleButtonComponent;
 import de.m_marvin.openui.core.layout.GridLayout;
-import de.m_marvin.openui.design1.Window;
-import de.m_marvin.openui.design1.components.BarComponent;
-import de.m_marvin.openui.design1.components.ButtonComponent;
-import de.m_marvin.openui.design1.components.GroupBox;
-import de.m_marvin.openui.design1.components.ScrollBarComponent;
-import de.m_marvin.openui.design1.components.TextFieldComponent;
-import de.m_marvin.openui.design1.components.ToggleButtonComponent;
 import de.m_marvin.univec.impl.Vec2i;
 
 public class TestWindow extends Window {
@@ -76,7 +76,7 @@ public class TestWindow extends Window {
 		b3.addComponent(scrollbar2);
 		
 		BarComponent bar1 = new BarComponent();
-		bar1.setValue(70);
+		bar1.setValue(50);
 		bar1.setSize(new Vec2i(300, 20));
 		bar1.setOffset(new Vec2i(240, 40));
 		b3.addComponent(bar1);

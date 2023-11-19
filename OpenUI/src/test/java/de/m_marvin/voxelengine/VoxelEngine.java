@@ -21,7 +21,6 @@ import de.m_marvin.renderengine.windows.Window;
 import de.m_marvin.simplelogging.filehandling.LogFileHandler;
 import de.m_marvin.simplelogging.printing.LogType;
 import de.m_marvin.simplelogging.printing.Logger;
-import de.m_marvin.uitest.ResourceFolders;
 import de.m_marvin.unimat.impl.Quaternion;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;

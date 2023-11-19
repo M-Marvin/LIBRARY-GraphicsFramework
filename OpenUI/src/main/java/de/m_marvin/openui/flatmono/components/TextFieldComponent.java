@@ -1,4 +1,4 @@
-package de.m_marvin.openui.design1.components;
+package de.m_marvin.openui.flatmono.components;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -13,17 +13,17 @@ import java.util.function.Consumer;
 
 import de.m_marvin.openui.core.UIRenderMode;
 import de.m_marvin.openui.core.components.Component;
-import de.m_marvin.openui.design1.TextRenderer;
-import de.m_marvin.openui.design1.UtilRenderer;
+import de.m_marvin.openui.flatmono.TextRenderer;
+import de.m_marvin.openui.flatmono.UtilRenderer;
 import de.m_marvin.renderengine.buffers.defimpl.SimpleBufferSource;
 import de.m_marvin.renderengine.fontrendering.FontRenderer;
 import de.m_marvin.renderengine.inputbinding.KeyCodes;
 import de.m_marvin.renderengine.inputbinding.UserInput.FunctionalKey;
-import de.m_marvin.renderengine.resources.defimpl.ResourcePath;
+import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.univec.impl.Vec2i;
 
-public class TextFieldComponent extends Component<ResourcePath> {
+public class TextFieldComponent extends Component<ResourceLocation> {
 	
 	public static final int FRAME_WIDTH = 1;
 	public static final int TEXT_BORDER_GAP = 2;
@@ -376,7 +376,7 @@ public class TextFieldComponent extends Component<ResourcePath> {
 	}
 	
 	@Override
-	public void drawBackground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
+	public void drawBackground(SimpleBufferSource<ResourceLocation, UIRenderMode<ResourceLocation>> bufferSource, PoseStack matrixStack) {
 		
 		String offsetText = this.text.substring(this.textOffset);
 		String renderableText = FontRenderer.limitStringWidth(offsetText, this.font, this.size.x - TEXT_BORDER_GAP * 2);
@@ -386,7 +386,7 @@ public class TextFieldComponent extends Component<ResourcePath> {
 	}
 	
 	@Override
-	public void drawForeground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
+	public void drawForeground(SimpleBufferSource<ResourceLocation, UIRenderMode<ResourceLocation>> bufferSource, PoseStack matrixStack) {
 		
 		UtilRenderer.renderFrame(this.size.x, this.size.y, FRAME_WIDTH, this.textColor, bufferSource, matrixStack);
 		

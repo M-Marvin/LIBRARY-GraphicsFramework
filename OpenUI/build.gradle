@@ -7,6 +7,10 @@
  */
 
 apply plugin: 'java'
+apply plugin: 'maven-publish'
+
+group = 'com.github.M-Marvin'
+version = '0.1'
 
 project.ext.lwjglVersion = "3.3.1"
 project.ext.lwjglNatives = "natives-windows"
@@ -29,7 +33,7 @@ dependencies {
 	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
 	
 	// RenderEngine
-	implementation "renderengine:RenderEngine:0.1"
+	implementation "renderengine:RenderEngine:0.2"
 	
 	// CommandLineParser
 	implementation 'com.github.M-Marvin:LIBRARY-CommandLineParser:d527412'
@@ -49,6 +53,24 @@ dependencies {
 	// JBullet (Voxel Engine)
 	implementation "cz.advel.jbullet:jbullet:20101010-1"
 	
+}
+
+java {
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+			from components.java
+        }
+    }
+}
+
+// Specify gradle version to use for jitpack
+wrapper {
+    gradleVersion = "7.4.2"
+    distributionType = Wrapper.DistributionType.ALL
 }
 
 jar {

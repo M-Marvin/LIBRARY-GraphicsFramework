@@ -1,15 +1,15 @@
-package de.m_marvin.openui.design1.components;
+package de.m_marvin.openui.flatmono.components;
 
 import java.awt.Color;
 
 import de.m_marvin.openui.core.UIRenderMode;
 import de.m_marvin.openui.core.components.Compound;
-import de.m_marvin.openui.design1.UtilRenderer;
+import de.m_marvin.openui.flatmono.UtilRenderer;
 import de.m_marvin.renderengine.buffers.defimpl.SimpleBufferSource;
-import de.m_marvin.renderengine.resources.defimpl.ResourcePath;
+import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.renderengine.translation.PoseStack;
 
-public class GroupBox extends Compound<ResourcePath> {
+public class GroupBox extends Compound<ResourceLocation> {
 	
 	protected Color backgroundColor;
 	protected Color frameColor;
@@ -45,14 +45,14 @@ public class GroupBox extends Compound<ResourcePath> {
 	}
 	
 	@Override
-	public void drawBackground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
+	public void drawBackground(SimpleBufferSource<ResourceLocation, UIRenderMode<ResourceLocation>> bufferSource, PoseStack matrixStack) {
 		
 		UtilRenderer.renderRectangle(this.size.x, this.size.y, this.backgroundColor, bufferSource, matrixStack);
 		
 	}
 	
 	@Override
-	public void drawForeground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
+	public void drawForeground(SimpleBufferSource<ResourceLocation, UIRenderMode<ResourceLocation>> bufferSource, PoseStack matrixStack) {
 		
 		UtilRenderer.renderFrame(this.size.x, this.size.y, this.frameWidth, this.frameColor, bufferSource, matrixStack);
 		

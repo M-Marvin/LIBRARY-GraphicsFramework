@@ -169,13 +169,15 @@ public class UIContainer<R extends IResourceProvider<R>> {
 		matrixStack.push();
 		matrixStack.translate(component.getAbsoluteOffset().x, component.getAbsoluteOffset().y, 0);
 		removeOutdatedVAOs(component);
-		component.drawBackground(this.bufferSource, this.matrixStack);
-		uploadNewVAOs(bufferSource, component);
-		matrixStack.translate(0, 0, LAYER_Z_SHIFT);
-		component.drawForeground(this.bufferSource, this.matrixStack);
+		component.render(this.bufferSource, this.matrixStack);
 		uploadNewVAOs(bufferSource, component);
 		matrixStack.pop();
 		
+	}
+	
+	public void shiftLayer(Compound<R> component) {
+		uploadNewVAOs(bufferSource, component);
+		matrixStack.translate(0, 0, LAYER_Z_SHIFT);
 	}
 
 	protected VertexBuffer getEmptyVAO() {

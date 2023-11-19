@@ -1,0 +1,15 @@
+{
+	"VertexShaderFile": "plain_circle",
+	"FragmentShaderFile": "plain_circle",
+	"Uniforms": [
+		{ "Name": "ProjMat", "Type": "matrix4x4", "Value": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] }
+	],
+	"Attributes": [
+		{ "Name": "position", "Type": "float", "Count": 3, "Normalize": false },
+		{ "Name": "pxpos", "Type": "float", "Count": 2, "Normalize": false },
+		{ "Name": "pxcenter", "Type": "int", "Count": 2, "Normalize": false },
+		{ "Name": "inner_rad", "Type": "int", "Count": 1, "Normalize": false },
+		{ "Name": "outer_rad", "Type": "int", "Count": 1, "Normalize": false },
+		{ "Name": "color", "Type": "float", "Count": 4, "Normalize": false }
+	]
+}

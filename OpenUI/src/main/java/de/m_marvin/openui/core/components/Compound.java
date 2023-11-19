@@ -257,6 +257,16 @@ public class Compound<R extends IResourceProvider<R>> {
 		this.setSizeMax(calculateMinSize());
 	}
 	
+	public void render(SimpleBufferSource<R, UIRenderMode<R>> bufferSource, PoseStack matrixStack) {
+		drawBackground(bufferSource, matrixStack);
+		shiftRenderLayer();
+		drawForeground(bufferSource, matrixStack);
+	}
+	
+	public void shiftRenderLayer() {
+		this.container.shiftLayer(this);
+	}
+	
 	public void drawBackground(SimpleBufferSource<R, UIRenderMode<R>> bufferSource, PoseStack matrixStack) {}
 	public void drawForeground(SimpleBufferSource<R, UIRenderMode<R>> bufferSource, PoseStack matrixStack) {}
 	

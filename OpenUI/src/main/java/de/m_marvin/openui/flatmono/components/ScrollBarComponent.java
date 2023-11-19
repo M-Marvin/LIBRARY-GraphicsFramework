@@ -1,4 +1,4 @@
-package de.m_marvin.openui.design1.components;
+package de.m_marvin.openui.flatmono.components;
 
 import java.awt.Color;
 import java.util.Optional;
@@ -6,16 +6,16 @@ import java.util.function.Consumer;
 
 import de.m_marvin.openui.core.UIRenderMode;
 import de.m_marvin.openui.core.components.Component;
-import de.m_marvin.openui.design1.UIRenderModes;
-import de.m_marvin.openui.design1.UtilRenderer;
+import de.m_marvin.openui.flatmono.UIRenderModes;
+import de.m_marvin.openui.flatmono.UtilRenderer;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.defimpl.SimpleBufferSource;
-import de.m_marvin.renderengine.resources.defimpl.ResourcePath;
+import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.univec.impl.Vec2d;
 import de.m_marvin.univec.impl.Vec2i;
 
-public class ScrollBarComponent extends Component<ResourcePath> {
+public class ScrollBarComponent extends Component<ResourceLocation> {
 	
 	public static final int RAIL_WIDTH = 1;
 	public static final int BAR_RAIL_GAP = 5;
@@ -201,7 +201,7 @@ public class ScrollBarComponent extends Component<ResourcePath> {
 	}
 	
 	@Override
-	public void drawBackground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
+	public void drawBackground(SimpleBufferSource<ResourceLocation, UIRenderMode<ResourceLocation>> bufferSource, PoseStack matrixStack) {
 		
 		float r = this.color.getRed() / 255F;
 		float g = this.color.getGreen() / 255F;

@@ -1,4 +1,4 @@
-package de.m_marvin.uitest;
+package de.m_marvin.voxelengine;
 
 import java.io.File;
 import java.io.FileInputStream;

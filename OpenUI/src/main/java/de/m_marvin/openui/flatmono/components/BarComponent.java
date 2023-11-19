@@ -1,4 +1,4 @@
-package de.m_marvin.openui.design1.components;
+package de.m_marvin.openui.flatmono.components;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -6,14 +6,14 @@ import java.util.function.Function;
 
 import de.m_marvin.openui.core.UIRenderMode;
 import de.m_marvin.openui.core.components.Component;
-import de.m_marvin.openui.design1.TextRenderer;
-import de.m_marvin.openui.design1.UtilRenderer;
+import de.m_marvin.openui.flatmono.TextRenderer;
+import de.m_marvin.openui.flatmono.UtilRenderer;
 import de.m_marvin.renderengine.buffers.defimpl.SimpleBufferSource;
-import de.m_marvin.renderengine.resources.defimpl.ResourcePath;
+import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.univec.impl.Vec2i;
 
-public class BarComponent extends Component<ResourcePath> {
+public class BarComponent extends Component<ResourceLocation> {
 	
 	public static final int FRAME_WIDTH = 1;
 	public static final int BAR_FRAME_GAP = 3;
@@ -35,6 +35,7 @@ public class BarComponent extends Component<ResourcePath> {
 		this.textColor = textColor;
 		this.minValue = min;
 		this.maxValue = max;
+		this.value = minValue;
 		this.horizontal = horizontal;
 
 		this.title = this.titleSupplier.apply(this.value);
@@ -45,7 +46,7 @@ public class BarComponent extends Component<ResourcePath> {
 	}
 	
 	public BarComponent(boolean horizontal, int min, int max, Function<Integer, String> titleSupplier, Color color) {
-		this(horizontal, min, max, titleSupplier, color, Color.BLACK);
+		this(horizontal, min, max, titleSupplier, color, Color.GRAY);
 	}
 
 	public BarComponent(boolean horizontal, int min, int max, Function<Integer, String> titleSupplier) {
@@ -127,14 +128,14 @@ public class BarComponent extends Component<ResourcePath> {
 	}
 	
 	public void setValue(int value) {
-		this.value = value;
+		this.value = Math.max(this.minValue, Math.min(this.maxValue, value));
 		this.title = this.titleSupplier.apply(this.value);
 		this.redraw();
 	}
 	
 	@Override
-	public void drawBackground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
-		
+	public void drawBackground(SimpleBufferSource<ResourceLocation, UIRenderMode<ResourceLocation>> bufferSource, PoseStack matrixStack) {
+
 		if (!this.horizontal) {
 
 			UtilRenderer.renderRectangle(0, 0, FRAME_WIDTH, this.size.y, this.color, bufferSource, matrixStack);
@@ -159,7 +160,7 @@ public class BarComponent extends Component<ResourcePath> {
 	}
 	
 	@Override
-	public void drawForeground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
+	public void drawForeground(SimpleBufferSource<ResourceLocation, UIRenderMode<ResourceLocation>> bufferSource, PoseStack matrixStack) {
 		
 		if (this.title != null) {
 			

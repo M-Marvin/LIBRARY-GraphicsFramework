@@ -1,20 +1,19 @@
-package de.m_marvin.openui.design1.components;
+package de.m_marvin.openui.flatmono.components;
 
 import java.awt.Color;
 import java.awt.Font;
 
 import de.m_marvin.openui.core.UIRenderMode;
 import de.m_marvin.openui.core.components.Component;
-import de.m_marvin.openui.design1.TextRenderer;
-import de.m_marvin.openui.design1.UIRenderModes;
-import de.m_marvin.renderengine.buffers.BufferBuilder;
+import de.m_marvin.openui.flatmono.TextRenderer;
+import de.m_marvin.openui.flatmono.UtilRenderer;
 import de.m_marvin.renderengine.buffers.defimpl.SimpleBufferSource;
 import de.m_marvin.renderengine.fontrendering.FontRenderer;
-import de.m_marvin.renderengine.resources.defimpl.ResourcePath;
+import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.univec.impl.Vec2i;
 
-public class ButtonComponent extends Component<ResourcePath> {
+public class ButtonComponent extends Component<ResourceLocation> {
 	
 	protected Color color;
 	protected Color textColor;
@@ -110,28 +109,16 @@ public class ButtonComponent extends Component<ResourcePath> {
 	}
 	
 	@Override
-	public void drawBackground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
+	public void drawBackground(SimpleBufferSource<ResourceLocation, UIRenderMode<ResourceLocation>> bufferSource, PoseStack matrixStack) {
 		
-		float r = this.color.getRed() / 255F;
-		float g = this.color.getGreen() / 255F;
-		float b = this.color.getBlue() / 255F;
-		float a = this.color.getAlpha() / 255F;
 		int p = this.pressed ? 2 : (this.cursorOverComponent ? 1 : 0);
 		
-		BufferBuilder buffer = bufferSource.startBuffer(UIRenderModes.plainClickable());
-		buffer.vertex(matrixStack, this.size.x, 0, 0)				.vec2f(this.size.x, 0)				.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, 0, 0, 0)							.vec2f(0, 0)						.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, this.size.x, this.size.y, 0)		.vec2f(this.size.x, this.size.y)	.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, this.size.x, this.size.y, 0)		.vec2f(this.size.x, this.size.y)	.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, 0, 0, 0)							.vec2f(0, 0)						.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
-		buffer.vertex(matrixStack, 0, this.size.y, 0)				.vec2f(0, this.size.y)				.vec2i(this.size.x, this.size.y).color(r, g, b, a).putInt(p).nextElement().endVertex();
-		
-		buffer.end();
+		UtilRenderer.renderClickableRectangle(this.size.x, this.size.y, 0, 0, this.size.x, this.size.y, p, this.color, bufferSource, matrixStack);
 		
 	}
 	
 	@Override
-	public void drawForeground(SimpleBufferSource<ResourcePath, UIRenderMode<ResourcePath>> bufferSource, PoseStack matrixStack) {
+	public void drawForeground(SimpleBufferSource<ResourceLocation, UIRenderMode<ResourceLocation>> bufferSource, PoseStack matrixStack) {
 		
 		if (this.title != null) {
 			
