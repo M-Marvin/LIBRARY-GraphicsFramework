@@ -13,23 +13,28 @@ public class LN2CoolingSystemController {
 	}
 	
 	private static LN2CoolingSystemController instance;
+
+	private ParameterDataSet parameterData;
+	private StatusMonitorWindow statusWindow;
 	
 	public static LN2CoolingSystemController getInstance() {
 		return instance;
 	}
 	
-	private StatusMonitorWindow statusWindow;
-	
 	public void start() {
 		
 		Logger.setDefaultLogger(new Logger());
 		
-		this.statusWindow = new StatusMonitorWindow();
+		this.parameterData = new ParameterDataSet();
+
+		this.parameterData.parseData("EVT22\nEVP988\nCDT22\nCDF192\nCMP0\nEXP10\n");
+		
+		this.statusWindow = new StatusMonitorWindow(this.parameterData);
 		this.statusWindow.start();
 		
 		while (this.statusWindow.isOpen()) {
-			this.statusWindow.test();
 			try { Thread.sleep(10); } catch (InterruptedException e) {}
+			this.statusWindow.update();
 		}
 		
 	}

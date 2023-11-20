@@ -20,6 +20,7 @@ public class PointerDisplayComponent extends Component<ResourceLocation> {
 	protected Font titleFont = DEFAULT_FONT;
 	protected Font font = DEFAULT_FONT;
 	protected Function<Float, String> titleSupplier;
+	protected int scalaNumberScale = 1;
 	protected int minValue;
 	protected int maxValue;
 	protected float value;
@@ -34,7 +35,7 @@ public class PointerDisplayComponent extends Component<ResourceLocation> {
 		this.minValue = min;
 		this.value = this.minValue;
 
-		this.title = this.titleSupplier.apply(this.value);
+		this.title = this.titleSupplier.apply(this.value * this.scalaNumberScale);
 		
 		this.setMargin(5, 5, 5, 5);
 		this.setSize(new Vec2i(200, 200));
@@ -111,13 +112,23 @@ public class PointerDisplayComponent extends Component<ResourceLocation> {
 		this.redraw();
 	}
 	
+	public int getScalaNumberScale() {
+		return scalaNumberScale;
+	}
+	
+	public void setScalaNumberScale(int scalaNumberScale) {
+		this.scalaNumberScale = scalaNumberScale;
+		this.title = this.titleSupplier.apply(this.value * this.scalaNumberScale);
+		this.redraw();
+	}
+	
 	public float getValue() {
 		return value;
 	}
 	
 	public void setValue(float value) {
-		this.value = Math.max(this.minValue, Math.max(this.minValue, value));
-		this.title = this.titleSupplier.apply(this.value);
+		this.value = Math.max(this.minValue, Math.min(this.maxValue, value));
+		this.title = this.titleSupplier.apply(this.value * this.scalaNumberScale);
 		this.redraw();
 	}
 
@@ -144,16 +155,17 @@ public class PointerDisplayComponent extends Component<ResourceLocation> {
 		matrixStack.translate(this.size.x / 2, this.size.y / 2, 0);
 		matrixStack.rotateDegrees(0, 0, 45);
 		
-		int scalaCount = this.maxValue - this.minValue + 1;
+		int scalaCount = this.maxValue - this.minValue;
 		float angleSteps = 270 / (float) scalaCount;
 		
-		for (int i = 0; i < scalaCount; i++) {
+		for (int i = 0; i <= scalaCount; i++) {
 			
-			matrixStack.rotateDegrees(0, 0, angleSteps);
-			
-			int sl = (i % 10 == 0) ? SCALA_LINE_LENGTH_10 : (i % 5 == 0) ? SCALA_LINE_LENGTH_5 : SCALA_LINE_LENGTH_1;
+			int value = this.minValue + i;
+			int sl = (value % 10 == 0) ? SCALA_LINE_LENGTH_10 : (value % 5 == 0) ? SCALA_LINE_LENGTH_5 : SCALA_LINE_LENGTH_1;
 			
 			UtilRenderer.renderRectangle(0, ri - sl - FRAME_GAP, 1, sl, this.textColor, bufferSource, matrixStack);
+
+			matrixStack.rotateDegrees(0, 0, angleSteps);
 			
 		}
 		
@@ -168,15 +180,19 @@ public class PointerDisplayComponent extends Component<ResourceLocation> {
 		int ri = ro - FRAME_GAP;
 		int rt = ri - FRAME_GAP - SCALA_LINE_LENGTH_10 - this.font.getSize();
 		
-		int scalaCount = (this.maxValue - this.minValue + 1) / 10;
+		int scalaCount = this.maxValue - this.minValue;
 		float angleSteps = 270 / (float) scalaCount;
 		
 		for (int i = 0; i <= scalaCount; i++) {
 			
+			int value = this.minValue + i;
+			
+			if (value % 10 != 0) continue;
+			
 			int x = (int) (Math.cos(Math.toRadians(i * angleSteps + 137)) * rt) + this.size.x / 2;
 			int y = (int) (Math.sin(Math.toRadians(i * angleSteps + 137)) * rt) + this.size.y / 2;
 			
-			TextRenderer.renderTextCentered(x, y, String.valueOf(this.minValue + i * 10), this.font, this.textColor, this.container.getActiveTextureLoader(), bufferSource, matrixStack);
+			TextRenderer.renderTextCentered(x, y, String.valueOf(value * this.scalaNumberScale), this.font, this.textColor, this.container.getActiveTextureLoader(), bufferSource, matrixStack);
 			
 		}
 

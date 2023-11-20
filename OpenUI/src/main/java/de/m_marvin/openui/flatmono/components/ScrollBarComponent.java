@@ -91,6 +91,15 @@ public class ScrollBarComponent extends Component<ResourceLocation> {
 		this.changeCallback = changeCallback;
 	}
 	
+	public int getBarPosition() {
+		return barPosition;
+	}
+	
+	public void setBarPosition(int barPosition) {
+		this.barPosition = Math.max(0, Math.min(this.scrollLength - this.barSize, barPosition));
+		this.redraw();
+	}
+	
 	public Consumer<Integer> getChangeCallback() {
 		return changeCallback;
 	}

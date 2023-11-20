@@ -71,7 +71,9 @@ public class UIContainer<R extends IResourceProvider<R>> {
 
 	private Compound<R> findTopComponentUnder0(Compound<R> c, Vec2i position) {
 		for (Compound<R> cc : c.getChildComponents()) {
-			if (cc.isInComponent(position.sub(c.getOffset()))) return findTopComponentUnder0(cc, position);
+			if (cc.isInComponent(position.sub(c.getAbsoluteOffset()))) {
+				return findTopComponentUnder0(cc, position);
+			}
 		}
 		return c;
 	}

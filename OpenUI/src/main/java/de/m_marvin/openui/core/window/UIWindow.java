@@ -69,6 +69,7 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 	protected UIContainer<R> uiContainer;
 	private int framesPerSecond;
 	private int frameTime;
+	private boolean initialized;
 	private boolean shouldClose;
 	
 	public boolean isOpen() {
@@ -79,13 +80,19 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 		if (this.renderThread != null)
 			return;
 		this.shouldClose = false;
+		this.initialized = false;
 		this.renderThread = new Thread(this::init, "RenderThread[" + this.windowName + "]");
 		this.renderThread.setDaemon(true);
 		this.renderThread.start();
 	}
 	
 	public void stop() {
+		this.initialized = false;
 		this.shouldClose = true;
+	}
+	
+	public boolean isInitialized() {
+		return initialized;
 	}
 	
 	private void init() {
@@ -181,6 +188,7 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 		
 		initUI();
 		autoSetMinSize();
+		this.initialized = true;
 		
 		windowResized(new Vec2i(this.mainWindow.getSize()[0], this.mainWindow.getSize()[1]));
 		this.mainWindow.registerWindowListener((windowResize, type) -> {

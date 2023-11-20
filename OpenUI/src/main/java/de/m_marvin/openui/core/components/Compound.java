@@ -173,7 +173,7 @@ public class Compound<R extends IResourceProvider<R>> {
 	public void setOffsetMargin(Vec2i offset) {
 		this.offset = offset.add(new Vec2i(marginLeft, marginTop));
 		for (Compound<R> child : this.childComponents) {
-			child.setParentOffset(this.offset);
+			child.setParentOffset(this.getAbsoluteOffset());
 		}
 	}
 	
@@ -255,6 +255,11 @@ public class Compound<R extends IResourceProvider<R>> {
 	public void autoSetMaxSize() {
 		this.setSizeMax(new Vec2i());
 		this.setSizeMax(calculateMinSize());
+	}
+	
+	public void autoSetMaxAndMinSize() {
+		autoSetMinSize();
+		autoSetMaxSize();
 	}
 	
 	public void render(SimpleBufferSource<R, UIRenderMode<R>> bufferSource, PoseStack matrixStack) {

@@ -23,20 +23,9 @@ public class GridLayout extends Layout<GridLayout.GridLayoutData> {
 		}
 	}
 	
-	protected boolean columnsEqualSize;
-	protected boolean rowsEquealSize;
-	
 	public GridLayout() {
-		this(false, false);
 	}
 	
-	public GridLayout(boolean columnsEqualSize, boolean rowsEquealSize) {
-		assert columnsEqualSize || rowsEquealSize : "One of rows or columns must have equeal size!";
-		
-		this.columnsEqualSize = columnsEqualSize;
-		this.rowsEquealSize = rowsEquealSize;
-	}
-
 	@Override
 	public Class<GridLayoutData> getDataClass() {
 		return GridLayoutData.class;
