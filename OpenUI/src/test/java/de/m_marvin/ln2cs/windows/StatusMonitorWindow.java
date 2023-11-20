@@ -48,7 +48,8 @@ public class StatusMonitorWindow extends Window {
 		pd3.setOffset(new Vec2i(500, 130));
 		pd3.setSize(new Vec2i(300, 300));
 		pd3.setTextColor(new Color(255, 0, 0, 255));
-		pd3.setFont(new Font("arial", Font.BOLD ,32));
+		pd3.setFont(new Font("arial", Font.BOLD, 20));
+		pd3.setTitleFont(new Font("arial", Font.BOLD, 32));
 		background.addComponent(pd3);
 		
 	}

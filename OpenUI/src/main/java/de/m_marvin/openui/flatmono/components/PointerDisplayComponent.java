@@ -17,6 +17,7 @@ public class PointerDisplayComponent extends Component<ResourceLocation> {
 	
 	protected Color color;
 	protected Color textColor;
+	protected Font titleFont = DEFAULT_FONT;
 	protected Font font = DEFAULT_FONT;
 	protected Function<Float, String> titleSupplier;
 	protected int minValue;
@@ -57,6 +58,7 @@ public class PointerDisplayComponent extends Component<ResourceLocation> {
 	}
 	
 	public void setColor(Color color) {
+		assert color != null : "Argument can not be null!";
 		this.color = color;
 		this.redraw();
 	}
@@ -66,6 +68,7 @@ public class PointerDisplayComponent extends Component<ResourceLocation> {
 	}
 	
 	public void setTextColor(Color textColor) {
+		assert textColor != null : "Argument can not be null!";
 		this.textColor = textColor;
 		this.redraw();
 	}
@@ -75,7 +78,18 @@ public class PointerDisplayComponent extends Component<ResourceLocation> {
 	}
 	
 	public void setFont(Font font) {
+		assert font != null : "Argument can not be null!";
 		this.font = font;
+		this.redraw();
+	}
+	
+	public Font getTitleFont() {
+		return titleFont;
+	}
+	
+	public void setTitleFont(Font titleFont) {
+		assert titleFont != null : "Argument can not be null!";
+		this.titleFont = titleFont;
 		this.redraw();
 	}
 	
@@ -151,7 +165,24 @@ public class PointerDisplayComponent extends Component<ResourceLocation> {
 	public void drawForeground(SimpleBufferSource<ResourceLocation, UIRenderMode<ResourceLocation>> bufferSource, PoseStack matrixStack) {
 		
 		int ro = this.size.x / 2;
-		int ri = ro - FRAME_WIDTH;
+		int ri = ro - FRAME_GAP;
+		int rt = ri - FRAME_GAP - SCALA_LINE_LENGTH_10 - this.font.getSize();
+		
+		int scalaCount = (this.maxValue - this.minValue + 1) / 10;
+		float angleSteps = 270 / (float) scalaCount;
+		
+		for (int i = 0; i <= scalaCount; i++) {
+			
+			int x = (int) (Math.cos(Math.toRadians(i * angleSteps + 137)) * rt) + this.size.x / 2;
+			int y = (int) (Math.sin(Math.toRadians(i * angleSteps + 137)) * rt) + this.size.y / 2;
+			
+			TextRenderer.renderTextCentered(x, y, String.valueOf(this.minValue + i * 10), this.font, this.textColor, this.container.getActiveTextureLoader(), bufferSource, matrixStack);
+			
+		}
+
+		TextRenderer.renderTextCentered(this.size.x / 2, this.size.y * 7/8, this.title, this.titleFont, this.textColor, this.getContainer().getActiveTextureLoader(), bufferSource, matrixStack);
+		
+		shiftRenderLayer();
 		
 		matrixStack.push();
 		matrixStack.translate(this.size.x / 2, this.size.y / 2, 0);
@@ -159,14 +190,12 @@ public class PointerDisplayComponent extends Component<ResourceLocation> {
 		
 		matrixStack.rotateDegrees(0, 0, 270 * (this.value - this.minValue) / (float) (this.maxValue - this.minValue));
 		
-		UtilRenderer.renderRectangle(-POINTER_WIDTH / 2, - ri + POINTER_FRAME_GAP, POINTER_WIDTH, ri + POINTER_WIDTH / 2 - POINTER_FRAME_GAP, this.color, bufferSource, matrixStack);
+		UtilRenderer.renderRectangle(-POINTER_WIDTH / 2, -ri + POINTER_FRAME_GAP, POINTER_WIDTH, ri + POINTER_WIDTH / 2 - POINTER_FRAME_GAP, this.color, bufferSource, matrixStack);
 		UtilRenderer.renderTriangle(-POINTER_WIDTH / 2, -ri + POINTER_FRAME_GAP - POINTER_TIP_LENGTH, POINTER_WIDTH, POINTER_TIP_LENGTH, this.color, bufferSource, matrixStack);
 		
 		UtilRenderer.renderCircle(-10, -10, 20, 20, 10, 10, 0, 10, this.color, bufferSource, matrixStack);
 		
 		matrixStack.pop();
-		
-		TextRenderer.renderTextCentered(this.size.x / 2, this.size.y * 3/4, this.title, this.font, this.textColor, this.getContainer().getActiveTextureLoader(), bufferSource, matrixStack);
 		
 	}
 	
