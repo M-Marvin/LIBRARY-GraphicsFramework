@@ -105,7 +105,7 @@ public class BorderLayout extends Layout<BorderLayout.BorderLayoutData> {
 				)
 		};
 		int[] widths = fitSizes(compound.getSize().x, widthsMinMax);
-
+		
 		int[][] heightsMinMax = {
 				totalMinAndMax(
 						heightMinMax(compounds.get(BorderSection.TOP_RIGHT)),

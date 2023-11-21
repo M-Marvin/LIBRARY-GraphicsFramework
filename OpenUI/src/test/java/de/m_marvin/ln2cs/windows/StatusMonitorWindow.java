@@ -53,69 +53,6 @@ public class StatusMonitorWindow extends Window {
 		
 		Compound<ResourceLocation> bg = this.getRootComponent();
 		
-		// Left side
-		
-		GroupBox groupleft = new GroupBox();
-		groupleft.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.LEFT));
-		bg.addComponent(groupleft);
-		
-		this.pd_evaporatorTemperatur = new PointerDisplayComponent(-50, 50, (t) -> String.format("%.0fC°", t));
-		this.pd_evaporatorTemperatur.setLayoutData(new GridLayout.GridLayoutData(0, 0));
-		groupleft.addComponent(pd_evaporatorTemperatur);
-		
-		this.pd_evaporatorPressure = new PointerDisplayComponent(-1, 10, (p) -> String.format("%.2fbar", p));
-		this.pd_evaporatorPressure.setLayoutData(new GridLayout.GridLayoutData(0, 1));
-		groupleft.addComponent(pd_evaporatorPressure);
-		
-		this.pd_condensatorTemperatur = new PointerDisplayComponent(0, 60, (t) -> String.format("%.0fC°", t));
-		this.pd_condensatorTemperatur.setLayoutData(new GridLayout.GridLayoutData(0, 2));
-		groupleft.addComponent(pd_condensatorTemperatur);
-		
-		groupleft.setLayout(new GridLayout());
-		groupleft.autoSetMinSize();
-		groupleft.autoSetMaxSize();
-		
-		// Right side
-		
-		GroupBox groupright = new GroupBox();
-		
-		this.pd_condenserFanSpeed = new PointerDisplayComponent(0, 20, (t) -> String.format("%.0f/min", t));
-		this.pd_condenserFanSpeed.setScalaNumberScale(10);
-		this.pd_condenserFanSpeed.setLayoutData(new GridLayout.GridLayoutData(0, 0));
-		groupright.addComponent(pd_condenserFanSpeed);
-		
-		Compound<ResourceLocation> statusBarGroup = new Compound<>();
-		int barWidth = this.pd_condenserFanSpeed.getSizeMargin().x / 3;
-		int barHeight = this.pd_condenserFanSpeed.getSizeMargin().y * 2;
-		
-		this.sb_compressorPower = new BarComponent(false, 0, 100, (p) -> String.format("COMP_PWR %d%%", p));
-		this.sb_compressorPower.setLayoutData(new GridLayout.GridLayoutData(0, 1));
-		this.sb_compressorPower.setSizeMargin(new Vec2i(barWidth, barHeight));
-		this.sb_compressorPower.fixSize();
-		statusBarGroup.addComponent(sb_compressorPower);
-
-		this.sb_condenserMaxTemperature = new BarComponent(false, 0, CONDENSER_MAX_TEMPERATUR, (p) -> String.format("COND_MAX_TEMP %dC°", p));
-		this.sb_condenserMaxTemperature.setLayoutData(new GridLayout.GridLayoutData(1, 1));
-		this.sb_condenserMaxTemperature.setSizeMargin(new Vec2i(barWidth, barHeight));
-		this.sb_condenserMaxTemperature.fixSize();
-		statusBarGroup.addComponent(sb_condenserMaxTemperature);
-
-		this.sb_evaporatorTargetTemperatur = new BarComponent(false, 0, -EVAPORATOR_TARGET_TEMPERATUR, (p) -> String.format("EVAP_TRGT_TEMP %dC°", -p));
-		this.sb_evaporatorTargetTemperatur.setLayoutData(new GridLayout.GridLayoutData(2, 1));
-		this.sb_evaporatorTargetTemperatur.setSizeMargin(new Vec2i(barWidth, barHeight));
-		this.sb_evaporatorTargetTemperatur.fixSize();
-		statusBarGroup.addComponent(sb_evaporatorTargetTemperatur);
-		
-		statusBarGroup.setLayout(new GridLayout());
-		statusBarGroup.setLayoutData(new GridLayout.GridLayoutData(0, 1));
-		statusBarGroup.autoSetMaxAndMinSize();
-		groupright.addComponent(statusBarGroup);
-		
-		groupright.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.RIGHT));
-		groupright.setLayout(new GridLayout());
-		groupright.autoSetMaxAndMinSize();
-		bg.addComponent(groupright);
-		
 		// Top
 		
 		GroupBox grouptop = new GroupBox();
@@ -187,6 +124,70 @@ public class StatusMonitorWindow extends Window {
 		groupdown.autoSetMaxAndMinSize();
 		groupdown.setSizeMax(new Vec2i(0, groupdown.getSizeMax().y));
 		bg.addComponent(groupdown);
+
+		// Left side
+		
+		GroupBox groupleft = new GroupBox();
+		groupleft.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.LEFT));
+		bg.addComponent(groupleft);
+		
+		this.pd_evaporatorTemperatur = new PointerDisplayComponent(-50, 50, (t) -> String.format("%.0fC°", t));
+		this.pd_evaporatorTemperatur.setLayoutData(new GridLayout.GridLayoutData(0, 0));
+		groupleft.addComponent(pd_evaporatorTemperatur);
+		
+		this.pd_evaporatorPressure = new PointerDisplayComponent(-1, 10, (p) -> String.format("%.2fbar", p));
+		this.pd_evaporatorPressure.setLayoutData(new GridLayout.GridLayoutData(0, 1));
+		groupleft.addComponent(pd_evaporatorPressure);
+		
+		this.pd_condensatorTemperatur = new PointerDisplayComponent(0, 60, (t) -> String.format("%.0fC°", t));
+		this.pd_condensatorTemperatur.setLayoutData(new GridLayout.GridLayoutData(0, 2));
+		groupleft.addComponent(pd_condensatorTemperatur);
+		
+		groupleft.setLayout(new GridLayout());
+		groupleft.autoSetMaxAndMinSize();
+		groupleft.getSizeMin().y -= grouptop.getSizeMin().y + groupdown.getSizeMin().y;
+		
+		// Right side
+		
+		GroupBox groupright = new GroupBox();
+		
+		this.pd_condenserFanSpeed = new PointerDisplayComponent(0, 20, (t) -> String.format("%.0f/min", t));
+		this.pd_condenserFanSpeed.setScalaNumberScale(10);
+		this.pd_condenserFanSpeed.setLayoutData(new GridLayout.GridLayoutData(0, 0));
+		groupright.addComponent(pd_condenserFanSpeed);
+		
+		Compound<ResourceLocation> statusBarGroup = new Compound<>();
+		int barWidth = this.pd_condenserFanSpeed.getSizeMargin().x / 3;
+		int barHeight = this.pd_condenserFanSpeed.getSizeMargin().y * 2;
+		
+		this.sb_compressorPower = new BarComponent(false, 0, 100, (p) -> String.format("COMP_PWR %d%%", p));
+		this.sb_compressorPower.setLayoutData(new GridLayout.GridLayoutData(0, 1));
+		this.sb_compressorPower.setSizeMargin(new Vec2i(barWidth, barHeight));
+		this.sb_compressorPower.fixSize();
+		statusBarGroup.addComponent(sb_compressorPower);
+
+		this.sb_condenserMaxTemperature = new BarComponent(false, 0, CONDENSER_MAX_TEMPERATUR, (p) -> String.format("COND_MAX_TEMP %dC°", p));
+		this.sb_condenserMaxTemperature.setLayoutData(new GridLayout.GridLayoutData(1, 1));
+		this.sb_condenserMaxTemperature.setSizeMargin(new Vec2i(barWidth, barHeight));
+		this.sb_condenserMaxTemperature.fixSize();
+		statusBarGroup.addComponent(sb_condenserMaxTemperature);
+
+		this.sb_evaporatorTargetTemperatur = new BarComponent(false, 0, -EVAPORATOR_TARGET_TEMPERATUR, (p) -> String.format("EVAP_TRGT_TEMP %dC°", -p));
+		this.sb_evaporatorTargetTemperatur.setLayoutData(new GridLayout.GridLayoutData(2, 1));
+		this.sb_evaporatorTargetTemperatur.setSizeMargin(new Vec2i(barWidth, barHeight));
+		this.sb_evaporatorTargetTemperatur.fixSize();
+		statusBarGroup.addComponent(sb_evaporatorTargetTemperatur);
+		
+		statusBarGroup.setLayout(new GridLayout());
+		statusBarGroup.setLayoutData(new GridLayout.GridLayoutData(0, 1));
+		statusBarGroup.autoSetMaxAndMinSize();
+		groupright.addComponent(statusBarGroup);
+		
+		groupright.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.RIGHT));
+		groupright.setLayout(new GridLayout());
+		groupright.autoSetMaxAndMinSize();
+		groupright.getSizeMin().y -= grouptop.getSizeMin().y + groupdown.getSizeMin().y;
+		bg.addComponent(groupright);
 		
 		// Center
 		
