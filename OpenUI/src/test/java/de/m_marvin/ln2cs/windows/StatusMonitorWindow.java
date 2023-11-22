@@ -42,6 +42,7 @@ public class StatusMonitorWindow extends Window {
 	public StatusMonitorWindow(ParameterDataSet dataSet) {
 		super("LN2_CS Status Monitor");
 		this.dataSet = dataSet;
+		this.setAdjustMaxScale(true);
 	}
 	
 	public ParameterDataSet getDataSet() {

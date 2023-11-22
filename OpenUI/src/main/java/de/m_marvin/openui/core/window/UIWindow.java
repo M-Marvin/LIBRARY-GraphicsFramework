@@ -9,8 +9,10 @@ import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.resources.ResourceLoader;
 import de.m_marvin.renderengine.shaders.ShaderLoader;
 import de.m_marvin.renderengine.textures.utility.TextureLoader;
+import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.renderengine.windows.Window;
 import de.m_marvin.renderengine.windows.Window.WindowEventType;
+import de.m_marvin.simplelogging.printing.Logger;
 import de.m_marvin.univec.impl.Vec2i;
 
 public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISourceFolder> {
@@ -57,6 +59,7 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 	}
 	
 	protected String windowName;
+	protected boolean adjustMaxScale = false;
 	protected final boolean clearCachesOnClose;
 	
 	private final ResourceLoader<R, S> resourceLoader;
@@ -71,6 +74,10 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 	private int frameTime;
 	private boolean initialized;
 	private boolean shouldClose;
+	
+	public void setAdjustMaxScale(boolean adjustMaxScale) {
+		this.adjustMaxScale = adjustMaxScale;
+	}
 	
 	public boolean isOpen() {
 		return !this.shouldClose;
@@ -205,7 +212,24 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 	
 	protected void windowResized(Vec2i screenSize) {
 		GLStateManager.resizeViewport(0, 0, screenSize.x, screenSize.y);
-		this.uiContainer.screenResize(screenSize);
+		
+		if (this.adjustMaxScale) {
+			Vec2i compoundSize = this.uiContainer.getRootCompound().getSizeMin().copy();
+			if (compoundSize.x == 0 || compoundSize.y == 0) {
+				Logger.defaultLogger().logError("Root min size not set, can not adjust scale!");
+				return;
+			}
+			float compoundRatio = compoundSize.x / (float) compoundSize.y; 
+			float screenRatio = screenSize.x / (float) screenSize.y;
+			
+			if (screenRatio < compoundRatio) compoundSize.y *= compoundRatio / screenRatio; 
+			if (screenRatio > compoundRatio) compoundSize.x *= screenRatio / compoundRatio; 
+			
+			this.uiContainer.screenResize(compoundSize);
+		} else {
+			
+			this.uiContainer.screenResize(screenSize);
+		}
 	}
 
 	protected void frame() {

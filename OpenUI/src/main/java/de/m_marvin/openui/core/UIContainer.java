@@ -134,13 +134,17 @@ public class UIContainer<R extends IResourceProvider<R>> {
 		return projectionMatrix;
 	}
 	
+	public void setMatrixStack(PoseStack matrixStack) {
+		this.matrixStack = matrixStack;
+	}
+	
 	/**
 	 * Check if any components need to be redrawn, and update the VAOs.<br>
 	 * <b>NEEDS TO BE CALLED ON RENDER THREAD</b>
 	 */
 	public void updateComponentVAOs(TextureLoader<R, ? extends ISourceFolder> textureLoader) {
 		this.activeTexureLoader = textureLoader;
-		if (this.matrixStack == null || !this.matrixStack.cleared()) this.matrixStack = new PoseStack();
+		if (this.matrixStack == null) this.matrixStack = new PoseStack();
 		this.matrixStack.push();
 		
 		List<Compound<R>> nextLayerComponents = new ArrayList<>();
@@ -163,7 +167,6 @@ public class UIContainer<R extends IResourceProvider<R>> {
 		}
 		
 		this.matrixStack.pop();
-		this.matrixStack.assertCleared();	
 	}
 	
 	protected void updateVAOs(Compound<R> component) {
