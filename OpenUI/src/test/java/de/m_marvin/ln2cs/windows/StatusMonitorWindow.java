@@ -245,6 +245,7 @@ public class StatusMonitorWindow extends Window {
 			this.pd_condensatorTemperatur.setValue(this.dataSet.condesserTemperature);
 			this.pd_evaporatorTemperatur.setValue(this.dataSet.evaporatorTemperature);
 			this.pd_evaporatorPressure.setValue(this.dataSet.evaportatorPressure / 1000);
+			this.pd_condenserFanSpeed.setValue(this.dataSet.condenserFanSpeed / this.pd_condenserFanSpeed.getScalaNumberScale());
 			this.sb_compressorPower.setValue((int) this.dataSet.compressorPower);
 			this.sb_condenserMaxTemperature.setValue((int) this.dataSet.condesserTemperature);
 			this.sb_evaporatorTargetTemperatur.setValue((int) -this.dataSet.evaporatorTemperature);

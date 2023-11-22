@@ -9,25 +9,25 @@ public class ParameterDataSet {
 	public static final String PARAM_EVAP_PRESS = "EVP";	// Evaporator Pressure [mbar]
 	public float evaportatorPressure;
 
-	public static final String PARAM_COND_TEMP = "CDT";		// Condenser Temperature [C°]
+	public static final String PARAM_COND_TEMP = "COT";		// Condenser Temperature [C°]
 	public float condesserTemperature;
 	
-	public static final String PARAM_COND_FAN_RPM = "CDF";	// Condenser Fan Speed [rpm]
+	public static final String PARAM_COND_FAN_RPM = "FAR";	// Condenser Fan Speed [rpm]
 	public float condenserFanSpeed;
 	
 	public static final String PARAM_COMP_POWER = "CMP";	// Compressor Power [%]
 	public float compressorPower;
 
-	public static final String PARAM_EXPV_STATE = "EXP";	// Expansion Valve State [%]
+	public static final String PARAM_EXPV_STATE = "VLV";	// Expansion Valve State [%]
 	public float expansionValveState;
 	
 	public static float parseField(String dataString, String fieldName) throws NumberFormatException {
-		for (String s : dataString.split("\n")) {
+		for (String s : dataString.split("\n\r")) {
 			if (s.startsWith(fieldName)) {
 				return Float.parseFloat(s.substring(fieldName.length()));
 			}
 		}
-		return -1;
+		return -Float.MAX_VALUE;
 	}
 
 	public boolean parseData(String dataString) {

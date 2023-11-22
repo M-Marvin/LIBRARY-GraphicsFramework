@@ -53,6 +53,9 @@ dependencies {
 	// JBullet (Voxel Engine)
 	implementation "cz.advel.jbullet:jbullet:20101010-1"
 	
+	// SerialPortAccess (LN2CS)
+	implementation 'com.github.M-Marvin:LIBRARY-SerialPortAccess:bb86ca1ca6'
+	
 }
 
 java {
