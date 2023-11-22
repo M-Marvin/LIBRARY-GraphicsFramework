@@ -35,6 +35,9 @@ public class UserInput {
 	protected List<TextInputConsumer> textInputListeners = new ArrayList<>();
 	protected List<CursorEventConsumer> cursorListeners = new ArrayList<>();
 	
+	protected Vec2d cursorOffset = new Vec2d(0, 0);
+	protected Vec2d cursorScale = new Vec2d(1, 1);
+	
 	/**
 	 * Creates a new user-input class to store key-bindings and event-listeners.
 	 * Multiple instances can be created, but mostly it will not make any sense to have multiple handlers since there is only one input.
@@ -44,6 +47,21 @@ public class UserInput {
 			Optional<FunctionalKey> fkey = Optional.ofNullable(FunctionalKey.getKey(key));
 			if (fkey.isPresent() && (pressed || repeated)) this.textInputListeners.forEach((listener) -> listener.input((char) -1, fkey));
 		});
+	}
+	
+	/**
+	 * Sets an offset that is applied to the cursor position on all callbacks/listeners (after the scale factor is applied)
+	 */
+	public void setCursorOffset(Vec2d cursorOffset) {
+		this.cursorOffset = cursorOffset;
+	}
+	
+	/**
+	 * Sets an scale factor that is applied to the cursor position on all callbacks/listeners (before the offset is applied)
+	 * @param cursorScale
+	 */
+	public void setCursorScale(Vec2d cursorScale) {
+		this.cursorScale = cursorScale;
 	}
 	
 	/**
@@ -245,9 +263,9 @@ public class UserInput {
 		this.attachedWindows.add(windowId);
 		GLFW.glfwSetKeyCallback(windowId, (window, key, scancode, action, mods) -> this.keyboardListeners.forEach((listener) -> listener.keyEvent(key, scancode, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
 		GLFW.glfwSetMouseButtonCallback(windowId, (window, button, action, mods) -> this.mouseListeners.forEach((listener) -> listener.mouseEvent(Optional.empty(), button, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
-		GLFW.glfwSetCursorPosCallback(windowId, (window, xpos, ypos) -> this.cursorListeners.forEach((listener) -> listener.cursorMove(new Vec2d(xpos, ypos), false, false)));
-		GLFW.glfwSetCursorEnterCallback(windowId, (window, entered) -> this.cursorListeners.forEach((listener) -> listener.cursorMove(getCursorPosition(windowId), entered, !entered)));
-		GLFW.glfwSetScrollCallback(windowId, (window, xoffset, yoffset) ->  this.mouseListeners.forEach((listener) -> listener.mouseEvent(Optional.of(new Vec2d(xoffset, yoffset)), 0, false, false)));		
+		GLFW.glfwSetCursorPosCallback(windowId, (window, xpos, ypos) -> this.cursorListeners.forEach((listener) -> listener.cursorMove(new Vec2d(xpos, ypos).mul(this.cursorScale).add(this.cursorOffset), false, false)));
+		GLFW.glfwSetCursorEnterCallback(windowId, (window, entered) -> this.cursorListeners.forEach((listener) -> listener.cursorMove(getCursorPosition(windowId).mul(this.cursorScale).add(this.cursorOffset), entered, !entered)));
+		GLFW.glfwSetScrollCallback(windowId, (window, xoffset, yoffset) ->  this.mouseListeners.forEach((listener) -> listener.mouseEvent(Optional.of(new Vec2d(xoffset, yoffset).mul(this.cursorScale).add(this.cursorOffset)), 0, false, false)));		
 		GLFW.glfwSetCharCallback(windowId, (window, codepoint) -> this.textInputListeners.forEach((listener) -> listener.input((char) codepoint, Optional.empty())));
 	}
 	

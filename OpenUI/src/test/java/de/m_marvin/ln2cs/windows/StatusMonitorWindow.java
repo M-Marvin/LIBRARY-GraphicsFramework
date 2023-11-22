@@ -10,6 +10,9 @@ import de.m_marvin.openui.flatmono.Window;
 import de.m_marvin.openui.flatmono.components.BarComponent;
 import de.m_marvin.openui.flatmono.components.ButtonComponent;
 import de.m_marvin.openui.flatmono.components.GroupBox;
+import de.m_marvin.openui.flatmono.components.ImageComponent;
+import de.m_marvin.openui.flatmono.components.ImageComponent.ImageAdjust;
+import de.m_marvin.openui.flatmono.components.LabelComponent;
 import de.m_marvin.openui.flatmono.components.PointerDisplayComponent;
 import de.m_marvin.openui.flatmono.components.ScrollBarComponent;
 import de.m_marvin.openui.flatmono.components.ToggleButtonComponent;
@@ -19,6 +22,8 @@ import de.m_marvin.univec.impl.Vec2i;
 public class StatusMonitorWindow extends Window {
 	
 	protected final ParameterDataSet dataSet;
+	
+	protected ImageComponent im_systemSchematic;
 	
 	protected PointerDisplayComponent pd_evaporatorPressure;
 	protected PointerDisplayComponent pd_evaporatorTemperatur;
@@ -61,16 +66,34 @@ public class StatusMonitorWindow extends Window {
 		bg.addComponent(groupleft);
 		
 		this.pd_evaporatorTemperatur = new PointerDisplayComponent(-50, 50, (t) -> String.format("%.0fC°", t));
-		this.pd_evaporatorTemperatur.setLayoutData(new GridLayout.GridLayoutData(0, 0));
+		this.pd_evaporatorTemperatur.setLayoutData(new GridLayout.GridLayoutData(0, 1));
 		groupleft.addComponent(pd_evaporatorTemperatur);
+
+		LabelComponent evapTempLabel = new LabelComponent("EVAP_TEMP");
+		evapTempLabel.getSize().setX(this.pd_evaporatorTemperatur.getSize().x);
+		evapTempLabel.fixSize();
+		evapTempLabel.setLayoutData(new GridLayout.GridLayoutData(0, 0));
+		groupleft.addComponent(evapTempLabel);
 		
 		this.pd_evaporatorPressure = new PointerDisplayComponent(-1, 10, (p) -> String.format("%.2fbar", p));
-		this.pd_evaporatorPressure.setLayoutData(new GridLayout.GridLayoutData(0, 1));
+		this.pd_evaporatorPressure.setLayoutData(new GridLayout.GridLayoutData(0, 3));
 		groupleft.addComponent(pd_evaporatorPressure);
+
+		LabelComponent evapPressLabel = new LabelComponent("EVAP_PRESS");
+		evapPressLabel.getSize().setX(this.pd_evaporatorPressure.getSize().x);
+		evapPressLabel.fixSize();
+		evapPressLabel.setLayoutData(new GridLayout.GridLayoutData(0, 2));
+		groupleft.addComponent(evapPressLabel);
 		
 		this.pd_condensatorTemperatur = new PointerDisplayComponent(0, 60, (t) -> String.format("%.0fC°", t));
-		this.pd_condensatorTemperatur.setLayoutData(new GridLayout.GridLayoutData(0, 2));
+		this.pd_condensatorTemperatur.setLayoutData(new GridLayout.GridLayoutData(0, 5));
 		groupleft.addComponent(pd_condensatorTemperatur);
+
+		LabelComponent condTempLabel = new LabelComponent("COND_TEMP");
+		condTempLabel.getSize().setX(this.pd_condensatorTemperatur.getSize().x);
+		condTempLabel.fixSize();
+		condTempLabel.setLayoutData(new GridLayout.GridLayoutData(0, 4));
+		groupleft.addComponent(condTempLabel);
 		
 		groupleft.setLayout(new GridLayout());
 		groupleft.autoSetMinSize();
@@ -82,8 +105,14 @@ public class StatusMonitorWindow extends Window {
 		
 		this.pd_condenserFanSpeed = new PointerDisplayComponent(0, 20, (t) -> String.format("%.0f/min", t));
 		this.pd_condenserFanSpeed.setScalaNumberScale(10);
-		this.pd_condenserFanSpeed.setLayoutData(new GridLayout.GridLayoutData(0, 0));
+		this.pd_condenserFanSpeed.setLayoutData(new GridLayout.GridLayoutData(0, 1));
 		groupright.addComponent(pd_condenserFanSpeed);
+
+		LabelComponent condFanSpeedLabel = new LabelComponent("CNDF_SPEED");
+		condFanSpeedLabel.getSize().setX(this.pd_condenserFanSpeed.getSize().x);
+		condFanSpeedLabel.fixSize();
+		condFanSpeedLabel.setLayoutData(new GridLayout.GridLayoutData(0, 0));
+		groupright.addComponent(condFanSpeedLabel);
 		
 		Compound<ResourceLocation> statusBarGroup = new Compound<>();
 		int barWidth = this.pd_condenserFanSpeed.getSizeMargin().x / 3;
@@ -108,7 +137,7 @@ public class StatusMonitorWindow extends Window {
 		statusBarGroup.addComponent(sb_evaporatorTargetTemperatur);
 		
 		statusBarGroup.setLayout(new GridLayout());
-		statusBarGroup.setLayoutData(new GridLayout.GridLayoutData(0, 1));
+		statusBarGroup.setLayoutData(new GridLayout.GridLayoutData(0, 2));
 		statusBarGroup.autoSetMaxAndMinSize();
 		groupright.addComponent(statusBarGroup);
 		
@@ -119,9 +148,9 @@ public class StatusMonitorWindow extends Window {
 		
 		// Top
 		
-		GroupBox grouptop = new GroupBox();
-		grouptop.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.TOP));
-		bg.addComponent(grouptop);
+//		GroupBox grouptop = new GroupBox();
+//		grouptop.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.TOP));
+//		bg.addComponent(grouptop);
 		
 		// Bottom
 		
@@ -192,7 +221,14 @@ public class StatusMonitorWindow extends Window {
 		// Center
 		
 		GroupBox center = new GroupBox();
+		
+		this.im_systemSchematic = new ImageComponent(new ResourceLocation("ln2cs:ui/schematic"), ImageAdjust.STRETCHED);
+		this.im_systemSchematic.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.CENTERED));
+		center.addComponent(im_systemSchematic);
+		
+		center.setLayout(new BorderLayout());
 		center.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.CENTERED));
+		center.autoSetMinSize();
 		bg.addComponent(center);
 		
 		bg.setLayout(new BorderLayout(CornerStretch.VERTICAL));

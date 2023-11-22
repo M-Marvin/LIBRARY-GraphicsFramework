@@ -9,10 +9,10 @@ import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.resources.ResourceLoader;
 import de.m_marvin.renderengine.shaders.ShaderLoader;
 import de.m_marvin.renderengine.textures.utility.TextureLoader;
-import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.renderengine.windows.Window;
 import de.m_marvin.renderengine.windows.Window.WindowEventType;
 import de.m_marvin.simplelogging.printing.Logger;
+import de.m_marvin.univec.impl.Vec2d;
 import de.m_marvin.univec.impl.Vec2i;
 
 public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISourceFolder> {
@@ -225,9 +225,11 @@ public abstract class UIWindow<R extends IResourceProvider<R>, S extends ISource
 			if (screenRatio < compoundRatio) compoundSize.y *= compoundRatio / screenRatio; 
 			if (screenRatio > compoundRatio) compoundSize.x *= screenRatio / compoundRatio; 
 			
+			float scale = compoundSize.x / (float) screenSize.x;
+			this.inputHandler.setCursorScale(new Vec2d(scale, scale));
 			this.uiContainer.screenResize(compoundSize);
 		} else {
-			
+			this.inputHandler.setCursorScale(new Vec2d(1, 1));
 			this.uiContainer.screenResize(screenSize);
 		}
 	}
