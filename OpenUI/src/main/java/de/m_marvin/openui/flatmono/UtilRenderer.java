@@ -5,6 +5,7 @@ import java.awt.Color;
 import de.m_marvin.openui.core.UIRenderMode;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.IBufferSource;
+import de.m_marvin.renderengine.buffers.defimpl.SimpleBufferSource;
 import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.renderengine.translation.PoseStack;
 
@@ -241,6 +242,38 @@ public class UtilRenderer {
 		buffer.vertex(matrixStack, w, h, 0).vec2f(w, h).vec2i(pxcx, pxcy).putInt(pxri).nextElement().putInt(pxro).nextElement().color(r, g, b, a).endVertex();
 		buffer.vertex(matrixStack, 0, h, 0).vec2f(0, h).vec2i(pxcx, pxcy).putInt(pxri).nextElement().putInt(pxro).nextElement().color(r, g, b, a).endVertex();
 		buffer.vertex(matrixStack, 0, 0, 0).vec2f(0, 0).vec2i(pxcx, pxcy).putInt(pxri).nextElement().putInt(pxro).nextElement().color(r, g, b, a).endVertex();
+		
+		buffer.end();
+		
+	}
+
+	public static void renderTexture(int x, int y, int w, int h, ResourceLocation texture, Color color, SimpleBufferSource<ResourceLocation, UIRenderMode<ResourceLocation>> bufferSource, PoseStack matrixStack) {
+		matrixStack.push();
+		matrixStack.translate(x, y, 0);
+		renderTexture(w, h, texture, color, bufferSource, matrixStack);
+		matrixStack.pop();
+	}
+	
+	public static void renderTexture(int w, int h, ResourceLocation texture, Color color, SimpleBufferSource<ResourceLocation, UIRenderMode<ResourceLocation>> bufferSource, PoseStack matrixStack) {
+
+		float r = color.getRed() / 255F;
+		float g = color.getGreen() / 255F;
+		float b = color.getBlue() / 255F;
+		float a = color.getAlpha() / 255F;
+		
+		float fxl = 0;
+		float fxr = w;
+		float fyt = 0;
+		float fyb = h;
+		
+		BufferBuilder buffer = bufferSource.startBuffer(UIRenderModes.texturedSolid(texture));
+		
+		buffer.vertex(matrixStack, fxl, fyt, 0).uv(0, 1).color(r, g, b, a).endVertex();
+		buffer.vertex(matrixStack, fxr, fyt, 0).uv(1, 1).color(r, g, b, a).endVertex();
+		buffer.vertex(matrixStack, fxr, fyb, 0).uv(1, 0).color(r, g, b, a).endVertex();
+		buffer.vertex(matrixStack, fxr, fyb, 0).uv(1, 0).color(r, g, b, a).endVertex();
+		buffer.vertex(matrixStack, fxl, fyb, 0).uv(0, 0).color(r, g, b, a).endVertex();
+		buffer.vertex(matrixStack, fxl, fyt, 0).uv(0, 1).color(r, g, b, a).endVertex();
 		
 		buffer.end();
 		
