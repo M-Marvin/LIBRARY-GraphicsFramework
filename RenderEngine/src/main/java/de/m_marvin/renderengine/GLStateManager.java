@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL33;
 
 /**
@@ -73,6 +74,10 @@ public class GLStateManager {
 
 	public static void disable(int target) {
 		GL33.glDisable(target);
+	}
+	
+	public static void lineWidth(float width) {
+		GL33.glLineWidth(width);
 	}
 
 	public static void resizeViewport(int x, int y, int w, int h) {

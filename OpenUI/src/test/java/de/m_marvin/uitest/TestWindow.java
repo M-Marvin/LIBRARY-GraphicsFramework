@@ -9,11 +9,14 @@ import de.m_marvin.openui.core.layout.BorderLayout.CornerStretch;
 import de.m_marvin.openui.flatmono.Window;
 import de.m_marvin.openui.flatmono.components.BarComponent;
 import de.m_marvin.openui.flatmono.components.ButtonComponent;
+import de.m_marvin.openui.flatmono.components.GraphComponent;
+import de.m_marvin.openui.flatmono.components.GraphComponent.Graph;
 import de.m_marvin.openui.flatmono.components.GroupBox;
 import de.m_marvin.openui.flatmono.components.ScrollBarComponent;
 import de.m_marvin.openui.flatmono.components.TextFieldComponent;
 import de.m_marvin.openui.flatmono.components.ToggleButtonComponent;
 import de.m_marvin.openui.core.layout.GridLayout;
+import de.m_marvin.univec.impl.Vec2d;
 import de.m_marvin.univec.impl.Vec2i;
 
 public class TestWindow extends Window {
@@ -36,8 +39,6 @@ public class TestWindow extends Window {
 		b.addComponent(scrollbar1);
 		
 		GroupBox b1 = new GroupBox();
-		b1.setSizeMin(new Vec2i(100, 100));
-		b1.setSizeMax(new Vec2i(0, 150));
 		b1.setLayoutData(new BorderLayout.BorderLayoutData(BorderSection.TOP));
 		b1.setLayout(new GridLayout());
 
@@ -54,6 +55,31 @@ public class TestWindow extends Window {
 				
 			}
 		}
+		
+		GraphComponent gc = new GraphComponent(0, 100, -50, 50);
+		gc.setLayoutData(new GridLayout.GridLayoutData(4, 0));
+		gc.setSize(new Vec2i(600, 300));
+		gc.fixSize();
+		b1.addComponent(gc);
+		
+		Graph graph = new GraphComponent.Graph("Test", new Color(0, 255, 0, 255));
+		gc.addGraph(graph);
+		graph.getDataPoints().add(new Vec2d(0, 25));
+		graph.getDataPoints().add(new Vec2d(40, -25));
+		graph.getDataPoints().add(new Vec2d(60, -40));
+		graph.getDataPoints().add(new Vec2d(80, 40));
+		graph.getDataPoints().add(new Vec2d(100, 45));
+
+		Graph graph2 = new GraphComponent.Graph("Test", new Color(255, 0, 0, 255));
+		gc.addGraph(graph2);
+		graph2.getDataPoints().add(new Vec2d(0, 20));
+		graph2.getDataPoints().add(new Vec2d(20, -20));
+		graph2.getDataPoints().add(new Vec2d(40, -30));
+		graph2.getDataPoints().add(new Vec2d(65, 00));
+		graph2.getDataPoints().add(new Vec2d(70, 23));
+		
+		b1.autoSetMaxAndMinSize();
+		b1.getSizeMax().setX(0);
 		
 		GroupBox b2 = new GroupBox();
 		b2.setSize(new Vec2i(100, 0));
@@ -98,6 +124,8 @@ public class TestWindow extends Window {
 				int c = t;
 				b6.setAction(() -> System.out.println("Clicked on " + a + "/" + c));
 				b5.addComponent(b6);
+				
+				b6.setAction(() -> gc.stepValueLimit(5, 0));
 				
 			}
 		}

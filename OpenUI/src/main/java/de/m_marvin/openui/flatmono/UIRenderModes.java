@@ -23,7 +23,27 @@ public class UIRenderModes {
 	public static final int RENDER_ORDER_SOLID = 0;
 	public static final int RENDER_ORDER_TRANSPARENT_0 = 1;
 	public static final int RENDER_ORDER_TRANSPARENT_1 = 2;
-	
+
+	public static UIRenderMode<ResourceLocation> lines(int width) {
+		return lines.apply(width);
+	}
+	private static final Function<Integer, UIRenderMode<ResourceLocation>> lines = Utility.memorize((width) -> {
+		return new UIRenderMode<ResourceLocation>(
+			RenderPrimitive.LINES, 
+			new VertexFormat()
+				.appand("position", NumberFormat.FLOAT, 3, false)
+				.appand("color", NumberFormat.FLOAT, 4, false),
+			SHADER_PLAIN_SOLID, 
+			(shader, container) -> {
+				shader.getUniform("ProjMat").setMatrix4f(container.getProjectionMatrix());
+				GLStateManager.enable(GL33.GL_DEPTH_TEST);
+				GLStateManager.enable(GL33.GL_BLEND);
+				GLStateManager.blendFunc(GL33.GL_SRC_ALPHA, GL33.GL_ONE_MINUS_SRC_ALPHA);
+				GLStateManager.lineWidth(width);
+			}
+		);
+	});
+
 	public static UIRenderMode<ResourceLocation> plainSolid() {
 		return plainSolid;
 	}
