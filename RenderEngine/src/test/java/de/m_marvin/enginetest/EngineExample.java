@@ -303,7 +303,7 @@ public class EngineExample {
 			
 //			WorldObject object = new Random().nextBoolean() ? new TestBlockObject() : new Random().nextBoolean() ? new MotorObject() : new KorbuvaObject();
 //			physicWorld.addObject(object);
-//			object.getRigidBody().setOrientation(new Quaternion(new Vec3i(1, 0, 0), 0));
+//			object.getRigidBody().setOrientation(new Quaternionf(new Vec3i(1, 0, 0), 0));
 //			object.getRigidBody().setPosition(this.mainCamera.getPosition());
 			
 		}

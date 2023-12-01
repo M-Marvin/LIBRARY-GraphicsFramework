@@ -28,7 +28,7 @@ dependencies {
 	implementation 'com.github.M-Marvin:LIBRARY-CommandLineParser:d527412'
 	
 	// UniVec
-	implementation 'com.github.M-Marvin:LIBRARY-UnifiedVectors:0c5578b'
+	implementation 'com.github.M-Marvin:LIBRARY-UnifiedVectors:1da6d35e86'
 	
 	// GSON
 	implementation "com.google.code.gson:gson:2.9.1"

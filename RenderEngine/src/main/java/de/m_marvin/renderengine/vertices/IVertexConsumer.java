@@ -161,7 +161,7 @@ public interface IVertexConsumer {
 	 * @return This consumer to apply more draw calls
 	 */
 	public default IVertexConsumer quatf(IQuaternion<?> q) {
-		return quat(q.i(), q.j(), q.k(), q.r());
+		return quat(q.i().floatValue(), q.j().floatValue(), q.k().floatValue(), q.r().floatValue());
 	}
 
 	/**

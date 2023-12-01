@@ -1,7 +1,8 @@
 package de.m_marvin.renderengine.translation;
 
+import de.m_marvin.unimat.api.IQuaternionMath.EulerOrder;
 import de.m_marvin.unimat.impl.Matrix4f;
-import de.m_marvin.unimat.impl.Quaternion;
+import de.m_marvin.unimat.impl.Quaternionf;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
 
@@ -16,14 +17,14 @@ public class Camera {
 	
 	protected Matrix4f viewMatrix = new Matrix4f();
 	protected Vec3f position;
-	protected Quaternion rotation;
+	protected Quaternionf rotation;
 	
 	/**
 	 * Creates a new camera on the given position.
 	 * @param position The position of the camera
-	 * @param rotation The rotation as {@link Quaternion}
+	 * @param rotation The rotation as {@link Quaternionf}
 	 */
-	public Camera(Vec3f position, Quaternion rotation) {
+	public Camera(Vec3f position, Quaternionf rotation) {
 		this.position = position;
 		this.rotation = rotation;
 	}
@@ -34,14 +35,14 @@ public class Camera {
 	 * @param eulerRotation The rotation as euler-angles
 	 */
 	public Camera(Vec3f position, Vec3f eulerRotation) {
-		this(position, Quaternion.fromXYZDegrees(eulerRotation));
+		this(position, new Quaternionf(eulerRotation, EulerOrder.XYZ, true));
 	}
 	
 	/**
 	 * Creates a new camera on the default position 0 0 0 with orientation 0 0 0.
 	 */
 	public Camera() {
-		this(new Vec3f(0F, 0F, 0F), new Quaternion(new Vec3i(0, 0, 0), 0F));
+		this(new Vec3f(0F, 0F, 0F), new Quaternionf(new Vec3i(0, 0, 0), 0F));
 	}
 	/**
 	 * Moves the camera by the specified xyz coordinates.
@@ -66,7 +67,7 @@ public class Camera {
 	 * @param ammount The angle to rotate in degrees
 	 */
 	public void rotate(Vec3i axisVec, float ammount) {
-		this.rotation.mulI(new Quaternion(axisVec, (float) Math.toRadians(ammount)));
+		this.rotation.mulI(new Quaternionf(axisVec, (float) Math.toRadians(ammount)));
 	}
 	
 	/**
@@ -75,7 +76,7 @@ public class Camera {
 	 * @param ammount The angle to rotate in degrees
 	 */
 	public void orientate(Vec3i axisVec, float ammount) {
-		this.rotation = new Quaternion(axisVec, (float) Math.toRadians(ammount)).mul(this.rotation);
+		this.rotation = new Quaternionf(axisVec, (float) Math.toRadians(ammount)).mul(this.rotation);
 	}
 	
 	/**
@@ -108,7 +109,7 @@ public class Camera {
 	 * Returns the rotation quaternion of the camera.
 	 * @return The rotation of the camera as quaternion
 	 */
-	public Quaternion getRotation() {
+	public Quaternionf getRotation() {
 		return rotation;
 	}
 	

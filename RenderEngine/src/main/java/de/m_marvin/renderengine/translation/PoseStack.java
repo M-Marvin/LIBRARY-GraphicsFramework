@@ -5,10 +5,12 @@ import java.util.List;
 
 import de.m_marvin.renderengine.TranslationStackException;
 import de.m_marvin.renderengine.vertices.IVertexConsumer;
+import de.m_marvin.unimat.api.IQuaternionMath.EulerOrder;
 import de.m_marvin.unimat.impl.Matrix3f;
 import de.m_marvin.unimat.impl.Matrix4f;
-import de.m_marvin.unimat.impl.Quaternion;
+import de.m_marvin.unimat.impl.Quaternionf;
 import de.m_marvin.univec.api.IVector3;
+import de.m_marvin.univec.impl.Vec3f;
 
 /**
  * Used to apply translations to draw calls of the {@link IVertexConsumer}.
@@ -73,12 +75,12 @@ public class PoseStack {
 	}
 	
 	public void rotateRadians(float x, float y, float z) {
-		rotate(Quaternion.fromXYZRadians(x, y, z));
+		rotate(new Quaternionf(new Vec3f(x, y, z), EulerOrder.XYZ, false));
 	}
 	public void rotateDegrees(float x, float y, float z) {
-		rotate(Quaternion.fromXYZDegrees(x, y, z));
+		rotate(new Quaternionf(new Vec3f(x, y, z), EulerOrder.XYZ, true));
 	}
-	public void rotate(Quaternion quat) {
+	public void rotate(Quaternionf quat) {
 		Pose pose = last();
 		pose.normal().mulI(quat);
 		pose.pose().mulI(quat);

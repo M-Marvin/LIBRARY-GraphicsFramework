@@ -7,7 +7,7 @@ import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.Transform;
 
 import de.m_marvin.unimat.impl.Matrix4f;
-import de.m_marvin.unimat.impl.Quaternion;
+import de.m_marvin.unimat.impl.Quaternionf;
 import de.m_marvin.univec.impl.Vec3f;
 
 public class UniVecHelper {
@@ -22,7 +22,7 @@ public class UniVecHelper {
 		return new SimplifiedRigidBody(mass, motionState, shape, inertia);
 	}
 
-	public static Transform transform(Vec3f translation, Quaternion rotation) {
+	public static Transform transform(Vec3f translation, Quaternionf rotation) {
 		return transform(Matrix4f.translateMatrix(translation.x, translation.y, translation.z).mul(rotation));
 	}
 
