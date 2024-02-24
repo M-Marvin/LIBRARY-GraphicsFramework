@@ -303,7 +303,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 			BufferedImage texture = loadBufferedTexture(resourceLoader.getAsStream(sourceFolder, textureFile));
 			return new TexturePack(metaData, texture);
 		} catch (FileNotFoundException e) {
-			throw new FileNotFoundException("The texture file " + textureFile + " does not exist!");
+			throw new FileNotFoundException("The texture file " + textureFile.nameString() + " does not exist!");
 		}
 	}
 	
@@ -378,7 +378,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	@SuppressWarnings("unchecked")
 	public AbstractTextureMap<R> getTextureMap(R resourceLocation) {
 		if (!this.textureCache.containsKey(resourceLocation)) {
-			Logger.defaultLogger().logWarn("Texture " + resourceLocation + " does not exist!");
+			Logger.defaultLogger().logWarn("Texture " + resourceLocation.nameString() + " does not exist!");
 			this.textureCache.put(resourceLocation, (AbstractTextureMap<R>) INVALID_TEXTURE_FALLBACK.get());
 		}
 		AbstractTextureMap<R> texture = this.textureCache.get(resourceLocation);

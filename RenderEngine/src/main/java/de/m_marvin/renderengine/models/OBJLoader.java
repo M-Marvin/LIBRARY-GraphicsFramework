@@ -64,7 +64,7 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 		try {
 			loadModelsIn0(modelFolderLocation, textureFolderLocation, recursive);
 		} catch (IOException e) {
-			Logger.defaultLogger().logWarn("Failed to load some of the shaders from " + modelFolderLocation.toString() + "!");
+			Logger.defaultLogger().logWarn("Failed to load some of the shaders from " + modelFolderLocation.nameString() + "!");
 			Logger.defaultLogger().printException(LogType.WARN, e);
 		}
 	}
@@ -107,6 +107,10 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 	 * @return The model under the given name or null if no model was found
 	 */
 	public RawModel<R> getModel(R modelLocation) {
+		if (!this.modelCache.containsKey(modelLocation)) {
+			Logger.defaultLogger().logWarn("Model " + modelLocation.nameString() + " does not exist!");
+			this.modelCache.put(modelLocation, null);
+		}
 		return this.modelCache.get(modelLocation);
 	}
 	

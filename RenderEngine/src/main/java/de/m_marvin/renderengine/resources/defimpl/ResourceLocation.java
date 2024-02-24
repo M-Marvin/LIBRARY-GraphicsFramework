@@ -38,7 +38,7 @@ public class ResourceLocation implements IResourceProvider<ResourceLocation> {
 		String[] parts = namespaceAndPath.split(":");
 		if (parts.length != 2) throw new IllegalArgumentException("The namespace and path must be seperated by one ':' to be a valid format!");
 		this.namespace = parts[0];
-		this.path = parts[1];
+		this.path = new File(parts[1]).toString();
 	}
 	
 	@Override

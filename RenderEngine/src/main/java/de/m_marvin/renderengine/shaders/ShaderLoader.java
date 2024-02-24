@@ -72,7 +72,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 		try {
 			loadShadersIn0(shaderFolderLocation, recusive);
 		} catch (IOException e) {
-			Logger.defaultLogger().logWarn("Failed to load some of the shaders from " + shaderFolderLocation.toString() + "!");
+			Logger.defaultLogger().logWarn("Failed to load some of the shaders from " + shaderFolderLocation.nameString() + "!");
 			Logger.defaultLogger().printException(LogType.WARN, e);
 		}
 	}
@@ -122,7 +122,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 				System.out.println(shaderLocation);
 				shaderCache.put(shaderLocation, load(shaderLocation, format));
 			} catch (IOException e) {
-				Logger.defaultLogger().logWarn("Failed to load shader " + shaderLocation.toString());
+				Logger.defaultLogger().logWarn("Failed to load shader " + shaderLocation.nameString());
 				Logger.defaultLogger().printException(LogType.WARN, e);
 				return null;
 			}
@@ -150,6 +150,10 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	 * @return The shader under the given name or null if no shader was found
 	 */
 	public ShaderInstance getShader(R shaderName) {
+		if (!this.shaderCache.containsKey(shaderName)) {
+			Logger.defaultLogger().logWarn("Shader " + shaderName.nameString() + " does not exist!");
+			this.shaderCache.put(shaderName, null);
+		}
 		return this.shaderCache.get(shaderName);
 	}
 	
