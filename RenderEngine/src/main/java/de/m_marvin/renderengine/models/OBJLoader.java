@@ -1,7 +1,7 @@
 package de.m_marvin.renderengine.models;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -56,11 +56,13 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 	
 	/**
 	 * Loads all models in the given folder and caches them.
+	 * 
 	 * @param modelFolderLocation The location of the folder
+	 * @param recursive How deep to search in sub-folders
 	 */
-	public void loadModelsIn(R modelFolderLocation, R textureFolderLocation) {
+	public void loadModelsIn(R modelFolderLocation, R textureFolderLocation, int recursive) {
 		try {
-			loadModelsIn0(modelFolderLocation, textureFolderLocation);
+			loadModelsIn0(modelFolderLocation, textureFolderLocation, recursive);
 		} catch (IOException e) {
 			Logger.defaultLogger().logWarn("Failed to load some of the shaders from " + modelFolderLocation.toString() + "!");
 			Logger.defaultLogger().printException(LogType.WARN, e);
@@ -72,42 +74,32 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 	 * Non-catch-block version of {@link #loadShadersIn(loadModelsIn)}.
 	 * 
 	 * @param modelFolderLocation The location of the folder
+	 * @param recursive How deep to search in sub-folders
 	 * @throws IOException If an error occurs in the loading of a shader
 	 */
-	public void loadModelsIn0(R modelFolderLocation, R textureFolderLocation) throws IOException {
+	public void loadModelsIn0(R modelFolderLocation, R textureFolderLocation, int recursive) throws IOException {
 		
-		for (String modelName : listModelNames(modelFolderLocation)) {
+		for (R modelLoc : this.resourceLoader.listFilesInAllNamespaces(sourceFolder, textureFolderLocation)) {
 			
-			R locationName = modelFolderLocation.locationOfFile(modelName);
+			String modelPath = modelLoc.getPath();
+			String modelName = modelPath.substring(modelPath.lastIndexOf(File.separatorChar) + 1);
+			if (!modelName.endsWith(MODEL_FILE_FORMAT)) continue;
+			
+			R locationName = modelFolderLocation.locationOfFile(modelName.substring(0, modelName.lastIndexOf('.')));
 			if (loadModel(locationName, textureFolderLocation) == null) {
 				Logger.defaultLogger().logWarn("Failed to load model '" + modelName + "'!");
 			}
 			
 		}
 		
-	}
-
-	/**
-	 * Lists all models in the given folders.
-	 * 
-	 * @param modelFolder The model source folder location
-	 * @return A list of all model names in the folder
-	 * @throws FileNotFoundException if the path is not valid
-	 */
-	protected List<String> listModelNames(R modelFolder) throws FileNotFoundException {
-		List<String> modelNames = new ArrayList<>();
-		for (String fileName : resourceLoader.listFilesIn(sourceFolder, modelFolder)) {
-			String[] fileNameParts = fileName.split("\\.");
-			if (fileNameParts[fileNameParts.length - 1].equals(MATERIAL_FILE_FORMAT)) continue;
-			if (fileNameParts.length > 1) {
-				int formatEndingLength = fileNameParts[fileNameParts.length - 1].length() + 1;
-				String modelName = fileName.substring(0, fileName.length() - formatEndingLength);
-				if (!modelNames.contains(modelName)) modelNames.add(modelName);
+		if (recursive > 0) {
+			for (R folderLoc : this.resourceLoader.listFoldersInAllNamespaces(sourceFolder, textureFolderLocation)) {
+				loadModelsIn0(folderLoc, textureFolderLocation, recursive--);
 			}
 		}
-		return modelNames;
+		
 	}
-	
+
 	/**
 	 * Returns the model cached under the given name.
 	 * 
@@ -248,7 +240,7 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 		if (is.length < 4) throw new IllegalArgumentException("Maleformed face '" + s + "' in source file!");
 		Vec3i[] indexes = new Vec3i[is.length - 1];
 		for (int i = 1; i < is.length; i++) {
-			String[] vs = is[i].split("/");
+			String[] vs = is[i].split(File.separator);
 			if (vs.length != 3) throw new IllegalArgumentException("Maleformed face '" + s + "' in source file!");
 			indexes[i - 1] = new Vec3i(Integer.parseInt(vs[0]) - 1, Integer.parseInt(vs[1]) - 1, Integer.parseInt(vs[2]) - 1);
 		}

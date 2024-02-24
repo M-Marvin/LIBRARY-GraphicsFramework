@@ -3,7 +3,7 @@ apply plugin: 'java'
 apply plugin: 'maven-publish'
 
 group = 'com.github.M-Marvin'
-version = '0.2'
+version = '0.3'
 
 project.ext.lwjglVersion = "3.3.1"
 project.ext.lwjglNatives = "natives-windows"
@@ -11,6 +11,10 @@ project.ext.lwjglNatives = "natives-windows"
 repositories {
 	mavenCentral()
 	maven { url 'https://jitpack.io' }
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
 
 dependencies {
@@ -25,17 +29,18 @@ dependencies {
 	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
 	
 	// CommandLineParser
-	implementation 'com.github.M-Marvin:LIBRARY-CommandLineParser:d527412'
+	implementation 'com.github.M-Marvin:LIBRARY-CommandLineParser:main-SNAPSHOT'
 	
 	// UniVec
-	implementation 'com.github.M-Marvin:LIBRARY-UnifiedVectors:1da6d35e86'
+	implementation 'com.github.M-Marvin:LIBRARY-UnifiedVectors:main-SNAPSHOT'
 	
 	// GSON
 	implementation "com.google.code.gson:gson:2.9.1"
 	
 	// SimpleLogging
-	implementation 'com.github.M-Marvin:LIBRARY-SimpleLogging:6da9e66783af7dd5d60188bbfc09648fd35fbf60'
+	implementation 'com.github.M-Marvin:LIBRARY-SimpleLogging:main-SNAPSHOT'
 	
+	// Physic Engine (Testing)
 	implementation "cz.advel.jbullet:jbullet:20101010-1"
 	
 }
@@ -60,7 +65,7 @@ wrapper {
 
 jar {
     manifest {
-        attributes 'Implementation-Version': '0.2 - beta'
+        attributes 'Implementation-Version': '0.3 - beta'
         attributes 'Implementation-Title': 'RenderEngine'
         attributes 'Implementation-Vendor-Id': 'de.m_marvin'
     }

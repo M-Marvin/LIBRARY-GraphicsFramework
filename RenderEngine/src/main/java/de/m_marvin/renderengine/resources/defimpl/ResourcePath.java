@@ -20,7 +20,7 @@ public class ResourcePath implements IResourceProvider<ResourcePath> {
 	 * @param path The path string
 	 */
 	public ResourcePath(String path) {
-		this.path = path;
+		this.path = new File(path).toString();
 	}
 	
 	/**
@@ -57,7 +57,12 @@ public class ResourcePath implements IResourceProvider<ResourcePath> {
 	@Override
 	public ResourcePath locationOfFile(String fileName) {
 		if (fileName == null) return null;
-		return new ResourcePath((this.path.isEmpty() ? this.path : this.path + "/") + fileName);
+		return new ResourcePath((this.path.isEmpty() ? this.path : this.path + File.separator) + fileName);
+	}
+	
+	@Override
+	public ResourcePath withNamespace(String namespace) {
+		return new ResourcePath(this.path);
 	}
 	
 	@Override

@@ -1,6 +1,6 @@
 #version 150
 
-#include math
+#include ../glsl/math
 
 uniform mat4 ViewMat;
 uniform mat4 ProjMat;

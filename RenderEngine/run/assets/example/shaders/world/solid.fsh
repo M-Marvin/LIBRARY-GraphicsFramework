@@ -1,6 +1,6 @@
 #version 150
 
-#include math
+#include ../glsl/math
 
 uniform float Interpolation;
 uniform sampler2D Texture;

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -95,10 +96,11 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	 * The metadata JSON can also hold informations about animation.
 	 * 
 	 * @param textureFolderLocation The texture folder location of the textures to load
+	 * @param recursive How deep to search in sub-folders
 	 */
-	public void buildSingleMapsFromTextures(R textureFolderLocation) {
+	public void buildSingleMapsFromTextures(R textureFolderLocation, int recursive) {
 		try {
-			buildSingleMapsFromTextures0(textureFolderLocation);
+			buildSingleMapsFromTextures0(textureFolderLocation, recursive);
 		} catch (IOException e) {
 			Logger.defaultLogger().logWarn("Failed to read some of the textures in " + textureFolderLocation);
 			Logger.defaultLogger().printException(LogType.WARN, e);
@@ -117,10 +119,11 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	 * @param atlasName The additional custom name for the atlas
 	 * @param prioritizeAtlasHeight Decides if the alignment of the images in the atlas are oriented on the x or y axis
 	 * @param selectInterpolatedTextures If true, only interpolated textures are loaded into the atlas, if false only non interpolated textures are loaded, mixing is not allowed
+	 * @param recursive How deep to search in sub-folders
 	 */
-	public void buildAtlasMapFromTextures(R textureFolderLocation, R atlasName, boolean prioritizeAtlasHeight, boolean selectInterpolatedTextures) {
+	public void buildAtlasMapFromTextures(R textureFolderLocation, R atlasName, boolean prioritizeAtlasHeight, boolean selectInterpolatedTextures, int recursive) {
 		try {
-			buildAtlasMapFromTexutes0(textureFolderLocation, atlasName, prioritizeAtlasHeight, selectInterpolatedTextures);
+			buildAtlasMapFromTexutes0(textureFolderLocation, atlasName, prioritizeAtlasHeight, selectInterpolatedTextures, recursive);
 		} catch (IOException e) {
 			Logger.defaultLogger().logWarn("Failed to read some of the textures in " + textureFolderLocation);
 			Logger.defaultLogger().printException(LogType.WARN, e);
@@ -131,16 +134,22 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	 * Non try-catch version of {@link #buildSingleMapsFromTextures(IResourceProvider)}.
 	 * 
 	 * @param textureFolderLocation The texture folder location of the textures to load
+	 * @param recursive How deep to search in sub-folders
 	 * @throws IOException If an error occurs accessing the texture files
 	 */
-	public void buildSingleMapsFromTextures0(R textureFolderLocation) throws IOException {
+	public void buildSingleMapsFromTextures0(R textureFolderLocation, int recursive) throws IOException {
 		
-		for (String textureName : listTextureNames(textureFolderLocation)) {
+		for (R textureLoc : resourceLoader.listFilesInAllNamespaces(this.sourceFolder, textureFolderLocation)) {
+
+			String texturePath = textureLoc.getPath();
+			String textureName = texturePath.substring(texturePath.lastIndexOf(File.separatorChar) + 1);
+			R locationName = textureLoc.getParent().locationOfFile(textureName.substring(0, textureName.lastIndexOf('.')));
+			
+			if (textureCache.containsKey(locationName)) continue;
 			
 			try {
 				
-				TexturePack textureData = loadTexture(textureFolderLocation.locationOfFile(textureName));
-				R locationName = textureFolderLocation.locationOfFile(textureName);
+				TexturePack textureData = loadTexture(locationName);
 				
 				SingleTextureMap<R> map = new SingleTextureMap<R>(textureData.texture(), textureData.metaData().frames(), textureData.metaData().frametime(), textureData.metaData().interpolate());
 				this.textureCache.put(locationName, map);
@@ -153,6 +162,12 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 			
 		}
 		
+		if (recursive > 0) {
+			for (R folderName : this.resourceLoader.listFoldersInAllNamespaces(sourceFolder, textureFolderLocation)) {
+				buildSingleMapsFromTextures0(folderName, recursive--);
+			}
+		}
+		
 	}
 	
 	/**
@@ -162,9 +177,10 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	 * @param atlasName The additional custom name for the atlas
 	 * @param prioritizeAtlasHeight Decides if the alignment of the images in the atlas are oriented on the x or y axis
 	 * @param selectInterpolatedTextures If true, only interpolated textures are loaded into the atlas, if false only non interpolated textures are loaded
+	 * @param recursive How deep to search in sub-folders
 	 * @throws IOException If an error occurs accessing the texture files
 	 */
-	public void buildAtlasMapFromTexutes0(R textureFolderLocation, R atlasName, boolean prioritizeAtlasHeight, boolean selectInterpolatedTextures) throws IOException {
+	public void buildAtlasMapFromTexutes0(R textureFolderLocation, R atlasName, boolean prioritizeAtlasHeight, boolean selectInterpolatedTextures, int recursive) throws IOException {
 		
 		AtlasTextureMap<R> map = new AtlasTextureMap<>();
 		List<R> locationsToLink = new ArrayList<>();
@@ -180,16 +196,35 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 				fallbackData.texture().getRGB(0, 0, fallbackData.texture().getWidth(), fallbackData.texture.getHeight(), null, 0, fallbackData.texture().getWidth())
 		);
 		
+		boolean addedImages = fillAttlasMap(textureFolderLocation, selectInterpolatedTextures, map, locationsToLink, recursive);
+		
+		if (addedImages) {
+
+			map.buildAtlas(prioritizeAtlasHeight, selectInterpolatedTextures);
+			this.textureCache.put(atlasName, map);
+			this.textureMapNames.add(atlasName);
+			for (R location : locationsToLink) this.textureCache.put(location, map);
+			
+		}
+		
+	}
+
+	protected boolean fillAttlasMap(R textureFolderLocation, boolean selectInterpolatedTextures, AtlasTextureMap<R> map, List<R> locationsToLink, int recursive) throws IOException {
+
 		boolean addedImages = false;
-		for (String textureName : listTextureNames(textureFolderLocation)) {
+		for (R textureLoc : this.resourceLoader.listFilesInAllNamespaces(this.sourceFolder, textureFolderLocation)) {
 			
 			try {
 				
-				TexturePack textureData = loadTexture(textureFolderLocation.locationOfFile(textureName));
+				String texturePath = textureLoc.getPath();
+				String textureName = texturePath.substring(texturePath.lastIndexOf(File.separatorChar) + 1);
+				R locationName = textureLoc.getParent().locationOfFile(textureName.substring(0, textureName.lastIndexOf('.')));
+				
+				if (locationsToLink.contains(locationName)) continue;
+				
+				TexturePack textureData = loadTexture(locationName);
 				
 				if (textureData.metaData().interpolate() == selectInterpolatedTextures) {
-
-					R locationName = textureFolderLocation.locationOfFile(textureName);
 					
 					BufferedImage image = textureData.texture();
 					int width = image.getWidth();
@@ -216,17 +251,16 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 			
 		}
 		
-		if (addedImages) {
-
-			map.buildAtlas(prioritizeAtlasHeight, selectInterpolatedTextures);
-			this.textureCache.put(atlasName, map);
-			this.textureMapNames.add(atlasName);
-			for (R location : locationsToLink) this.textureCache.put(location, map);
-			
+		if (recursive > 0) {
+			for (R folderName : this.resourceLoader.listFoldersInAllNamespaces(this.sourceFolder, textureFolderLocation)) {
+				if (fillAttlasMap(folderName, selectInterpolatedTextures, map, locationsToLink, recursive--)) addedImages = true;
+			}
 		}
 		
+		return addedImages;
+		
 	}
-
+	
 	/**
 	 * Manually adds an texture map to the cached textures.
 	 * This is mostly used by external texture loaders, like the font manager.
@@ -248,27 +282,6 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	 */
 	public void cacheTexture(R textureName, AbstractTextureMap<R> textureMap) {
 		this.textureCache.put(textureName, textureMap);
-	}
-	
-	/**
-	 * Lists all texture names found in the given folder.
-	 * Does not search in sub-folders.
-	 * 
-	 * @param textureFolder The folder location to search for textures
-	 * @return A list containing all found texture names
-	 * @throws IOException If an error occurs accessing the files
-	 */
-	protected List<String> listTextureNames(R textureFolder) throws IOException {
-		List<String> textureNames = new ArrayList<>();
-		for (String fileName : resourceLoader.listFilesIn(sourceFolder, textureFolder)) {
-			String[] fileNameParts = fileName.split("\\.");
-			if (fileNameParts.length > 1) {
-				int formatEndingLength = fileNameParts[fileNameParts.length - 1].length() + 1;
-				String textureName = fileName.substring(0, fileName.length() - formatEndingLength);
-				if (!textureNames.contains(textureName)) textureNames.add(textureName);
-			}
-		}
-		return textureNames;
 	}
 	
 	/**

@@ -2,12 +2,9 @@ package de.m_marvin.renderengine.shaders;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -71,9 +68,9 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	 * 
 	 * @param shaderFolderLocation The location of the folder
 	 */
-	public void loadShadersIn(R shaderFolderLocation) {
+	public void loadShadersIn(R shaderFolderLocation, int recusive) {
 		try {
-			loadShadersIn0(shaderFolderLocation);
+			loadShadersIn0(shaderFolderLocation, recusive);
 		} catch (IOException e) {
 			Logger.defaultLogger().logWarn("Failed to load some of the shaders from " + shaderFolderLocation.toString() + "!");
 			Logger.defaultLogger().printException(LogType.WARN, e);
@@ -85,40 +82,28 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	 * Non-catch-block version of {@link #loadShadersIn(IResourceProvider)}.
 	 * 
 	 * @param shaderFolderLocation The location of the folder
+	 * @param recursive How deep to search in sub-folders
 	 * @throws IOException If an error occurs in the loading of a shader
 	 */
-	public void loadShadersIn0(R shaderFolderLocation) throws IOException {
+	public void loadShadersIn0(R shaderFolderLocation, int recursive) throws IOException {
 		
-		// FIXME Rework all "loadIn" methods
-		for (String shaderName : resourceLoader.listFilesIn(sourceFolder, shaderFolderLocation)) {
+		for (R shaderLoc : resourceLoader.listFilesInAllNamespaces(sourceFolder, shaderFolderLocation)) {
 			
+			String shaderPath = shaderLoc.getPath();
+			String shaderName = shaderPath.substring(shaderPath.lastIndexOf(File.separatorChar) + 1);
 			if (!shaderName.endsWith(".json")) continue;
-			R locationName = shaderFolderLocation.locationOfFile(shaderName.split("\\.")[0]);
-			loadShader(locationName, locationName, Optional.empty());
+			
+			R locationName = shaderLoc.getParent().locationOfFile(shaderName.substring(0, shaderName.lastIndexOf('.')));
+			loadShader(locationName, Optional.empty());
 			
 		}
 		
-	}
-
-	/**
-	 * Lists all shaders in the given folders.
-	 * 
-	 * @param shaderFolder The shader source folder
-	 * @return A list of all shader names in the folder
-	 * @throws FileNotFoundException if the path is not valid
-	 */
-	protected List<String> listShaderNames(R shaderFolder) throws FileNotFoundException {
-		List<String> shaderNames = new ArrayList<>();
-		for (String fileName : resourceLoader.listFilesIn(sourceFolder, shaderFolder)) {
-			String[] fileNameParts = fileName.split("\\.");
-			if (fileNameParts[fileNameParts.length - 1].equals(SHADER_LIB_FORMAT)) continue;
-			if (fileNameParts.length > 1) {
-				int formatEndingLength = fileNameParts[fileNameParts.length - 1].length() + 1;
-				String shaderName = fileName.substring(0, fileName.length() - formatEndingLength);
-				if (!shaderNames.contains(shaderName)) shaderNames.add(shaderName);
+		if (recursive > 0) {
+			for (R folderLoc : resourceLoader.listFoldersInAllNamespaces(sourceFolder, shaderFolderLocation)) {
+				loadShadersIn0(folderLoc, recursive--);
 			}
 		}
-		return shaderNames;
+		
 	}
 	
 	/**
@@ -131,17 +116,18 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	 * @param format The vertex format applied to the shader instance
 	 * @return The loaded and cached shader instance
 	 */
-	public ShaderInstance loadShader(R shaderLocation, R shaderName, Optional<VertexFormat> format) {
-		if (!shaderCache.containsKey(shaderName)) {
+	public ShaderInstance loadShader(R shaderLocation, Optional<VertexFormat> format) {
+		if (!shaderCache.containsKey(shaderLocation)) {
 			try {
-				shaderCache.put(shaderName, load(shaderLocation, format));
+				System.out.println(shaderLocation);
+				shaderCache.put(shaderLocation, load(shaderLocation, format));
 			} catch (IOException e) {
 				Logger.defaultLogger().logWarn("Failed to load shader " + shaderLocation.toString());
 				Logger.defaultLogger().printException(LogType.WARN, e);
 				return null;
 			}
 		}
-		return shaderCache.get(shaderName);
+		return shaderCache.get(shaderLocation);
 	}
 	
 	/**
@@ -152,7 +138,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	 */
 	public ShaderInstance getOrLoadShader(R shaderName, Optional<VertexFormat> format) {
 		if (!this.shaderCache.containsKey(shaderName)) {
-			return loadShader(shaderName, shaderName, format);
+			return loadShader(shaderName, format);
 		}
 		return this.shaderCache.get(shaderName);
 	}
@@ -263,7 +249,8 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 		StringBuilder stringBuilder = new StringBuilder();
 		while ((line = vertexShaderInputStream.readLine()) != null) {
 			if (line.startsWith(INCLUDE_LINE)) {
-				String includeCode = loadGLSLFile(fileLocation.getParent().locationOfFile(line.substring(INCLUDE_LINE.length()) + "." + SHADER_LIB_FORMAT));
+				R fileLoc = fileLocation.getParent().locationOfFile(new File(line.substring(INCLUDE_LINE.length()) + "." + SHADER_LIB_FORMAT).toString());
+				String includeCode = loadGLSLFile(fileLoc);
 				stringBuilder.append(includeCode);
 			} else {
 				stringBuilder.append(line + "\n");

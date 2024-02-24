@@ -49,5 +49,13 @@ public interface ISourceFolder {
 	 * @return A list of sub-folders contained in the given folder
 	 */
 	public String[] listFolders(String path);
+
+	
+	/**
+	 * Lists all namespaces available for this folder
+	 * 
+	 * @return A list of Strings naming all namespaces that exist for this folder
+	 */
+	public String[] listNamespaces();
 	
 }

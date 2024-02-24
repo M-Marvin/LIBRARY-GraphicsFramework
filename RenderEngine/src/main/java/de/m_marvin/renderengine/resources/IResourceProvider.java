@@ -23,6 +23,13 @@ public interface IResourceProvider<R> {
 	public R locationOfFile(String fileName);
 
 	/**
+	 * Returns this resource location but with the new namespace
+	 * @param namespace The new namespace
+	 * @return A new resource location the new namespace
+	 */
+	public R withNamespace(String namespace);
+
+	/**
 	 * Appends the given string to this resource and returns the resulting location as new instance.
 	 * @param string The string to append to this location
 	 * @return The resulting location or null if the string is null

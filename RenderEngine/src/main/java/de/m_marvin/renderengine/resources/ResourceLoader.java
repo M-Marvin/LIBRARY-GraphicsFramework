@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
+import java.util.stream.Stream;
+
+import de.m_marvin.renderengine.utility.Utility;
 
 /**
  * Provides different methods to access files on the disc.
@@ -85,6 +89,44 @@ public class ResourceLoader<R extends IResourceProvider<R>, FE extends ISourceFo
 	 */
 	public String[] listFoldersIn(FE sourceFolder, R resourceProvider) {
 		return sourceFolder.listFolders(resolveLocation(sourceFolder, resourceProvider));
+	}
+	
+	/**
+	 * Lists all files in the given location in all namespaces (ignoring the one provided)
+	 * 
+	 * @param sourceFolder The resource folder in which the location points
+	 * @param resourceProvider The resource location to the folder, namespace is ignored
+	 * @return A array of all files in the given location in all namespaces
+	 */
+	@SuppressWarnings("unchecked")
+	public R[] listFilesInAllNamespaces(FE sourceFolder, R resourceProvider) {
+		return Stream.of(sourceFolder.listNamespaces())
+				.map(resourceProvider::withNamespace)
+				.map(loc -> Stream
+						.of(sourceFolder.listFiles(resolveLocation(sourceFolder, loc)))
+						.map(loc::locationOfFile)
+						.toArray(i -> (R[]) Array.newInstance(IResourceProvider.class, i))
+				)
+				.reduce((a, b) -> Utility.concatArr(a, b, IResourceProvider.class)).get();
+	}
+	
+	/**
+	 * Lists all sub-folders in the given location in all namespaces (ignoring the one provided)
+	 * 
+	 * @param sourceFolder The resource folder in which the location points
+	 * @param resourceProvider The resource location to the folder, namespace is ignored
+	 * @return A array of all sub-folders in the given location in all namespaces
+	 */
+	@SuppressWarnings("unchecked")
+	public R[] listFoldersInAllNamespaces(FE sourceFolder, R resourceProvider) {
+		return Stream.of(sourceFolder.listNamespaces())
+				.map(resourceProvider::withNamespace)
+				.map(loc -> Stream
+						.of(sourceFolder.listFolders(resolveLocation(sourceFolder, loc)))
+						.map(loc::locationOfFile)
+						.toArray(i -> (R[]) Array.newInstance(IResourceProvider.class, i))
+				)
+				.reduce((a, b) -> Utility.concatArr(a, b, IResourceProvider.class)).get();
 	}
 	
 	/**

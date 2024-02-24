@@ -26,7 +26,7 @@ public class ResourceLocation implements IResourceProvider<ResourceLocation> {
 	 */
 	public ResourceLocation(String namespace, String path) {
 		this.namespace = namespace;
-		this.path = path;
+		this.path = new File(path).toString();
 	}
 	
 	/**
@@ -43,18 +43,24 @@ public class ResourceLocation implements IResourceProvider<ResourceLocation> {
 	
 	@Override
 	public String getNamespace() {
-		return namespace;
+		return this.namespace;
 	}
 	
 	@Override
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
 	@Override
 	public ResourceLocation locationOfFile(String fileName) {
 		if (fileName == null) return null;
-		return new ResourceLocation(this.namespace, (this.path.isEmpty() ? fileName : (this.path + "/") + fileName));
+		return new ResourceLocation(this.namespace, (this.path.isEmpty() ? fileName : (this.path + File.separator) + fileName));
+	}
+
+	@Override
+	public ResourceLocation withNamespace(String namespace) {
+		if (namespace == null) return null;
+		return new ResourceLocation(namespace, this.path);
 	}
 	
 	@Override
@@ -95,5 +101,5 @@ public class ResourceLocation implements IResourceProvider<ResourceLocation> {
 	public String toString() {
 		return "Resource{" + nameString() + "}";
 	}
-	
+
 }

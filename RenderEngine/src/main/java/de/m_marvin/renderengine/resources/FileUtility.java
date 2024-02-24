@@ -19,7 +19,7 @@ public class FileUtility {
 	protected static void executeForEachFolder0(File folderTreeStart, String path, Consumer<String> task) {
 		task.accept(path);
 		for (File entry : folderTreeStart.listFiles()) {
-			if (entry.isDirectory()) executeForEachFolder0(entry, (path.isEmpty() ? path : path + "/") + entry.getName(), task);
+			if (entry.isDirectory()) executeForEachFolder0(entry, (path.isEmpty() ? path : path + File.separator) + entry.getName(), task);
 		}
 	}
 	

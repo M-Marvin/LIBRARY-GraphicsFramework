@@ -46,4 +46,9 @@ public enum ResourceFolders implements ISourceFolder {
 		return new String[] {};
 	}
 	
+	@Override
+	public String[] listNamespaces() {
+		return Stream.of(new File(ResourceLoader.getRuntimeFolder()).list()).filter(f -> new File(ResourceLoader.getRuntimeFolder(), f).isDirectory()).toArray(i -> new String[i]);
+	}
+	
 }
