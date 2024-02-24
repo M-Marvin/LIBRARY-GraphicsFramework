@@ -29,16 +29,16 @@ dependencies {
 	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
 	
 	// CommandLineParser
-	implementation 'com.github.M-Marvin:LIBRARY-CommandLineParser:6662276358'
+	implementation 'com.github.M-Marvin:LIBRARY-CommandLineParser:main-SNAPSHOT'
 	
 	// UniVec
-	implementation 'com.github.M-Marvin:LIBRARY-UnifiedVectors:4050cae3c2'
+	implementation 'com.github.M-Marvin:LIBRARY-UnifiedVectors:main-SNAPSHOT'
 	
 	// GSON
 	implementation "com.google.code.gson:gson:2.9.1"
 	
 	// SimpleLogging
-	implementation 'com.github.M-Marvin:LIBRARY-SimpleLogging:ac6990ebd7'
+	implementation 'com.github.M-Marvin:LIBRARY-SimpleLogging:main-SNAPSHOT'
 	
 	// Physic Engine (Testing)
 	implementation "cz.advel.jbullet:jbullet:20101010-1"
