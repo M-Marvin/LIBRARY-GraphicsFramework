@@ -331,5 +331,9 @@ public class ShaderInstance {
 		if (!this.uniforms.containsKey(name)) throw new IllegalArgumentException("The uniform '" + name + "' doesn not exist in the shader!");
 		return this.uniforms.get(name);
 	}
+	
+	public VertexFormat getFormat() {
+		return format;
+	}
 
 }
