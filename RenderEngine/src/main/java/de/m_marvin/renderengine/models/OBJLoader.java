@@ -244,7 +244,7 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 		if (is.length < 4) throw new IllegalArgumentException("Maleformed face '" + s + "' in source file!");
 		Vec3i[] indexes = new Vec3i[is.length - 1];
 		for (int i = 1; i < is.length; i++) {
-			String[] vs = is[i].split(File.separator);
+			String[] vs = is[i].split("/");
 			if (vs.length != 3) throw new IllegalArgumentException("Maleformed face '" + s + "' in source file!");
 			indexes[i - 1] = new Vec3i(Integer.parseInt(vs[0]) - 1, Integer.parseInt(vs[1]) - 1, Integer.parseInt(vs[2]) - 1);
 		}
