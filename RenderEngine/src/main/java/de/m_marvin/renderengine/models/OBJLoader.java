@@ -60,9 +60,9 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 	 * @param modelFolderLocation The location of the folder
 	 * @param recursive How deep to search in sub-folders
 	 */
-	public void loadModelsIn(R modelFolderLocation, R textureFolderLocation, int recursive) {
+	public void loadModelsIn(R modelFolderLocation, int recursive) {
 		try {
-			loadModelsIn0(modelFolderLocation, textureFolderLocation, recursive);
+			loadModelsIn0(modelFolderLocation, recursive);
 		} catch (IOException e) {
 			Logger.defaultLogger().logWarn("Failed to load some of the shaders from " + modelFolderLocation.nameString() + "!");
 			Logger.defaultLogger().printException(LogType.WARN, e);
@@ -77,24 +77,24 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 	 * @param recursive How deep to search in sub-folders
 	 * @throws IOException If an error occurs in the loading of a shader
 	 */
-	public void loadModelsIn0(R modelFolderLocation, R textureFolderLocation, int recursive) throws IOException {
+	public void loadModelsIn0(R modelFolderLocation, int recursive) throws IOException {
 		
-		for (R modelLoc : this.resourceLoader.listFilesInAllNamespaces(sourceFolder, textureFolderLocation)) {
+		for (R modelLoc : this.resourceLoader.listFilesInAllNamespaces(sourceFolder, modelFolderLocation)) {
 			
 			String modelPath = modelLoc.getPath();
 			String modelName = modelPath.substring(modelPath.lastIndexOf(File.separatorChar) + 1);
 			if (!modelName.endsWith(MODEL_FILE_FORMAT)) continue;
 			
 			R locationName = modelFolderLocation.locationOfFile(modelName.substring(0, modelName.lastIndexOf('.')));
-			if (loadModel(locationName, textureFolderLocation) == null) {
+			if (loadModel(locationName) == null) {
 				Logger.defaultLogger().logWarn("Failed to load model '" + modelName + "'!");
 			}
 			
 		}
 		
 		if (recursive > 0) {
-			for (R folderLoc : this.resourceLoader.listFoldersInAllNamespaces(sourceFolder, textureFolderLocation)) {
-				loadModelsIn0(folderLoc, textureFolderLocation, recursive--);
+			for (R folderLoc : this.resourceLoader.listFoldersInAllNamespaces(sourceFolder, modelFolderLocation)) {
+				loadModelsIn0(folderLoc, recursive--);
 			}
 		}
 		
@@ -127,13 +127,12 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 	 * Loads the model at the given location and stores it in the cache.
 	 * 
 	 * @param modelLocation The location of the model OBJ file
-	 * @param textureFolderLocation The location of the folder to search for the textures
 	 * @return The loaded and cached model instance
 	 */
-	public RawModel<R> loadModel(R modelLocation, R textureFolderLocation) {
+	public RawModel<R> loadModel(R modelLocation) {
 		if (!this.modelCache.containsKey(modelLocation)) {
 			try {
-				RawModel<R> model = load(modelLocation, textureFolderLocation);
+				RawModel<R> model = load(modelLocation);
 				this.modelCache.put(modelLocation, model);
 			} catch (IOException e) {
 				Logger.defaultLogger().logWarn("Failed to load model " + modelLocation);
@@ -148,11 +147,10 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 	 * Texture paths are build with the provided location.
 	 * 
 	 * @param modelFile The model file location
-	 * @param textureFolderLocation The location to look for the textures
 	 * @return The loaded model
 	 * @throws IOException If an error occurs accessing the files
 	 */
-	public RawModel<R> load(R modelFile, R textureFolderLocation) throws IOException {
+	public RawModel<R> load(R modelFile) throws IOException {
 		
 		BufferedReader reader = new BufferedReader(new InputStreamReader(resourceLoader.getAsStream(sourceFolder, modelFile.append("." + MODEL_FILE_FORMAT))));
 		
@@ -161,6 +159,8 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 		Map<String, String> material2texture = new HashMap<>();
 		String currentObjectName = "default";
 		String currentTexture = null;
+		
+		R texturePath = modelFile.getParent();
 		
 		String line;
 		while ((line = reader.readLine()) != null) {
@@ -192,7 +192,7 @@ public class OBJLoader<R extends IResourceProvider<R>, FE extends ISourceFolder>
 					String[] tns = textureName.split("\\.");
 					textureName = textureName.substring(0, textureName.length() - tns[tns.length - 1].length() - 1);
 				}
-				faces.add(new RawModel.ModelFace<R>(textureFolderLocation.locationOfFile(textureName), indexes));
+				faces.add(new RawModel.ModelFace<R>(texturePath.locationOfFile(textureName), indexes));
 				break;
 			case "usemtl":
 				currentTexture = parseString(line);
