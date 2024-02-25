@@ -78,7 +78,7 @@ public class OBJParser<R extends IResourceProvider<R>> {
 					Vec3f color = face.vertexIndecies.get(i) < 1 ? new Vec3f(1, 1, 1) : this.colors.get(face.vertexIndecies.get(i) - 1);
 					vertexData.color = new Vec4f(color.x, color.y, color.z, 1.0F);
 					vertexData.texcoord = face.texcoordIndecies.get(i) < 1 ? new Vec2f(0, 0) : this.texcoords.get(face.texcoordIndecies.get(i) - 1);
-					vertexData.normal = face.normalIndecies.get(i) < 1 ? new Vec3f(0, 0, 0) : this.vertecies.get(face.normalIndecies.get(i) - 1);
+					vertexData.normal = face.normalIndecies.get(i) < 1 ? new Vec3f(0, 0, 0) : this.normals.get(face.normalIndecies.get(i) - 1);
 					
 					fragment.vertecies.add(vertexData);
 					
