@@ -44,8 +44,8 @@ public class ModelData<R extends IResourceProvider<R>> {
 		protected Vec3f ambientColor;
 		protected Vec3f diffuseColor;
 		protected Vec3f specularColor;
-		protected double specularExponent;
-		protected double opticalDensity;
+		protected float specularExponent;
+		protected float opticalDensity;
 		protected R ambientMap;
 		protected R diffuesMap;
 		protected R specularMap;
@@ -61,10 +61,10 @@ public class ModelData<R extends IResourceProvider<R>> {
 		public Vec3f getSpecularColor() {
 			return specularColor;
 		}
-		public double getSpecularExponent() {
+		public float getSpecularExponent() {
 			return specularExponent;
 		}
-		public double getOpticalDensity() {
+		public float getOpticalDensity() {
 			return opticalDensity;
 		}
 		public R getAmbientMap() {

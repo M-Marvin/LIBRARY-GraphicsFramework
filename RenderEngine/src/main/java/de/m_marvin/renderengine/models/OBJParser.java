@@ -30,8 +30,8 @@ public class OBJParser<R extends IResourceProvider<R>> {
 		protected Vec3f ambientColor;
 		protected Vec3f diffuseColor;
 		protected Vec3f specularColor;
-		protected double specularExponent;
-		protected double opticalDensity;
+		protected float specularExponent;
+		protected float opticalDensity;
 		protected String ambientMap;
 		protected String diffuesMap;
 		protected String specularMap;
@@ -208,8 +208,8 @@ public class OBJParser<R extends IResourceProvider<R>> {
 	protected Vec3f ambientColor;
 	protected Vec3f diffuseColor;
 	protected Vec3f specularColor;
-	protected double specularExponent;
-	protected double opticalDensity;
+	protected float specularExponent;
+	protected float opticalDensity;
 	protected String ambientMap;
 	protected String diffuesMap;
 	protected String specularMap;
@@ -248,10 +248,10 @@ public class OBJParser<R extends IResourceProvider<R>> {
 				this.specularColor = parseVec3f(lineSegments, 0);
 				continue;
 			case "Ns":
-				this.specularExponent = lineSegments.length >= 2 ? Double.parseDouble(lineSegments[1]) : 0;
+				this.specularExponent = lineSegments.length >= 2 ? Float.parseFloat(lineSegments[1]) : 0;
 				continue;
 			case "Ni":
-				this.opticalDensity = lineSegments.length >= 2 ? Double.parseDouble(lineSegments[1]) : 0;
+				this.opticalDensity = lineSegments.length >= 2 ? Float.parseFloat(lineSegments[1]) : 0;
 				continue;
 			case "map_Ka":
 				this.ambientMap = lineSegments.length >= 2 ? lineSegments[1] : "";
@@ -283,8 +283,8 @@ public class OBJParser<R extends IResourceProvider<R>> {
 		this.ambientColor = new Vec3f(1, 1, 1);
 		this.diffuseColor = new Vec3f(1, 1, 1);
 		this.specularColor = new Vec3f(0, 0, 0);
-		this.specularExponent = 10.0;
-		this.opticalDensity = 1.0;
+		this.specularExponent = 10.0F;
+		this.opticalDensity = 1.0F;
 		this.ambientMap = null;
 		this.diffuesMap = null;
 		this.specularMap = null;
