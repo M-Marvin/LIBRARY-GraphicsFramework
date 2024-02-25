@@ -40,6 +40,7 @@ public class OBJParser<R extends IResourceProvider<R>> {
 	}
 	
 	protected List<Vec3f> vertecies = new ArrayList<>();
+	protected List<Vec3f> colors = new ArrayList<>();
 	protected List<Vec2f> texcoords = new ArrayList<>();
 	protected List<Vec3f> normals = new ArrayList<>();
 	protected List<Face> faces = new ArrayList<>();
@@ -74,9 +75,10 @@ public class OBJParser<R extends IResourceProvider<R>> {
 					ModelData<R>.VertexData vertexData = modelData.new VertexData();
 					
 					vertexData.vertex = face.vertexIndecies.get(i) < 1 ? new Vec3f(0, 0, 0) : this.vertecies.get(face.vertexIndecies.get(i) - 1);
+					Vec3f color = face.vertexIndecies.get(i) < 1 ? new Vec3f(1, 1, 1) : this.colors.get(face.vertexIndecies.get(i) - 1);
+					vertexData.color = new Vec4f(color.x, color.y, color.z, 1.0F);
 					vertexData.texcoord = face.texcoordIndecies.get(i) < 1 ? new Vec2f(0, 0) : this.texcoords.get(face.texcoordIndecies.get(i) - 1);
 					vertexData.normal = face.normalIndecies.get(i) < 1 ? new Vec3f(0, 0, 0) : this.vertecies.get(face.normalIndecies.get(i) - 1);
-					vertexData.color = new Vec4f(1, 1, 1, 1);
 					
 					fragment.vertecies.add(vertexData);
 					
@@ -177,13 +179,17 @@ public class OBJParser<R extends IResourceProvider<R>> {
 				this.object = lineSegments.length > 1 ? lineSegments[1] : "";
 				continue;
 			case "v":
-				this.vertecies.add(parseVec3f(lineSegments));
+				this.vertecies.add(parseVec3f(lineSegments, 0));
+				if (lineSegments.length > 4) 
+					this.colors.add(parseVec3f(lineSegments, 3));
+				else
+					this.colors.add(new Vec3f(1, 1, 1));
 				continue;
 			case "vt":
-				this.texcoords.add(parseVec2f(lineSegments));
+				this.texcoords.add(parseVec2f(lineSegments, 0));
 				continue;
 			case "vn":
-				this.normals.add(parseVec3f(lineSegments).normalize());
+				this.normals.add(parseVec3f(lineSegments, 0).normalize());
 				continue;
 			case "f":
 				this.faces.add(parseFace(lineSegments));
@@ -233,13 +239,13 @@ public class OBJParser<R extends IResourceProvider<R>> {
 				this.newmtl = lineSegments.length >= 2 ? lineSegments[1] : "";
 				continue;
 			case "Ka":
-				this.ambientColor = parseVec3f(lineSegments);
+				this.ambientColor = parseVec3f(lineSegments, 0);
 				continue;
 			case "Kd":
-				this.diffuseColor = parseVec3f(lineSegments);
+				this.diffuseColor = parseVec3f(lineSegments, 0);
 				continue;
 			case "Ks":
-				this.specularColor = parseVec3f(lineSegments);
+				this.specularColor = parseVec3f(lineSegments, 0);
 				continue;
 			case "Ns":
 				this.specularExponent = lineSegments.length >= 2 ? Double.parseDouble(lineSegments[1]) : 0;
@@ -315,22 +321,22 @@ public class OBJParser<R extends IResourceProvider<R>> {
 		return face;
 	}
 
-	protected Vec2f parseVec2f(String[] segments) {
-		if (segments.length == 3) {
+	protected Vec2f parseVec2f(String[] segments, int offset) {
+		if (segments.length >= 3 + offset) {
 			return new Vec2f(
-					(segments.length >= 1) ? safeParseFloat(segments[1]) : 0,
-					(segments.length >= 2) ? safeParseFloat(segments[2]) : 0
+					(segments.length >= 1) ? safeParseFloat(segments[offset + 1]) : 0,
+					(segments.length >= 2) ? safeParseFloat(segments[offset + 2]) : 0
 					);
 		}
 		return new Vec2f();
 	}
 	
-	protected Vec3f parseVec3f(String[] segments) {
-		if (segments.length == 4) {
+	protected Vec3f parseVec3f(String[] segments, int offset) {
+		if (segments.length >= 4 + offset) {
 			return new Vec3f(
-					(segments.length >= 1) ? safeParseFloat(segments[1]) : 0,
-					(segments.length >= 2) ? safeParseFloat(segments[2]) : 0,
-					(segments.length >= 3) ? safeParseFloat(segments[3]) : 0
+					(segments.length >= 1) ? safeParseFloat(segments[offset + 1]) : 0,
+					(segments.length >= 2) ? safeParseFloat(segments[offset + 2]) : 0,
+					(segments.length >= 3) ? safeParseFloat(segments[offset + 3]) : 0
 					);
 		}
 		return new Vec3f();
