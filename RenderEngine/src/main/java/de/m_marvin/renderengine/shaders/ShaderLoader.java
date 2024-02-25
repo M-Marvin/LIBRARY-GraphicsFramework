@@ -227,7 +227,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 				
 				return shaderInstance;
 				
-			} catch (IllegalArgumentException e) {
+			} catch (Exception e) {
 				throw new IOException("Failed to load shader '" + shaderLocation.nameString() + "' with exception:\n" + e.getMessage());
 			}
 			

@@ -62,6 +62,11 @@ public class ShaderInstance {
 		public void setDefault() {
 			set(this.defaultValue);
 		}
+
+		@SuppressWarnings("unchecked")
+		public Class<T> getTypeClass() {
+			return (Class<T>) this.defaultValue.getClass();
+		}
 		
 		/**
 		 * Sets the value of the uniform.
