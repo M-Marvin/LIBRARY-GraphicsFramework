@@ -152,8 +152,8 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 				TexturePack textureData = loadTexture(locationName);
 				
 				SingleTextureMap<R> map = new SingleTextureMap<R>(textureData.texture(), textureData.metaData().frames(), textureData.metaData().frametime(), textureData.metaData().interpolate());
-				this.textureCache.put(locationName, map);
-				this.textureMapNames.add(locationName);
+				this.textureCache.put(textureLoc, map);
+				this.textureMapNames.add(textureLoc);
 				
 			} catch (FileNotFoundException e) {
 				Logger.defaultLogger().logWarn("Warning: A texture could not be loaded!");
@@ -233,14 +233,14 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 					
 					addedImages = true;
 					map.addTexture(
-							locationName,
+							textureLoc,
 							width,
 							height,
 							textureData.metaData.frames,
 							textureData.metaData.frametime,
 							pixels
 					);
-					locationsToLink.add(locationName);
+					locationsToLink.add(textureLoc);
 					
 				}
 					

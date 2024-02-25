@@ -59,7 +59,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	
 	@Override
 	public void clearCached() {
-		this.shaderCache.values().forEach(ShaderInstance::delete);
+		this.shaderCache.values().forEach(s -> { if (s != null) s.delete(); });
 		this.shaderCache.clear();
 	}
 	
@@ -119,7 +119,6 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	public ShaderInstance loadShader(R shaderLocation, Optional<VertexFormat> format) {
 		if (!shaderCache.containsKey(shaderLocation)) {
 			try {
-				System.out.println(shaderLocation);
 				shaderCache.put(shaderLocation, load(shaderLocation, format));
 			} catch (IOException e) {
 				Logger.defaultLogger().logWarn("Failed to load shader " + shaderLocation.nameString());

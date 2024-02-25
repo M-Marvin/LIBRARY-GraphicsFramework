@@ -129,7 +129,7 @@ public class VertexBuffer {
 	/**
 	 * Draws the content of the currently bound VertexBuffer.
 	 * @implNote It does not matter on which VertexBuffer instance the method is called, only the buffer currently bound will be drawn.
-	 * @param The geometry primitive drawn using the data in the currently bound VAO.
+	 * @param mode The geometry primitive drawn using the data in the currently bound VAO.
 	 */
 	public void drawAll(RenderPrimitive mode) {
 		GLStateManager.drawElements(mode.getgltype(), indecies, indecieFormat().gltype());
