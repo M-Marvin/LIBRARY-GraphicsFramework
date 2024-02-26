@@ -100,11 +100,11 @@ public class OBJParser<R extends IResourceProvider<R>> {
 				ModelData<R>.VertexData vrtx3 = fragment.vertecies.get(indecies.get((tri * 3) + 2));
 				
 				Vec3f edge1 = vrtx2.vertex.sub(vrtx1.vertex);
-				Vec3f edge2 = vrtx2.vertex.sub(vrtx1.vertex);
+				Vec3f edge2 = vrtx3.vertex.sub(vrtx1.vertex);
 				Vec2f deltaUV1 = vrtx2.texcoord.sub(vrtx1.texcoord);
 				Vec2f deltaUV2 = vrtx3.texcoord.sub(vrtx1.texcoord);
 				
-				float f = 1 / deltaUV1.cross(deltaUV2);
+				float f = 1 / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
 				
 				Vec3f tangent = new Vec3f(
 						f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x),
