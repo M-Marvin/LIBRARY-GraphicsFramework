@@ -93,9 +93,9 @@ public class OBJParser<R extends IResourceProvider<R>> {
 				// per triangle tangent and bitangent calculation
 				for (int tri = 0; tri < indecies.size() / 3; tri++) {
 					
-					ModelData<R>.VertexData vrtx1 = fragment.vertecies.get(firstFaceVertexIndex + (tri * 3) + 0);
-					ModelData<R>.VertexData vrtx2 = fragment.vertecies.get(firstFaceVertexIndex + (tri * 3) + 1);
-					ModelData<R>.VertexData vrtx3 = fragment.vertecies.get(firstFaceVertexIndex + (tri * 3) + 2);
+					ModelData<R>.VertexData vrtx1 = fragment.vertecies.get(indecies.get(firstFaceVertexIndex + (tri * 3) + 0));
+					ModelData<R>.VertexData vrtx2 = fragment.vertecies.get(indecies.get(firstFaceVertexIndex + (tri * 3) + 1));
+					ModelData<R>.VertexData vrtx3 = fragment.vertecies.get(indecies.get(firstFaceVertexIndex + (tri * 3) + 2));
 					
 					Vec3f edge1 = vrtx2.vertex.sub(vrtx1.vertex);
 					Vec3f edge2 = vrtx2.vertex.sub(vrtx1.vertex);
