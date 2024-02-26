@@ -90,40 +90,40 @@ public class OBJParser<R extends IResourceProvider<R>> {
 					
 				}
 				
-				// per triangle tangent and bitangent calculation
-				for (int tri = 0; tri < indecies.size() / 3; tri++) {
-					
-					ModelData<R>.VertexData vrtx1 = fragment.vertecies.get(indecies.get(firstFaceVertexIndex + (tri * 3) + 0));
-					ModelData<R>.VertexData vrtx2 = fragment.vertecies.get(indecies.get(firstFaceVertexIndex + (tri * 3) + 1));
-					ModelData<R>.VertexData vrtx3 = fragment.vertecies.get(indecies.get(firstFaceVertexIndex + (tri * 3) + 2));
-					
-					Vec3f edge1 = vrtx2.vertex.sub(vrtx1.vertex);
-					Vec3f edge2 = vrtx2.vertex.sub(vrtx1.vertex);
-					Vec2f deltaUV1 = vrtx2.texcoord.sub(vrtx1.texcoord);
-					Vec2f deltaUV2 = vrtx3.texcoord.sub(vrtx1.texcoord);
-					
-					float f = 1 / deltaUV1.cross(deltaUV2);
-					
-					Vec3f tangent = new Vec3f(
-							f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x),
-							f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y),
-							f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z)
-						);
-					
-					Vec3f bitangent = new Vec3f(
-							f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x),
-							f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y),
-							f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z)
-						);
-					
-					vrtx1.tangent.addI(tangent).normalizeI();
-					vrtx2.tangent.addI(tangent).normalizeI();
-					vrtx3.tangent.addI(tangent).normalizeI();
-					vrtx1.bitangent.addI(bitangent).normalizeI();
-					vrtx2.bitangent.addI(bitangent).normalizeI();
-					vrtx3.bitangent.addI(bitangent).normalizeI();
-					
-				}
+			}
+
+			// per triangle tangent and bitangent calculation
+			for (int tri = 0; tri < indecies.size() / 3; tri++) {
+				
+				ModelData<R>.VertexData vrtx1 = fragment.vertecies.get(indecies.get((tri * 3) + 0));
+				ModelData<R>.VertexData vrtx2 = fragment.vertecies.get(indecies.get((tri * 3) + 1));
+				ModelData<R>.VertexData vrtx3 = fragment.vertecies.get(indecies.get((tri * 3) + 2));
+				
+				Vec3f edge1 = vrtx2.vertex.sub(vrtx1.vertex);
+				Vec3f edge2 = vrtx2.vertex.sub(vrtx1.vertex);
+				Vec2f deltaUV1 = vrtx2.texcoord.sub(vrtx1.texcoord);
+				Vec2f deltaUV2 = vrtx3.texcoord.sub(vrtx1.texcoord);
+				
+				float f = 1 / deltaUV1.cross(deltaUV2);
+				
+				Vec3f tangent = new Vec3f(
+						f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x),
+						f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y),
+						f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z)
+					);
+				
+				Vec3f bitangent = new Vec3f(
+						f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x),
+						f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y),
+						f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z)
+					);
+				
+				vrtx1.tangent.addI(tangent).normalizeI();
+				vrtx2.tangent.addI(tangent).normalizeI();
+				vrtx3.tangent.addI(tangent).normalizeI();
+				vrtx1.bitangent.addI(bitangent).normalizeI();
+				vrtx2.bitangent.addI(bitangent).normalizeI();
+				vrtx3.bitangent.addI(bitangent).normalizeI();
 				
 			}
 			
