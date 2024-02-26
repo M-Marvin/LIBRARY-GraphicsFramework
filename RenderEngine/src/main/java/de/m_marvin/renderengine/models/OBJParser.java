@@ -306,7 +306,7 @@ public class OBJParser<R extends IResourceProvider<R>> {
 			case "map_Ns":
 				this.specularHighlightMap = lineSegments.length >= 2 ? lineSegments[1] : "";
 				continue;
-			case "map_bump":
+			case "norm":
 				this.normalMap = lineSegments.length >= 2 ? lineSegments[1] : "";
 				continue;
 			}
