@@ -13,6 +13,8 @@ public class ModelData<R extends IResourceProvider<R>> {
 	public class VertexData {
 		protected Vec3f vertex;
 		protected Vec3f normal;
+		protected Vec3f tangent;
+		protected Vec3f bitangent;
 		protected Vec2f texcoord;
 		protected Vec4f color;
 	}
@@ -93,7 +95,7 @@ public class ModelData<R extends IResourceProvider<R>> {
 		for (FragmentData fragment : this.fragmentData) {
 			fragmentWriter.startFragment(fragment.shaderData);
 			for (VertexData vertex : fragment.vertecies) {
-				fragmentWriter.writeVertex(vertex.vertex, vertex.color, vertex.normal, vertex.texcoord);
+				fragmentWriter.writeVertex(vertex.vertex, vertex.color, vertex.normal, vertex.tangent, vertex.bitangent, vertex.texcoord);
 			}
 			fragmentWriter.endFragment(fragment.indecies);
 		}
@@ -102,7 +104,7 @@ public class ModelData<R extends IResourceProvider<R>> {
 	
 	public static interface FragmentWriter<R extends IResourceProvider<R>> {
 		public void startFragment(ShaderData<R> shaderData);
-		public void writeVertex(Vec3f vertex, Vec4f color, Vec3f normal, Vec2f uv);
+		public void writeVertex(Vec3f vertex, Vec4f color, Vec3f normal, Vec3f tangent, Vec3f bitangent, Vec2f uv);
 		public void endFragment(int[] indecies);
 	}
 	
