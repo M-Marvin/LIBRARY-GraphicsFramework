@@ -37,7 +37,7 @@ public class OBJParser<R extends IResourceProvider<R>> {
 		protected String specularMap;
 		protected String specularHighlightMap;
 		protected String normalMap;
-		protected String bumpMap;
+		protected String displacementMap;
 	}
 	
 	protected List<Vec3f> vertecies = new ArrayList<>();
@@ -146,7 +146,7 @@ public class OBJParser<R extends IResourceProvider<R>> {
 			fragment.shaderData.specularMap = 			mtrl.specularMap == null ? null : modelFilesLocation.locationOfFile(mtrl.specularMap);
 			fragment.shaderData.specularHighlightMap = 	mtrl.specularHighlightMap == null ? null : modelFilesLocation.locationOfFile(mtrl.specularHighlightMap);
 			fragment.shaderData.normalMap = 			mtrl.normalMap == null ? null : modelFilesLocation.locationOfFile(mtrl.normalMap);
-			fragment.shaderData.bumpMap =				mtrl.bumpMap == null ? null : modelFilesLocation.locationOfFile(mtrl.bumpMap);
+			fragment.shaderData.displacementMap =				mtrl.displacementMap == null ? null : modelFilesLocation.locationOfFile(mtrl.displacementMap);
 			
 			modelData.fragmentData.add(fragment);
 			
@@ -258,7 +258,7 @@ public class OBJParser<R extends IResourceProvider<R>> {
 	protected String specularMap;
 	protected String specularHighlightMap;
 	protected String normalMap;
-	protected String bumpMap;
+	protected String displacementMap;
 	
 	public void parseMTLFile(InputStream input) throws IOException {
 		
@@ -312,8 +312,8 @@ public class OBJParser<R extends IResourceProvider<R>> {
 			case "norm":
 				this.normalMap = lineSegments.length >= 2 ? lineSegments[1] : "";
 				continue;
-			case "bump":
-				this.bumpMap = lineSegments.length >= 2 ? lineSegments[1] : "";
+			case "disp":
+				this.displacementMap = lineSegments.length >= 2 ? lineSegments[1] : "";
 				continue;
 			}
 			
@@ -337,7 +337,7 @@ public class OBJParser<R extends IResourceProvider<R>> {
 		this.specularMap = null;
 		this.specularHighlightMap = null;
 		this.normalMap = null;
-		this.bumpMap = null;
+		this.displacementMap = null;
 	}
 	
 	protected Material makeMaterial() {
@@ -352,7 +352,7 @@ public class OBJParser<R extends IResourceProvider<R>> {
 		material.specularMap = this.specularMap;
 		material.specularHighlightMap = this.specularHighlightMap;
 		material.normalMap = this.normalMap;
-		material.bumpMap = this.bumpMap;
+		material.displacementMap = this.displacementMap;
 		return material;
 	}
 	

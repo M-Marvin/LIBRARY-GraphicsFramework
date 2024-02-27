@@ -41,7 +41,7 @@ public class ModelData<R extends IResourceProvider<R>> {
 			this.specularMap = 				null;
 			this.specularHighlightMap = 	null;
 			this.normalMap = 				null;
-			this.bumpMap =					null;
+			this.displacementMap =			null;
 		}
 		
 		protected Vec3f ambientColor;
@@ -54,7 +54,7 @@ public class ModelData<R extends IResourceProvider<R>> {
 		protected R specularMap;
 		protected R specularHighlightMap;
 		protected R normalMap;
-		protected R bumpMap;
+		protected R displacementMap;
 		
 		public Vec3f getAmbientColor() {
 			return ambientColor;
@@ -86,8 +86,8 @@ public class ModelData<R extends IResourceProvider<R>> {
 		public R getNormalMap() {
 			return normalMap;
 		}
-		public R getBumpMap() {
-			return bumpMap;
+		public R getDisplacementMap() {
+			return displacementMap;
 		}
 		
 	}
