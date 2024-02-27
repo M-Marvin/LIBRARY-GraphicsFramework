@@ -334,20 +334,23 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		JsonObject metaJson = gson.fromJson(new InputStreamReader(inputStream), JsonObject.class);
 		inputStream.close();
 		
-		int frameTime = metaJson.get("FrameTime").getAsInt();
+		int frameTime = metaJson.has("FrameTime") ? metaJson.get("FrameTime").getAsInt() : DEFAULT_META_DATA.frametime();
 		
-		JsonElement framesJson = metaJson.get("Frames");
 		int[] frames = null;
-		if (framesJson instanceof JsonPrimitive) {
-			frames = IntStream.range(0, framesJson.getAsInt()).toArray();
+		if (metaJson.has("Frames")) {
+			JsonElement framesJson = metaJson.get("Frames");
+			if (framesJson instanceof JsonPrimitive) {
+				frames = IntStream.range(0, framesJson.getAsInt()).toArray();
+			} else {
+				frames = gson.fromJson(framesJson, int[].class);
+			}
 		} else {
-			frames = gson.fromJson(framesJson, int[].class);
+			frames = DEFAULT_META_DATA.frames();
 		}
 		
-		boolean interpolate = metaJson.has("Interpolate") ? metaJson.get("Interpolate").getAsBoolean() : false;
-		boolean gammaCorrect = metaJson.has("GammaCorrect") ? metaJson.get("GammaCorrect").getAsBoolean() : false;
-		
-		String formatName = metaJson.has("TextureFormat") ? metaJson.get("TextureFormat").getAsString() : DEFAULT_TEXTURE_FORMAT;
+		boolean interpolate = metaJson.has("Interpolate") ? metaJson.get("Interpolate").getAsBoolean() : DEFAULT_META_DATA.interpolate();
+		boolean gammaCorrect = metaJson.has("GammaCorrect") ? metaJson.get("GammaCorrect").getAsBoolean() : DEFAULT_META_DATA.gammaCorrect();
+		String formatName = metaJson.has("TextureFormat") ? metaJson.get("TextureFormat").getAsString() : DEFAULT_META_DATA.fileFormat();
 		
 		return new TextureMetaData(frameTime, frames, interpolate, gammaCorrect, formatName);
 		
