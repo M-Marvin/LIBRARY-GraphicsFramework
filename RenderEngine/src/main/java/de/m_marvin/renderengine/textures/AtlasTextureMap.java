@@ -67,7 +67,7 @@ public class AtlasTextureMap<R extends IResourceProvider<R>> extends AbstractTex
 	 * @param prioritizeAtlasHeight Determines the if the textures are aligned on the x or y axis
 	 * @param interpolate True if the textures of the atlas need to be interpolated
 	 */
-	public void buildAtlas(boolean prioritizeAtlasHeight, boolean interpolate) {
+	public void buildAtlas(boolean prioritizeAtlasHeight, boolean interpolate, boolean gammaCorrection) {
 		if (!building) throw new IllegalStateException("The atlas is already compiled!");
 
 		AtlasMultiFrameLayout<LayoutPair<R>> layout = layoutBuilder.buildLayout(prioritizeAtlasHeight);
@@ -109,7 +109,7 @@ public class AtlasTextureMap<R extends IResourceProvider<R>> extends AbstractTex
 		this.pixels = atlasImage.getRGB(0, 0, this.width, this.height, null, 0, this.width);
 		this.interpolate = interpolate;
 		updateMatrix();
-		init();
+		init(gammaCorrection);
 	}
 
 	/**

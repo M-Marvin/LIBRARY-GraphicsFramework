@@ -85,7 +85,7 @@ public class FontAtlasMap<R extends IResourceProvider<R>> extends AbstractTextur
 		this.frametime = 0;
 		this.pixels = atlasImage.getRGB(0, 0, this.width, this.height, null, 0, this.width);
 		updateMatrix();
-		init();
+		init(false);
 	}
 	
 	@Override

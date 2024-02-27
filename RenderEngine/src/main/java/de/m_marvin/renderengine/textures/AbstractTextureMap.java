@@ -35,12 +35,12 @@ public abstract class AbstractTextureMap<R extends IResourceProvider<R>> impleme
 	 * All parameters have to be set before this method can be called.
 	 * After this method is called, the texture is ready for use.
 	 */
-	protected void init() {
+	protected void init(boolean gammaCorrection) {
 		GLStateManager.assertOnRenderThread();
 		this.textureId = GLStateManager.genTexture();
 		GLStateManager.bindTexture(GL33.GL_TEXTURE_2D, textureId);
 		setTextureFilter(TextureFilter.NEAREST, TextureFilter.NEAREST);
-		GLStateManager.loadTexture(GL33.GL_TEXTURE_2D, 0, GL33.GL_RGBA8, GL33.GL_BGRA, width, height, 0, GL33.GL_UNSIGNED_INT_8_8_8_8_REV, pixels);
+		GLStateManager.loadTexture(GL33.GL_TEXTURE_2D, 0, gammaCorrection ? GL33.GL_SRGB_ALPHA : GL33.GL_RGBA, GL33.GL_BGRA, width, height, 0, GL33.GL_UNSIGNED_INT_8_8_8_8_REV, pixels);
 		GLStateManager.bindTexture(GL33.GL_TEXTURE_2D, 0);
 	}
 	

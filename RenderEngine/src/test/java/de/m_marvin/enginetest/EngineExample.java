@@ -176,8 +176,8 @@ public class EngineExample {
 		
 		// Load shader, textures and models
 		shaderLoader.loadShadersIn(WORLD_SHADER_LOCATION, 10);
-		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS, false, false, 10);
-		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS_INTERPOLATED, false, true, 10);
+		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS, false, false, 10, false);
+		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS_INTERPOLATED, false, true, 10, false);
 
 		windowResized(new Vec2i(this.mainWindow.getSize()[0], this.mainWindow.getSize()[1]));
 		this.mainWindow.registerWindowListener((windowResize, type) -> { if (windowResize.isPresent()) windowResized(windowResize.get()); });

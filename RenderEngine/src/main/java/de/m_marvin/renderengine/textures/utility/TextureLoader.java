@@ -45,12 +45,12 @@ import de.m_marvin.simplelogging.printing.Logger;
  */
 public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFolder> implements IClearableLoader {
 	
-	public static record TextureMetaData(int frametime, int[] frames, boolean interpolate, String fileFormat) {}
+	public static record TextureMetaData(int frametime, int[] frames, boolean interpolate, boolean gammaCorrect, String fileFormat) {}
 	public static record TexturePack(TextureMetaData metaData, BufferedImage texture) {}
 	
 	public static final String TEXTURE_META_DATA_FORMAT = "json";
 	public static final String DEFAULT_TEXTURE_FORMAT = "png";
-	public static final TextureMetaData DEFAULT_META_DATA = new TextureMetaData(1, new int[] {0}, false, DEFAULT_TEXTURE_FORMAT);
+	public static final TextureMetaData DEFAULT_META_DATA = new TextureMetaData(1, new int[] {0}, false, false, DEFAULT_TEXTURE_FORMAT);
 	
 	public static final int[] INVALID_TEXTURE_FALLBACK_PIXELS = new int[] {
 			new Color(255, 0, 255, 255).getRGB(),
@@ -64,7 +64,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 			return image;
 	};
 	public static final TexturePack INVALID_TEXTURE_FALLBACK_PACK = new TexturePack(DEFAULT_META_DATA, INVALID_TEXTURE_FALLBACK_IMAGE.get());
-	public static final Supplier<SingleTextureMap<?>> INVALID_TEXTURE_FALLBACK = () -> new SingleTextureMap<>(2, 2, new int[] {0}, 1, INVALID_TEXTURE_FALLBACK_PIXELS, false);
+	public static final Supplier<SingleTextureMap<?>> INVALID_TEXTURE_FALLBACK = () -> new SingleTextureMap<>(2, 2, new int[] {0}, 1, INVALID_TEXTURE_FALLBACK_PIXELS, false, false);
 	
 	protected final FE sourceFolder;
 	protected final ResourceLoader<R, FE> resourceLoader;
@@ -121,9 +121,9 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	 * @param selectInterpolatedTextures If true, only interpolated textures are loaded into the atlas, if false only non interpolated textures are loaded, mixing is not allowed
 	 * @param recursive How deep to search in sub-folders
 	 */
-	public void buildAtlasMapFromTextures(R textureFolderLocation, R atlasName, boolean prioritizeAtlasHeight, boolean selectInterpolatedTextures, int recursive) {
+	public void buildAtlasMapFromTextures(R textureFolderLocation, R atlasName, boolean prioritizeAtlasHeight, boolean selectInterpolatedTextures, int recursive, boolean gammaCorrect) {
 		try {
-			buildAtlasMapFromTexutes0(textureFolderLocation, atlasName, prioritizeAtlasHeight, selectInterpolatedTextures, recursive);
+			buildAtlasMapFromTexutes0(textureFolderLocation, atlasName, prioritizeAtlasHeight, selectInterpolatedTextures, recursive, gammaCorrect);
 		} catch (IOException e) {
 			Logger.defaultLogger().logWarn("Failed to read some of the textures in " + textureFolderLocation);
 			Logger.defaultLogger().printException(LogType.WARN, e);
@@ -151,7 +151,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 				
 				TexturePack textureData = loadTexture(locationName);
 				
-				SingleTextureMap<R> map = new SingleTextureMap<R>(textureData.texture(), textureData.metaData().frames(), textureData.metaData().frametime(), textureData.metaData().interpolate());
+				SingleTextureMap<R> map = new SingleTextureMap<R>(textureData.texture(), textureData.metaData().frames(), textureData.metaData().frametime(), textureData.metaData().interpolate(), textureData.metaData().gammaCorrect());
 				this.textureCache.put(textureLoc, map);
 				this.textureMapNames.add(textureLoc);
 				
@@ -180,7 +180,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	 * @param recursive How deep to search in sub-folders
 	 * @throws IOException If an error occurs accessing the texture files
 	 */
-	public void buildAtlasMapFromTexutes0(R textureFolderLocation, R atlasName, boolean prioritizeAtlasHeight, boolean selectInterpolatedTextures, int recursive) throws IOException {
+	public void buildAtlasMapFromTexutes0(R textureFolderLocation, R atlasName, boolean prioritizeAtlasHeight, boolean selectInterpolatedTextures, int recursive, boolean gammaCorrect) throws IOException {
 		
 		AtlasTextureMap<R> map = new AtlasTextureMap<>();
 		List<R> locationsToLink = new ArrayList<>();
@@ -200,7 +200,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		
 		if (addedImages) {
 
-			map.buildAtlas(prioritizeAtlasHeight, selectInterpolatedTextures);
+			map.buildAtlas(prioritizeAtlasHeight, selectInterpolatedTextures, gammaCorrect);
 			this.textureCache.put(atlasName, map);
 			this.textureMapNames.add(atlasName);
 			for (R location : locationsToLink) this.textureCache.put(location, map);
@@ -345,10 +345,11 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		}
 		
 		boolean interpolate = metaJson.has("Interpolate") ? metaJson.get("Interpolate").getAsBoolean() : false;
+		boolean gammaCorrect = metaJson.has("GammaCorrect") ? metaJson.get("GammaCorrect").getAsBoolean() : false;
 		
 		String formatName = metaJson.has("TextureFormat") ? metaJson.get("TextureFormat").getAsString() : DEFAULT_TEXTURE_FORMAT;
 		
-		return new TextureMetaData(frameTime, frames, interpolate, formatName);
+		return new TextureMetaData(frameTime, frames, interpolate, gammaCorrect, formatName);
 		
 	}
 	

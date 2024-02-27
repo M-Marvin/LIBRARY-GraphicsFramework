@@ -26,7 +26,7 @@ public class SingleTextureMap<R extends IResourceProvider<R>> extends AbstractTe
 	 * @param pixels The RGBA pixel data array
 	 * @param interpolate True if the texture has to be interpolated
 	 */
-	public SingleTextureMap(int width, int height, int[] frames, int frametime, int[] pixels, boolean interpolate) {
+	public SingleTextureMap(int width, int height, int[] frames, int frametime, int[] pixels, boolean interpolate, boolean gammaCorrection) {
 		this.width = width;
 		this.height = height;
 		this.frames = frames;
@@ -35,7 +35,7 @@ public class SingleTextureMap<R extends IResourceProvider<R>> extends AbstractTe
 		this.pixels = pixels;
 		this.interpolate = interpolate;
 		updateMatrix();
-		init();
+		init(gammaCorrection);
 	}
 	
 	/**
@@ -46,8 +46,8 @@ public class SingleTextureMap<R extends IResourceProvider<R>> extends AbstractTe
 	 * @param frametime The number of ticks a frame lasts
 	 * @param interpolate True if the texture has to be interpolated
 	 */
-	public SingleTextureMap(BufferedImage imageSource, int[] frames, int frametime, boolean interpolate) {
-		this(imageSource.getWidth(), imageSource.getHeight(), frames, frametime, imageSource.getRGB(0, 0, imageSource.getWidth(), imageSource.getHeight(), null, 0, imageSource.getWidth()), interpolate);
+	public SingleTextureMap(BufferedImage imageSource, int[] frames, int frametime, boolean interpolate, boolean gammaCorrection) {
+		this(imageSource.getWidth(), imageSource.getHeight(), frames, frametime, imageSource.getRGB(0, 0, imageSource.getWidth(), imageSource.getHeight(), null, 0, imageSource.getWidth()), interpolate, gammaCorrection);
 	}
 	
 	@Override
