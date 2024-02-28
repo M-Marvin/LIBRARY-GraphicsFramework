@@ -40,6 +40,8 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	public static final String SHADER_META_FORMAT = "json";
 	public static final String SHADER_LIB_FORMAT = "glsl";
 	protected static final String INCLUDE_LINE = "#include ";
+
+	protected static final Gson GSON = new GsonBuilder().create();
 	
 	protected final FE sourceFolder;
 	protected final ResourceLoader<R, FE> resourceLoader;
@@ -177,11 +179,10 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	public ShaderInstance load(R shaderLocation, Optional<VertexFormat> vertexFormat) throws IOException {
 		
 		try {
-
-			Gson gson = new GsonBuilder().create();
+			
 			InputStreamReader inputStream = new InputStreamReader(resourceLoader.getAsStream(sourceFolder, shaderLocation.append("." + SHADER_META_FORMAT)));
 			
-			JsonObject json = gson.fromJson(inputStream, JsonObject.class);
+			JsonObject json = GSON.fromJson(inputStream, JsonObject.class);
 			
 			String vertexShaderFile = json.get("VertexShaderFile").getAsString();
 			String fragmentShaderFile = json.get("FragmentShaderFile").getAsString();
@@ -214,14 +215,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 				ShaderInstance shaderInstance = new ShaderInstance(vertexShaderSource, fragmentShaderSource, geometryShaderSource, attributeFormat);
 				
 				JsonArray uniformArray = json.get("Uniforms").getAsJsonArray();
-				for (int i = 0; i < uniformArray.size(); i++) {
-					JsonObject uniformJson = uniformArray.get(i).getAsJsonObject();
-					String uniformName = uniformJson.get("Name").getAsString();
-					UniformType type = UniformType.byName(uniformJson.get("Type").getAsString());
-					JsonElement defaultValueJson = uniformJson.get("Value");
-					Object defaultValue = gson.fromJson(defaultValueJson, type.getValueType());
-					shaderInstance.createUniform(uniformName, type, defaultValue);
-				}
+				parseUniforms(uniformArray, shaderInstance, null);
 				
 				inputStream.close();
 				
@@ -233,6 +227,50 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 			
 		} catch (NullPointerException e) {
 			throw new IOException("Failed to load shader definition file '" + shaderLocation.nameString() + "'! Maleformed JSON!");
+		}
+		
+	}
+	
+	protected void parseUniforms(JsonArray uniformArray, ShaderInstance shaderInstance, String parentField) {
+		
+		for (int i = 0; i < uniformArray.size(); i++) {
+			JsonObject uniformJson = uniformArray.get(i).getAsJsonObject();
+			String uniformName = uniformJson.get("Name").getAsString();
+			String typeName = uniformJson.get("Type").getAsString();
+			int arrLen = uniformJson.has("Length") ? uniformJson.get("Length").getAsInt() : 0;
+			
+			if (arrLen > 0) {
+				
+				for (int i2 = 0; i2 < arrLen; i2++) {
+					
+					String uniformArrName = uniformName.replace("[]", "[" + i2 + "]");
+					
+					if (typeName.equals("struct")) {
+						JsonArray subArray = uniformJson.get("Fields").getAsJsonArray();
+						parseUniforms(subArray, shaderInstance, uniformArrName);
+					} else {
+						UniformType type = UniformType.byName(typeName);
+						JsonElement defaultValueJson = uniformJson.get("Value");
+						Object defaultValue = GSON.fromJson(defaultValueJson, type.getValueType());
+						shaderInstance.createUniform((parentField != null ? parentField + "." : "") + uniformArrName, type, defaultValue);
+					}
+					
+				}
+				
+			} else {
+
+				if (typeName.equals("struct")) {
+					JsonArray subArray = uniformJson.get("Fields").getAsJsonArray();
+					parseUniforms(subArray, shaderInstance, uniformName);
+				} else {
+					UniformType type = UniformType.byName(typeName);
+					JsonElement defaultValueJson = uniformJson.get("Value");
+					Object defaultValue = GSON.fromJson(defaultValueJson, type.getValueType());
+					shaderInstance.createUniform((parentField != null ? parentField + "." : "") + uniformName, type, defaultValue);
+				}
+				
+			}
+			
 		}
 		
 	}

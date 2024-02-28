@@ -22,8 +22,10 @@ import javax.imageio.ImageIO;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
 
 import de.m_marvin.renderengine.resources.IClearableLoader;
 import de.m_marvin.renderengine.resources.IResourceProvider;
@@ -297,6 +299,8 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		TextureMetaData metaData = DEFAULT_META_DATA;
 		try {
 			metaData = loadJsonMetaData(resourceLoader.getAsStream(sourceFolder, textureMeta));
+		} catch (NullPointerException | JsonSyntaxException | JsonIOException e) {
+			throw new IOException("Failed to load texture metadata '" + textureLocation.nameString() + "'", e);
 		} catch (FileNotFoundException e) {}
 		R textureFile = textureLocation.append("." + metaData.fileFormat());
 		try {
