@@ -1,12 +1,35 @@
+import org.gradle.internal.os.OperatingSystem
 
 apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 
+project.ext.lwjglVersion = "3.3.3"
+
+switch (OperatingSystem.current()) {
+	case OperatingSystem.LINUX:
+		project.ext.lwjglNatives = "natives-linux"
+		def osArch = System.getProperty("os.arch")
+		if (osArch.startsWith("arm") || osArch.startsWith("aarch64")) {
+			project.ext.lwjglNatives += osArch.contains("64") || osArch.startsWith("armv8") ? "-arm64" : "-arm32"
+		} else if  (osArch.startsWith("ppc")) {
+			project.ext.lwjglNatives += "-ppc64le"
+		} else if  (osArch.startsWith("riscv")) {
+			project.ext.lwjglNatives += "-riscv64"
+		}
+		break
+	case OperatingSystem.MAC_OS:
+		project.ext.lwjglNatives = System.getProperty("os.arch").startsWith("aarch64") ? "natives-macos-arm64" : "natives-macos"
+		break
+	case OperatingSystem.WINDOWS:
+		def osArch = System.getProperty("os.arch")
+		project.ext.lwjglNatives = osArch.contains("64")
+			? "natives-windows${osArch.startsWith("aarch64") ? "-arm64" : ""}"
+			: "natives-windows-x86"
+		break
+}
+
 group = 'com.github.M-Marvin'
 version = '0.4'
-
-project.ext.lwjglVersion = "3.3.1"
-project.ext.lwjglNatives = "natives-windows"
 
 repositories {
 	mavenCentral()
@@ -20,13 +43,16 @@ configurations.all {
 dependencies {
 	
 	// LWJGL
-	api platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+	implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+
 	api "org.lwjgl:lwjgl"
 	api "org.lwjgl:lwjgl-glfw"
+	api "org.lwjgl:lwjgl-openal"
 	api "org.lwjgl:lwjgl-opengl"
-	api "org.lwjgl:lwjgl::$lwjglNatives"
-	api "org.lwjgl:lwjgl-glfw::$lwjglNatives"
-	api "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
 	
 	// UniVec
 	api 'com.github.M-Marvin:LIBRARY-UnifiedVectors:main-SNAPSHOT'
