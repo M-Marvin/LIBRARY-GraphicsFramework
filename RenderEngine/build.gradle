@@ -1,5 +1,5 @@
 
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 
 group = 'com.github.M-Marvin'
@@ -20,25 +20,25 @@ configurations.all {
 dependencies {
 	
 	// LWJGL
-	implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
-	implementation "org.lwjgl:lwjgl"
-	implementation "org.lwjgl:lwjgl-glfw"
-	implementation "org.lwjgl:lwjgl-opengl"
-	runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
-	runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
-	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
-	
-	// CommandLineParser
-	implementation 'com.github.M-Marvin:LIBRARY-CommandLineParser:main-SNAPSHOT'
+	api platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+	api "org.lwjgl:lwjgl"
+	api "org.lwjgl:lwjgl-glfw"
+	api "org.lwjgl:lwjgl-opengl"
+	api "org.lwjgl:lwjgl::$lwjglNatives"
+	api "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+	api "org.lwjgl:lwjgl-opengl::$lwjglNatives"
 	
 	// UniVec
-	implementation 'com.github.M-Marvin:LIBRARY-UnifiedVectors:main-SNAPSHOT'
+	api 'com.github.M-Marvin:LIBRARY-UnifiedVectors:main-SNAPSHOT'
 	
 	// GSON
-	implementation "com.google.code.gson:gson:2.9.1"
+	api "com.google.code.gson:gson:2.9.1"
 	
 	// SimpleLogging
-	implementation 'com.github.M-Marvin:LIBRARY-SimpleLogging:main-SNAPSHOT'
+	api 'com.github.M-Marvin:LIBRARY-SimpleLogging:main-SNAPSHOT'
+	
+	// CommandLineParser (Testing)
+	//implementation 'com.github.M-Marvin:LIBRARY-CommandLineParser:main-SNAPSHOT'
 	
 	// Physic Engine (Testing)
 	testImplementation "cz.advel.jbullet:jbullet:20101010-1"
