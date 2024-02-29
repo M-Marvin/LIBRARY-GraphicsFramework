@@ -3,7 +3,7 @@ apply plugin: 'java'
 apply plugin: 'maven-publish'
 
 group = 'com.github.M-Marvin'
-version = '0.3'
+version = '0.4'
 
 project.ext.lwjglVersion = "3.3.1"
 project.ext.lwjglNatives = "natives-windows"
@@ -41,7 +41,7 @@ dependencies {
 	implementation 'com.github.M-Marvin:LIBRARY-SimpleLogging:main-SNAPSHOT'
 	
 	// Physic Engine (Testing)
-	implementation "cz.advel.jbullet:jbullet:20101010-1"
+	testImplementation "cz.advel.jbullet:jbullet:20101010-1"
 	
 }
 
@@ -65,7 +65,7 @@ wrapper {
 
 jar {
     manifest {
-        attributes 'Implementation-Version': '0.3 - beta'
+        attributes 'Implementation-Version': version
         attributes 'Implementation-Title': 'RenderEngine'
         attributes 'Implementation-Vendor-Id': 'de.m_marvin'
     }
