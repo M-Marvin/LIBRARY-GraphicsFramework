@@ -32,9 +32,11 @@ public class OBJParser<R extends IResourceProvider<R>> {
 		protected Vec3f specularColor;
 		protected float specularExponent;
 		protected float opticalDensity;
+		protected float dissolve;
 		protected String ambientMap;
 		protected String diffuesMap;
 		protected String specularMap;
+		protected String dissolveMap;
 		protected String specularHighlightMap;
 		protected String normalMap;
 		protected String displacementMap;
@@ -141,9 +143,11 @@ public class OBJParser<R extends IResourceProvider<R>> {
 			fragment.shaderData.specularColor = 		mtrl.specularColor;
 			fragment.shaderData.specularExponent = 		mtrl.specularExponent;
 			fragment.shaderData.opticalDensity = 		mtrl.opticalDensity;
+			fragment.shaderData.dissolve =				mtrl.dissolve;
 			fragment.shaderData.ambientMap = 			mtrl.ambientMap == null ? null : modelFilesLocation.locationOfFile(mtrl.ambientMap);
 			fragment.shaderData.diffuesMap = 			mtrl.diffuesMap == null ? null : modelFilesLocation.locationOfFile(mtrl.diffuesMap);
 			fragment.shaderData.specularMap = 			mtrl.specularMap == null ? null : modelFilesLocation.locationOfFile(mtrl.specularMap);
+			fragment.shaderData.dissolveMap =			mtrl.dissolveMap == null ? null : modelFilesLocation.locationOfFile(mtrl.dissolveMap);
 			fragment.shaderData.specularHighlightMap = 	mtrl.specularHighlightMap == null ? null : modelFilesLocation.locationOfFile(mtrl.specularHighlightMap);
 			fragment.shaderData.normalMap = 			mtrl.normalMap == null ? null : modelFilesLocation.locationOfFile(mtrl.normalMap);
 			fragment.shaderData.displacementMap =				mtrl.displacementMap == null ? null : modelFilesLocation.locationOfFile(mtrl.displacementMap);
@@ -253,10 +257,12 @@ public class OBJParser<R extends IResourceProvider<R>> {
 	protected Vec3f specularColor;
 	protected float specularExponent;
 	protected float opticalDensity;
+	protected float dissolve;
 	protected String ambientMap;
 	protected String diffuesMap;
 	protected String specularMap;
 	protected String specularHighlightMap;
+	protected String dissolveMap;
 	protected String normalMap;
 	protected String displacementMap;
 	
@@ -297,6 +303,9 @@ public class OBJParser<R extends IResourceProvider<R>> {
 			case "Ni":
 				this.opticalDensity = lineSegments.length >= 2 ? Float.parseFloat(lineSegments[1]) : 0;
 				continue;
+			case "d":
+				this.dissolve = lineSegments.length >= 2 ? Float.parseFloat(lineSegments[1]) : 1;
+				continue;
 			case "map_Ka":
 				this.ambientMap = lineSegments.length >= 2 ? lineSegments[1] : "";
 				continue;
@@ -308,6 +317,9 @@ public class OBJParser<R extends IResourceProvider<R>> {
 				continue;
 			case "map_Ns":
 				this.specularHighlightMap = lineSegments.length >= 2 ? lineSegments[1] : "";
+				continue;
+			case "map_d":
+				this.dissolveMap = lineSegments.length >= 2 ? lineSegments[1] : "";
 				continue;
 			case "norm":
 				this.normalMap = lineSegments.length >= 2 ? lineSegments[1] : "";
@@ -332,9 +344,11 @@ public class OBJParser<R extends IResourceProvider<R>> {
 		this.specularColor = new Vec3f(0, 0, 0);
 		this.specularExponent = 10.0F;
 		this.opticalDensity = 1.0F;
+		this.dissolve = 1.0F;
 		this.ambientMap = null;
 		this.diffuesMap = null;
 		this.specularMap = null;
+		this.dissolveMap = null;
 		this.specularHighlightMap = null;
 		this.normalMap = null;
 		this.displacementMap = null;
@@ -347,9 +361,11 @@ public class OBJParser<R extends IResourceProvider<R>> {
 		material.specularColor = this.specularColor;
 		material.specularExponent = this.specularExponent;
 		material.opticalDensity = this.opticalDensity;
+		material.dissolve = this.dissolve;
 		material.ambientMap = this.ambientMap;
 		material.diffuesMap = this.diffuesMap;
 		material.specularMap = this.specularMap;
+		material.dissolveMap = this.dissolveMap;
 		material.specularHighlightMap = this.specularHighlightMap;
 		material.normalMap = this.normalMap;
 		material.displacementMap = this.displacementMap;

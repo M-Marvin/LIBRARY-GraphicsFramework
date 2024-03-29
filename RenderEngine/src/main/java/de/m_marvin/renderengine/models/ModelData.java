@@ -49,9 +49,11 @@ public class ModelData<R extends IResourceProvider<R>> {
 		protected Vec3f specularColor;
 		protected float specularExponent;
 		protected float opticalDensity;
+		protected float dissolve;
 		protected R ambientMap;
 		protected R diffuesMap;
 		protected R specularMap;
+		protected R dissolveMap;
 		protected R specularHighlightMap;
 		protected R normalMap;
 		protected R displacementMap;
@@ -71,6 +73,9 @@ public class ModelData<R extends IResourceProvider<R>> {
 		public float getOpticalDensity() {
 			return opticalDensity;
 		}
+		public float getDissolve() {
+			return dissolve;
+		}
 		public R getAmbientMap() {
 			return ambientMap;
 		}
@@ -79,6 +84,9 @@ public class ModelData<R extends IResourceProvider<R>> {
 		}
 		public R getSpecularMap() {
 			return specularMap;
+		}
+		public R getDissolveMap() {
+			return dissolveMap;
 		}
 		public R getSpecularHighlightMap() {
 			return specularHighlightMap;
