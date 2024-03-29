@@ -337,6 +337,10 @@ public class ShaderInstance {
 		return this.uniforms.get(name);
 	}
 	
+	public boolean hasUniform(String name) {
+		return this.uniforms.containsKey(name);
+	}
+	
 	public VertexFormat getFormat() {
 		return format;
 	}
