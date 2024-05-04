@@ -5,10 +5,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.m_marvin.renderengine.resources.IResourceProvider;
-import de.m_marvin.renderengine.textures.AbstractTextureMap;
 import de.m_marvin.renderengine.textures.atlasbuilding.AtlasLayoutBuilder;
 import de.m_marvin.renderengine.textures.atlasbuilding.AtlasLayoutBuilder.AtlasImageLayout;
 import de.m_marvin.renderengine.textures.atlasbuilding.AtlasLayoutBuilder.AtlasLayout;
+import de.m_marvin.renderengine.textures.maps.AbstractTextureMap;
+import de.m_marvin.renderengine.textures.utility.TextureDataFormat;
+import de.m_marvin.renderengine.textures.utility.TextureFormat;
 import de.m_marvin.simplelogging.printing.Logger;
 import de.m_marvin.univec.impl.Vec2i;
 import de.m_marvin.univec.impl.Vec4f;
@@ -24,6 +26,7 @@ public class FontAtlasMap<R extends IResourceProvider<R>> extends AbstractTextur
 	protected boolean building;
 	
 	public FontAtlasMap(R atlasLocation) {
+		super(TextureFormat.RED_GREEN_BLUE_ALPHA);
 		this.layoutBuilder = new AtlasLayoutBuilder<>();
 		this.building = true;
 		this.atlasLocation = atlasLocation;
@@ -78,14 +81,13 @@ public class FontAtlasMap<R extends IResourceProvider<R>> extends AbstractTextur
 		
 		building = false;
 		
-		this.width = layout.width();
-		this.height = layout.height();
 		this.frames = new int[] {0};
 		this.frameHeight = this.height;
 		this.frametime = 0;
-		this.pixels = atlasImage.getRGB(0, 0, this.width, this.height, null, 0, this.width);
-		updateMatrix();
-		init(false);
+		int width = layout.width();
+		int height = layout.height();
+		int[] pixels = atlasImage.getRGB(0, 0, this.width, this.height, null, 0, this.width);
+		upload(width, height, TextureDataFormat.INT_RGBA_8_8_8_8, pixels);
 	}
 	
 	@Override

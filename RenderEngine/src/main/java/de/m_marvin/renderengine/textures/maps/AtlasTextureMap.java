@@ -1,4 +1,4 @@
-package de.m_marvin.renderengine.textures;
+package de.m_marvin.renderengine.textures.maps;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -11,6 +11,8 @@ import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.renderengine.textures.atlasbuilding.MultiFrameAtlasLayoutBuilder;
 import de.m_marvin.renderengine.textures.atlasbuilding.MultiFrameAtlasLayoutBuilder.AtlasFrameLayout;
 import de.m_marvin.renderengine.textures.atlasbuilding.MultiFrameAtlasLayoutBuilder.AtlasMultiFrameLayout;
+import de.m_marvin.renderengine.textures.utility.TextureDataFormat;
+import de.m_marvin.renderengine.textures.utility.TextureFormat;
 import de.m_marvin.simplelogging.printing.Logger;
 import de.m_marvin.univec.impl.Vec4f;
 
@@ -36,7 +38,8 @@ public class AtlasTextureMap<R extends IResourceProvider<R>> extends AbstractTex
 	 * Creates a new atlas map, ready for adding textures to it.
 	 * Before it can be used {@link #buildAtlas(boolean, boolean)} has to be called.
 	 */
-	public AtlasTextureMap() {
+	public AtlasTextureMap(TextureFormat format) {
+		super(format);
 		layoutBuilder = new MultiFrameAtlasLayoutBuilder<>();
 		building = true;
 	}
@@ -67,9 +70,9 @@ public class AtlasTextureMap<R extends IResourceProvider<R>> extends AbstractTex
 	 * @param prioritizeAtlasHeight Determines the if the textures are aligned on the x or y axis
 	 * @param interpolate True if the textures of the atlas need to be interpolated
 	 */
-	public void buildAtlas(boolean prioritizeAtlasHeight, boolean interpolate, boolean gammaCorrection) {
+	public void buildAtlas(boolean prioritizeAtlasHeight, boolean interpolate) {
 		if (!building) throw new IllegalStateException("The atlas is already compiled!");
-
+		
 		AtlasMultiFrameLayout<LayoutPair<R>> layout = layoutBuilder.buildLayout(prioritizeAtlasHeight);
 		BufferedImage atlasImage = new BufferedImage(layout.width(), layout.height(), BufferedImage.TYPE_4BYTE_ABGR);
 		
@@ -101,15 +104,15 @@ public class AtlasTextureMap<R extends IResourceProvider<R>> extends AbstractTex
 		
 		building = false;
 		
-		this.width = layout.width();
-		this.height = layout.height();
 		this.frames = IntStream.range(0, layout.frames()).toArray();
 		this.frameHeight = this.height / (IntStream.of(this.frames).max().getAsInt() + 1);
 		this.frametime = layout.frametime();
-		this.pixels = atlasImage.getRGB(0, 0, this.width, this.height, null, 0, this.width);
 		this.interpolate = interpolate;
-		updateMatrix();
-		init(gammaCorrection);
+		
+		int width = layout.width();
+		int height = layout.height();
+		int[] pixels = atlasImage.getRGB(0, 0, width, height, null, 0, width);
+		upload(width, height, TextureDataFormat.INT_RGBA_8_8_8_8, pixels);
 	}
 
 	/**

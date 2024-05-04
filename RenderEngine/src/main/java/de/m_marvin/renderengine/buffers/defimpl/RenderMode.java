@@ -5,7 +5,7 @@ import java.util.function.BiConsumer;
 import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.shaders.ShaderInstance;
-import de.m_marvin.renderengine.textures.utility.TextureLoader;
+import de.m_marvin.renderengine.textures.TextureLoader;
 import de.m_marvin.renderengine.vertices.RenderPrimitive;
 import de.m_marvin.renderengine.vertices.VertexFormat;
 

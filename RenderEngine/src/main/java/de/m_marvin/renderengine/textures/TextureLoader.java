@@ -1,4 +1,4 @@
-package de.m_marvin.renderengine.textures.utility;
+package de.m_marvin.renderengine.textures;
 
 import java.awt.Color;
 import java.awt.geom.AffineTransform;
@@ -31,9 +31,11 @@ import de.m_marvin.renderengine.resources.IClearableLoader;
 import de.m_marvin.renderengine.resources.IResourceProvider;
 import de.m_marvin.renderengine.resources.ISourceFolder;
 import de.m_marvin.renderengine.resources.ResourceLoader;
-import de.m_marvin.renderengine.textures.AbstractTextureMap;
-import de.m_marvin.renderengine.textures.AtlasTextureMap;
-import de.m_marvin.renderengine.textures.SingleTextureMap;
+import de.m_marvin.renderengine.textures.maps.AbstractTextureMap;
+import de.m_marvin.renderengine.textures.maps.AtlasTextureMap;
+import de.m_marvin.renderengine.textures.maps.SingleTextureMap;
+import de.m_marvin.renderengine.textures.utility.TextureDataFormat;
+import de.m_marvin.renderengine.textures.utility.TextureFormat;
 import de.m_marvin.simplelogging.printing.LogType;
 import de.m_marvin.simplelogging.printing.Logger;
 
@@ -66,7 +68,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 			return image;
 	};
 	public static final TexturePack INVALID_TEXTURE_FALLBACK_PACK = new TexturePack(DEFAULT_META_DATA, INVALID_TEXTURE_FALLBACK_IMAGE.get());
-	public static final Supplier<SingleTextureMap<?>> INVALID_TEXTURE_FALLBACK = () -> new SingleTextureMap<>(2, 2, new int[] {0}, 1, INVALID_TEXTURE_FALLBACK_PIXELS, false, false);
+	public static final Supplier<SingleTextureMap<?>> INVALID_TEXTURE_FALLBACK = () -> new SingleTextureMap<>(TextureFormat.RED_GREEN_BLUE_ALPHA, 2, 2, new int[] {0}, 1, TextureDataFormat.INT_RGBA_8_8_8_8, INVALID_TEXTURE_FALLBACK_PIXELS, false);
 	
 	protected final FE sourceFolder;
 	protected final ResourceLoader<R, FE> resourceLoader;
@@ -86,7 +88,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	
 	@Override
 	public void clearCached() {
-		this.textureCache.values().forEach(AbstractTextureMap::delete);
+		this.textureCache.values().forEach(AbstractTextureMap::discard);
 		this.textureCache.clear();
 		this.textureMapNames.clear();
 	}
@@ -153,7 +155,12 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 				
 				TexturePack textureData = loadTexture(locationName);
 				
-				SingleTextureMap<R> map = new SingleTextureMap<R>(textureData.texture(), textureData.metaData().frames(), textureData.metaData().frametime(), textureData.metaData().interpolate(), textureData.metaData().gammaCorrect());
+				SingleTextureMap<R> map = new SingleTextureMap<R>(
+						textureData.metaData().gammaCorrect() ? TextureFormat.RED_GREEN_BLUE_ALPHA_GAMMACORRECT : TextureFormat.RED_GREEN_BLUE_ALPHA,
+						textureData.texture(), 
+						textureData.metaData().frames(), 
+						textureData.metaData().frametime(), 
+						textureData.metaData().interpolate());
 				this.textureCache.put(textureLoc, map);
 				this.textureMapNames.add(textureLoc);
 				
@@ -184,7 +191,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 	 */
 	public void buildAtlasMapFromTexutes0(R textureFolderLocation, R atlasName, boolean prioritizeAtlasHeight, boolean selectInterpolatedTextures, int recursive, boolean gammaCorrect) throws IOException {
 		
-		AtlasTextureMap<R> map = new AtlasTextureMap<>();
+		AtlasTextureMap<R> map = new AtlasTextureMap<>(gammaCorrect ? TextureFormat.RED_GREEN_BLUE_ALPHA_GAMMACORRECT : TextureFormat.RED_GREEN_BLUE_ALPHA);
 		List<R> locationsToLink = new ArrayList<>();
 		
 		// Put fallback texture as with location "null" as default into the atlas
@@ -202,7 +209,7 @@ public class TextureLoader<R extends IResourceProvider<R>, FE extends ISourceFol
 		
 		if (addedImages) {
 
-			map.buildAtlas(prioritizeAtlasHeight, selectInterpolatedTextures, gammaCorrect);
+			map.buildAtlas(prioritizeAtlasHeight, selectInterpolatedTextures);
 			this.textureCache.put(atlasName, map);
 			this.textureMapNames.add(atlasName);
 			for (R location : locationsToLink) this.textureCache.put(location, map);

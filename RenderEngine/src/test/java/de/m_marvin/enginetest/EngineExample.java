@@ -1,6 +1,11 @@
 package de.m_marvin.enginetest;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.Random;
+
+import javax.imageio.ImageIO;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL33;
@@ -10,13 +15,16 @@ import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.buffers.BufferBuilder;
 import de.m_marvin.renderengine.buffers.BufferUsage;
 import de.m_marvin.renderengine.buffers.VertexBuffer;
+import de.m_marvin.renderengine.framebuffers.Framebuffer;
 import de.m_marvin.renderengine.inputbinding.UserInput;
 import de.m_marvin.renderengine.inputbinding.bindingsource.KeySource;
 import de.m_marvin.renderengine.resources.ResourceLoader;
 import de.m_marvin.renderengine.resources.defimpl.ResourceLocation;
 import de.m_marvin.renderengine.shaders.ShaderInstance;
 import de.m_marvin.renderengine.shaders.ShaderLoader;
-import de.m_marvin.renderengine.textures.utility.TextureLoader;
+import de.m_marvin.renderengine.textures.TextureLoader;
+import de.m_marvin.renderengine.textures.texture.Texture;
+import de.m_marvin.renderengine.textures.utility.TextureDataFormat;
 import de.m_marvin.renderengine.translation.Camera;
 import de.m_marvin.renderengine.utility.NumberFormat;
 import de.m_marvin.renderengine.vertices.RenderPrimitive;
@@ -243,6 +251,13 @@ public class EngineExample {
 	
 	private void frame(float partialTick) {
 		
+		// TODO debug framebuffersp
+		Framebuffer framebuffer = new Framebuffer(1000, 600);
+		framebuffer.bind();
+		framebuffer.setClearColor(1, 1, 0, 1);
+		framebuffer.setClearDepth(0.0);
+		//framebuffer.clear();
+		
 		ShaderInstance shader = shaderLoader.getShader(new ResourceLocation(NAMESPACE, "world/particle"));
 		
 		Matrix4f viewMatrix = mainCamera.getViewMatrix();
@@ -277,6 +292,21 @@ public class EngineExample {
 		particleDrawBuffer.unbind();
 		
 		mainWindow.glSwapFrames();
+		
+		framebuffer.unbind();
+		
+		try {
+			Texture texture = framebuffer.getColorTexture();
+			int[] pixels = texture.download(TextureDataFormat.INT_RGBA_8_8_8_8);
+			
+			BufferedImage image = new BufferedImage(texture.getTexWidth(), texture.getTexHeight(), BufferedImage.TYPE_INT_ARGB);
+			image.setRGB(0, 0, texture.getTexWidth(), texture.getTexHeight(), pixels, 0, texture.getTexWidth());
+			ImageIO.write(image, "PNG", new File("C:\\Users\\marvi\\Desktop\\test.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		framebuffer.discard();
 		
 	}
 	

@@ -107,7 +107,7 @@ public class ResourceLoader<R extends IResourceProvider<R>, FE extends ISourceFo
 						.map(loc::locationOfFile)
 						.toArray(i -> (R[]) Array.newInstance(IResourceProvider.class, i))
 				)
-				.reduce((a, b) -> Utility.concatArr(a, b, IResourceProvider.class)).get();
+				.reduce((a, b) -> Utility.concatArr(a, b, IResourceProvider.class)).orElseGet(() -> (R[]) new Object[0]);
 	}
 	
 	/**

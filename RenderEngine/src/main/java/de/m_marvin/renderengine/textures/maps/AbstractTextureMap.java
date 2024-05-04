@@ -1,22 +1,21 @@
-package de.m_marvin.renderengine.textures;
+package de.m_marvin.renderengine.textures.maps;
 
-import org.lwjgl.opengl.GL33;
-
-import de.m_marvin.renderengine.GLStateManager;
 import de.m_marvin.renderengine.resources.IResourceProvider;
-import de.m_marvin.renderengine.textures.utility.TextureFilter;
+import de.m_marvin.renderengine.textures.texture.Texture;
+import de.m_marvin.renderengine.textures.utility.TextureDataFormat;
+import de.m_marvin.renderengine.textures.utility.TextureFormat;
 import de.m_marvin.unimat.impl.Matrix3f;
 
 /**
  * Base class of the different texture maps.
- * Contains basic functionality to upload the texture data to the GPU.
+ * Contains basic functionality to upload the texture data to the GPU and declares animation and texture map features.
  * 
  * @author Marvin Köhler
  *
  * @param <R> The resource location type used
  */
-public abstract class AbstractTextureMap<R extends IResourceProvider<R>> implements ITextureSampler, IUVModifyer {
-
+public abstract class AbstractTextureMap<R extends IResourceProvider<R>> extends Texture implements IUVModifyer {
+	
 	protected Matrix3f animationMatrixLast;
 	protected Matrix3f animationMatrix;
 	protected int frameHeight;
@@ -24,63 +23,9 @@ public abstract class AbstractTextureMap<R extends IResourceProvider<R>> impleme
 	protected int frametime;
 	protected int activeFrame;
 	protected boolean interpolate;
-	
-	protected int width;
-	protected int height;
-	protected int[] pixels;
-	protected int textureId;
-	
-	/**
-	 * Initializes the texture on the GPU.
-	 * All parameters have to be set before this method can be called.
-	 * After this method is called, the texture is ready for use.
-	 */
-	protected void init(boolean gammaCorrection) {
-		GLStateManager.assertOnRenderThread();
-		this.textureId = GLStateManager.genTexture();
-		GLStateManager.bindTexture(GL33.GL_TEXTURE_2D, textureId);
-		setTextureFilter(TextureFilter.NEAREST, TextureFilter.NEAREST);
-		GLStateManager.loadTexture(GL33.GL_TEXTURE_2D, 0, gammaCorrection ? GL33.GL_SRGB_ALPHA : GL33.GL_RGBA, GL33.GL_BGRA, width, height, 0, GL33.GL_UNSIGNED_INT_8_8_8_8_REV, pixels);
-		GLStateManager.bindTexture(GL33.GL_TEXTURE_2D, 0);
-	}
-	
-	/**
-	 * Sets the used texture filter on the GPU.
-	 * @param minificationFilter
-	 * @param magnificationFilter
-	 */
-	public void setTextureFilter(TextureFilter minificationFilter, TextureFilter magnificationFilter) {
-		GLStateManager.assertOnRenderThread();
-		GLStateManager.bindTexture(GL33.GL_TEXTURE_2D, textureId);
-		GLStateManager.textureParameter(GL33.GL_TEXTURE_2D, GL33.GL_TEXTURE_MIN_FILTER, minificationFilter.glType());
-		GLStateManager.textureParameter(GL33.GL_TEXTURE_2D, GL33.GL_TEXTURE_MAG_FILTER, magnificationFilter.glType());
-	}
-	
-	/**
-	 * Binds the texture on the GPU for rendering.
-	 */
-	@Override
-	public void bindTexture(int samplerId) {
-		GLStateManager.assertOnRenderThread();
-		GLStateManager.activeTexture(samplerId);
-		GLStateManager.bindTexture(GL33.GL_TEXTURE_2D, textureId);
-	}
-	
-	/**
-	 * Binds texture 0 on the GPU.
-	 * Effectively unbinds this texture.
-	 */
-	@Override
-	public void unbindTexture() {
-		GLStateManager.assertOnRenderThread();
-		GLStateManager.bindTexture(GL33.GL_TEXTURE_2D, 0);
-	}
-	
-	/**
-	 * Deletes the texture map from the GPU memory.
-	 */
-	public void delete() {
-		GLStateManager.deleteTexture(this.textureId);
+
+	public AbstractTextureMap(TextureFormat format) {
+		super(format);
 	}
 	
 	/**
@@ -129,20 +74,56 @@ public abstract class AbstractTextureMap<R extends IResourceProvider<R>> impleme
 		if (this.animationMatrixLast == null) this.animationMatrixLast = this.animationMatrix;
 	}
 	
+	@Override
+	public void upload(int width, int height, TextureDataFormat format, int[] pixels) {
+		super.upload(width, height, format, pixels);
+		updateMatrix();
+	}
+	
+	/**
+	 * Gets the width of the currently activated texture of this map.
+	 * @return The width in pixels
+	 */
 	public abstract int getImageWidth();
+	/**
+	 * Gets the height of the currently activated texture of this map.
+	 * @return The height in pixels
+	 */
 	public abstract int getImageHeight();
 
+	/**
+	 * Gets the width of the entire texture map.
+	 * @return The width in pixels
+	 */
 	public abstract int getMapWidth();
+	/**
+	 * Gets the height of the entire texture map.
+	 * @return The height in pixels
+	 */
 	public abstract int getMapHeight();
 	
+	/**
+	 * A matrix that can be applied to the uv positions in the shader to apply the animation.
+	 * @return The matrix for the current frame
+	 */
 	@Override
 	public Matrix3f frameMatrix() {
 		return this.animationMatrix;
 	}
+	
+	/**
+	 * A matrix that can be applied to the uv positions in the shader to apply the animation.
+	 * @return The matrix for the last frame, used for interpolation
+	 */
 	@Override
 	public Matrix3f lastFrameMatrix() {
 		return doFrameInterpolation() ? this.animationMatrixLast : this.animationMatrix;
 	}
+	
+	/**
+	 * If the texture was marked for interpolation.
+	 * @return true if interpolation should be applied
+	 */
 	@Override
 	public boolean doFrameInterpolation() {
 		return this.interpolate;

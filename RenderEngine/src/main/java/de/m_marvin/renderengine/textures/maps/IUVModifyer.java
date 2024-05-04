@@ -1,4 +1,4 @@
-package de.m_marvin.renderengine.textures;
+package de.m_marvin.renderengine.textures.maps;
 
 import de.m_marvin.unimat.impl.Matrix3f;
 import de.m_marvin.univec.impl.Vec4f;

@@ -52,7 +52,7 @@ public class GLStateManager {
 	}
 	
 	public static void assertOnRenderThread() {
-		if (!isOnRenderThread()) throw new IllegalStateException("GL operations have to be performed on the render thread!");
+		assert isOnRenderThread() : "GL operations have to be performed on the render thread!";
 	}
 	
 	public static void clear(int bufferBitMask) {
@@ -79,12 +79,24 @@ public class GLStateManager {
 		GL33.glLineWidth(width);
 	}
 
+	public static void pointSize(int size) {
+		GL33.glPointSize(size);
+	}
+	
+	public static void polygonOffset(float factor, float units) {
+		GL33.glPolygonOffset(factor, units);
+	}
+	
 	public static void resizeViewport(int x, int y, int w, int h) {
 		GL33.glViewport(x, y, w, h);
 	}
 
 	public static void clearColor(float r, float g, float b, float a) {
 		GL33.glClearColor(r, g, b, a);
+	}
+	
+	public static void clearDepth(double depth) {
+		GL33.glClearDepth(depth);
 	}
 
 	public static int genVertexArray() {
@@ -131,8 +143,12 @@ public class GLStateManager {
 		GL33.glTexParameteri(target, parameter, value);
 	}
 
-	public static void loadTexture(int target, int level, int internalformat, int format, int width, int height, int border, int type, int[] pixels) {
+	public static void uploadTexture(int target, int level, int internalformat, int format, int width, int height, int border, int type, int[] pixels) {
 		GL33.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+	}
+	
+	public static void downloadTexture(int target, int level, int format, int type, int[] pixelBuffer) {
+		GL33.glGetTexImage(target, level, format, type, pixelBuffer);
 	}
 
 	public static void activeTexture(int textureId) {
@@ -290,6 +306,26 @@ public class GLStateManager {
 
 	public static void blendFunc(int sfactor, int dfactor) {
 		GL33.glBlendFunc(sfactor, dfactor);
+	}
+	
+	public static void bindFramebuffer(int target, int framebuffer) {
+		GL33.glBindFramebuffer(target, framebuffer);
+	}
+	
+	public static void framebufferTexture2D(int target, int attachment, int textureTarget, int texture, int level) {
+		GL33.glFramebufferTexture2D(target, attachment, textureTarget, texture, level);
+	}
+	
+	public static int checkFramebufferStatus(int target) {
+		return GL33.glCheckFramebufferStatus(target);
+	}
+	
+	public static void deleteFramebuffer(int framebuffer) {
+		GL33.glDeleteFramebuffers(framebuffer);
+	}
+	
+	public static int genFramebuffer() {
+		return GL33.glGenFramebuffers();
 	}
 	
 }

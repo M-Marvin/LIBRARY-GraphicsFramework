@@ -1,7 +1,7 @@
 package de.m_marvin.renderengine.vertices;
 
 import de.m_marvin.renderengine.buffers.BufferBuilder;
-import de.m_marvin.renderengine.textures.IUVModifyer;
+import de.m_marvin.renderengine.textures.maps.IUVModifyer;
 import de.m_marvin.renderengine.translation.PoseStack;
 import de.m_marvin.unimat.api.IMatrix3f;
 import de.m_marvin.unimat.api.IMatrix4f;

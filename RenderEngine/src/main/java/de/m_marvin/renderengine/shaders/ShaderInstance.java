@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.lwjgl.opengl.GL33;
 
 import de.m_marvin.renderengine.GLStateManager;
-import de.m_marvin.renderengine.textures.ITextureSampler;
+import de.m_marvin.renderengine.textures.texture.ITextureSampler;
 import de.m_marvin.renderengine.vertices.VertexFormat;
 import de.m_marvin.unimat.impl.Matrix3f;
 import de.m_marvin.unimat.impl.Matrix4f;
@@ -205,7 +205,7 @@ public class ShaderInstance {
 		 */
 		public void setTextureSampler(ITextureSampler texture) {
 			if (texture != null) {
-				texture.bindTexture(this.index);
+				texture.bindSampler(this.index);
 				this.type.set(this.location, this.index);
 			} else {
 				GLStateManager.activeTexture(this.index);
