@@ -86,7 +86,7 @@ public class FontAtlasMap<R extends IResourceProvider<R>> extends AbstractTextur
 		this.frametime = 0;
 		int width = layout.width();
 		int height = layout.height();
-		int[] pixels = atlasImage.getRGB(0, 0, this.width, this.height, null, 0, this.width);
+		int[] pixels = atlasImage.getRGB(0, 0, width, height, null, 0, width);
 		upload(width, height, TextureDataFormat.INT_RGBA_8_8_8_8, pixels);
 	}
 	
