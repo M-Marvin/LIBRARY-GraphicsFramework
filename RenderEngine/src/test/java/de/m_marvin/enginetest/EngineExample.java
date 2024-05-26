@@ -249,14 +249,18 @@ public class EngineExample {
 	VertexBuffer particleDrawBuffer = new VertexBuffer();
 	BufferBuilder particleBuffer = new BufferBuilder(36000);
 	
+	int fbt = 0;
+	
 	private void frame(float partialTick) {
+
+		Framebuffer framebuffer = null;
+		if (fbt == 100) {
+			framebuffer = new Framebuffer(1000, 600);
+			framebuffer.bind();
+		}
 		
-		// TODO debug framebuffersp
-		Framebuffer framebuffer = new Framebuffer(1000, 600);
-		framebuffer.bind();
-		framebuffer.setClearColor(1, 1, 0, 1);
-		framebuffer.setClearDepth(0.0);
-		//framebuffer.clear();
+		GLStateManager.clearColor(1, 0.5F, 0.25F, 0.1F);
+		GLStateManager.clear();
 		
 		ShaderInstance shader = shaderLoader.getShader(new ResourceLocation(NAMESPACE, "world/particle"));
 		
@@ -291,22 +295,38 @@ public class EngineExample {
 		particleDrawBuffer.drawAll(RenderPrimitive.POINTS);
 		particleDrawBuffer.unbind();
 		
-		mainWindow.glSwapFrames();
-		
-		framebuffer.unbind();
-		
-		try {
-			Texture texture = framebuffer.getColorTexture();
-			int[] pixels = texture.download(TextureDataFormat.INT_RGBA_8_8_8_8);
+		if (fbt == 100) {
+
+			framebuffer.unbind();
 			
-			BufferedImage image = new BufferedImage(texture.getTexWidth(), texture.getTexHeight(), BufferedImage.TYPE_INT_ARGB);
-			image.setRGB(0, 0, texture.getTexWidth(), texture.getTexHeight(), pixels, 0, texture.getTexWidth());
-			ImageIO.write(image, "PNG", new File("C:\\Users\\marvi\\Desktop\\test.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
+			try {
+				Texture texture = framebuffer.getColorTexture();
+				int[] pixels = texture.download(TextureDataFormat.INT_RGBA_8_8_8_8);
+				
+				BufferedImage image = new BufferedImage(texture.getTexWidth(), texture.getTexHeight(), BufferedImage.TYPE_INT_ARGB);
+				image.setRGB(0, 0, texture.getTexWidth(), texture.getTexHeight(), pixels, 0, texture.getTexWidth());
+				ImageIO.write(image, "PNG", new File("C:\\Users\\marvi\\Desktop\\test.png"));
+				
+				Texture texture2 = framebuffer.getDepthTexture();
+				int[] pixels2 = texture2.download(TextureDataFormat.FLOAT_DEPTH);
+
+				BufferedImage image2 = new BufferedImage(texture2.getTexWidth(), texture2.getTexHeight(), BufferedImage.TYPE_INT_ARGB);
+				image2.setRGB(0, 0, texture2.getTexWidth(), texture2.getTexHeight(), pixels2, 0, texture2.getTexWidth());
+				ImageIO.write(image2, "PNG", new File("C:\\Users\\marvi\\Desktop\\test2.png"));
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			framebuffer.discard();
+			
+		} else {
+
+			mainWindow.glSwapFrames();
+			
 		}
-		
-		framebuffer.discard();
+
+		fbt++;
 		
 	}
 	

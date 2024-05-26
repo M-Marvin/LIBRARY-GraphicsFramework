@@ -55,7 +55,7 @@ public class FontAtlasMap<R extends IResourceProvider<R>> extends AbstractTextur
 		if (!building) throw new IllegalStateException("The atlas is already compiled!");
 
 		AtlasLayout<LayoutPair<R>> layout = layoutBuilder.buildLayout(prioritizeAtlasHeight);
-		BufferedImage atlasImage = new BufferedImage(layout.width(), layout.height(), BufferedImage.TYPE_4BYTE_ABGR);
+		BufferedImage atlasImage = new BufferedImage(layout.width(), layout.height(), BufferedImage.TYPE_INT_ARGB);
 		
 		for (AtlasImageLayout<LayoutPair<R>> imageLayout : layout.imageLayouts()) {
 			

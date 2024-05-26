@@ -1,7 +1,5 @@
 package de.m_marvin.renderengine.framebuffers;
 
-import java.awt.Color;
-
 import org.lwjgl.opengl.GL33;
 
 import de.m_marvin.renderengine.GLStateManager;
@@ -22,8 +20,6 @@ public class Framebuffer {
 	protected int framebufferId;
 	protected Texture colorTexture;
 	protected Texture depthTexture;
-	protected float[] clearColor;
-	protected double clearDepth;
 	
 	/**
 	 * Creates a framebuffer with the initial size of width x height
@@ -31,36 +27,7 @@ public class Framebuffer {
 	 * @param height The height in pixels
 	 */
 	public Framebuffer(int width, int height) {
-		this.clearColor = new float[] { 0.6F, 0.6F, 0.6F, 1.0F };
-		this.clearDepth = 1.0;
 		resize(width, height);
-	}
-	
-	/**
-	 * Sets the clear color of this framebuffer
-	 * @param r The red component
-	 * @param g The green component
-	 * @param b The blue component
-	 * @param a The alpha component
-	 */
-	public void setClearColor(float r, float g, float b, float a) {
-		this.clearColor = new float[] {r, g, b, a};
-	}
-	
-	/**
-	 * Sets the clear color of this framebuffer
-	 * @param color The awt color object
-	 */
-	public void setClearColor(Color color) {
-		setClearColor(color.getRed() / 255F, color.getGreen() / 255F, color.getBlue() / 255F, color.getAlpha() / 255F);
-	}
-	
-	/**
-	 * Sets the clear depth of this framebuffer
-	 * @param clearDepth The depth component (0.0 - 1.0)
-	 */
-	public void setClearDepth(double clearDepth) {
-		this.clearDepth = clearDepth;
 	}
 	
 	/**
@@ -162,17 +129,6 @@ public class Framebuffer {
 	
 	public int getHeight() {
 		return height;
-	}
-	
-	/**
-	 * Clears the buffers content to the specified clear values
-	 */
-	public void clear() {
-		GLStateManager.assertOnRenderThread();
-		bind();
-		GLStateManager.clearColor(this.clearColor[0], this.clearColor[1], this.clearColor[2], this.clearColor[3]);
-		GLStateManager.clearDepth(this.clearDepth);
-		GLStateManager.clear(GL33.GL_COLOR_BUFFER_BIT | GL33.GL_DEPTH_BUFFER_BIT);
 	}
 	
 	/**

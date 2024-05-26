@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWDropCallback;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLCapabilities;
 
 import de.m_marvin.renderengine.GLStateManager;
@@ -118,9 +117,8 @@ public class Window {
 	 */
 	public void glSwapFrames() {
 		GLStateManager.assertOnRenderThread();
-		GLFW.glfwSwapBuffers(glWindow);
 		GLStateManager.flush();
-		GLStateManager.clear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+		GLFW.glfwSwapBuffers(glWindow);
 	}
 	
 	/**

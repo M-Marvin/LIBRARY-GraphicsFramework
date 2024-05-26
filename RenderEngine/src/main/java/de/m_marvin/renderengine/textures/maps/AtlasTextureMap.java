@@ -43,7 +43,7 @@ public class AtlasTextureMap<R extends IResourceProvider<R>> extends AbstractTex
 		layoutBuilder = new MultiFrameAtlasLayoutBuilder<>();
 		building = true;
 	}
-
+	
 	/**
 	 * Adds a texture to the atlas.
 	 * @param location The name under which the texture should be stored in the atlas
@@ -74,7 +74,7 @@ public class AtlasTextureMap<R extends IResourceProvider<R>> extends AbstractTex
 		if (!building) throw new IllegalStateException("The atlas is already compiled!");
 		
 		AtlasMultiFrameLayout<LayoutPair<R>> layout = layoutBuilder.buildLayout(prioritizeAtlasHeight);
-		BufferedImage atlasImage = new BufferedImage(layout.width(), layout.height(), BufferedImage.TYPE_4BYTE_ABGR);
+		BufferedImage atlasImage = new BufferedImage(layout.width(), layout.height(), BufferedImage.TYPE_INT_ARGB);
 		
 		for (List<AtlasFrameLayout<LayoutPair<R>>> frameLayout : layout.frameLayouts()) {
 			for (AtlasFrameLayout<LayoutPair<R>> imageLayout : frameLayout) {

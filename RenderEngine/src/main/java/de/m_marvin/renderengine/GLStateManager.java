@@ -59,6 +59,10 @@ public class GLStateManager {
 		GL33.glClear(bufferBitMask);
 	}
 	
+	public static void clear() {
+		clear(GL33.GL_COLOR_BUFFER_BIT | GL33.GL_DEPTH_BUFFER_BIT);
+	}
+	
 	public static void flush() {
 		GL33.glFlush();
 	}

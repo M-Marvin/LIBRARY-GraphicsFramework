@@ -3,7 +3,6 @@ package de.m_marvin.renderengine.translation;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.m_marvin.renderengine.TranslationStackException;
 import de.m_marvin.renderengine.vertices.IVertexConsumer;
 import de.m_marvin.unimat.api.IQuaternionMath.EulerOrder;
 import de.m_marvin.unimat.impl.Matrix3f;
