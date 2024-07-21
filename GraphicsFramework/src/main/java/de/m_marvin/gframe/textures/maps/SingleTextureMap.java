@@ -33,7 +33,7 @@ public class SingleTextureMap<R extends IResourceProvider<R>> extends AbstractTe
 	public SingleTextureMap(TextureFormat format, int width, int height, int[] frames, int frametime, TextureDataFormat pixelFormat, int[] pixels, boolean interpolate) {
 		super(format);
 		this.frames = frames;
-		this.frameHeight = this.height / (IntStream.of(this.frames).max().getAsInt() + 1);
+		this.frameHeight = height / (IntStream.of(this.frames).max().getAsInt() + 1);
 		this.frametime = frametime;
 		this.interpolate = interpolate;
 		upload(width, height, pixelFormat, pixels);
