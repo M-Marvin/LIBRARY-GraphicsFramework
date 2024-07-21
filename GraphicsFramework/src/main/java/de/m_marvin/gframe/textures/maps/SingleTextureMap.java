@@ -54,7 +54,7 @@ public class SingleTextureMap<R extends IResourceProvider<R>> extends AbstractTe
 				imageSource.getHeight(), 
 				frames, 
 				frametime, 
-				TextureDataFormat.INT_RGBA_8_8_8_8,
+				TextureDataFormat.INT_BGRA_8_8_8_8,
 				imageSource.getRGB(0, 0, imageSource.getWidth(), imageSource.getHeight(), null, 0, imageSource.getWidth()), 
 				interpolate);
 	}
