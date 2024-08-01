@@ -29,7 +29,7 @@ switch (OperatingSystem.current()) {
 }
 
 group = 'com.github.M-Marvin'
-version = '1.1'
+version = '1.2'
 
 repositories {
 	mavenCentral()
@@ -80,6 +80,8 @@ java {
 publishing {
     publications {
         maven(MavenPublication) {
+        	groupId = 'de.m_marvin.gframe'
+        
 			from components.java
         }
     }

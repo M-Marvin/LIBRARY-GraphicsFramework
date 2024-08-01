@@ -1,16 +1,20 @@
 package de.m_marvin.gframe.windows;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWDropCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 
+import de.m_marvin.gframe.GLFWStateManager;
 import de.m_marvin.gframe.GLStateManager;
 import de.m_marvin.univec.impl.Vec2d;
+import de.m_marvin.univec.impl.Vec2f;
 import de.m_marvin.univec.impl.Vec2i;
 
 /**
@@ -24,13 +28,13 @@ public class Window {
 	
 	protected long glWindow;
 	protected GLCapabilities glCapabilities;
-	protected List<CourserEventConsumer> courserListeners = new ArrayList<>();
-	protected List<WindowEventConsumer> windowListeners = new ArrayList<>();
-	protected List<FileDropConsumer> fileDropWindowListeners = new ArrayList<>();
+	protected List<CourserEventConsumer> courserListeners = Collections.synchronizedList(new ArrayList<>());
+	protected List<WindowEventConsumer> windowListeners = Collections.synchronizedList(new ArrayList<>());
+	protected List<FileDropConsumer> fileDropWindowListeners = Collections.synchronizedList(new ArrayList<>());
 	
 	public static enum WindowEventType {
-		CLOSED,RESIZED,FOCUSED,UNFOCUSED,MAXIMIZED,MINIMIZED,RESTORED,REFRESH;
-	}
+		CLOSED,RESIZED,FOCUSED,UNFOCUSED,MAXIMIZED,MINIMIZED,RESTORED,REFRESH,DPI_CHANGE;
+	} 
 	
 	@FunctionalInterface
 	public static interface CourserEventConsumer {
@@ -39,7 +43,7 @@ public class Window {
 
 	@FunctionalInterface
 	public static interface WindowEventConsumer {
-		public void windowEvent(Optional<Vec2i> windowResize, WindowEventType type);
+		public void windowEvent(Optional<Vec2f> windowResize, WindowEventType type);
 	}
 	
 	@FunctionalInterface
@@ -56,31 +60,62 @@ public class Window {
 	 * Internally registers this class as event receiver to the GLFW window.
 	 */
 	protected void setCallbacks() {
-		GLFW.glfwSetCursorPosCallback(glWindow, (window, xpos, ypos) -> this.courserListeners.forEach((listener) -> listener.courserEvent(new Vec2d(xpos, ypos), false, false)));
-		GLFW.glfwSetCursorEnterCallback(glWindow, (window, entered) -> this.courserListeners.forEach((listener) -> listener.courserEvent(new Vec2d(0, 0), entered, !entered)));
-		GLFW.glfwSetWindowCloseCallback(glWindow, window -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.empty(), WindowEventType.CLOSED)));
-		GLFW.glfwSetFramebufferSizeCallback(glWindow, (window, width, height) -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.of(new Vec2i(width, height)), WindowEventType.RESIZED)));
-		GLFW.glfwSetWindowFocusCallback(glWindow, (window, focused) -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.empty(), focused ? WindowEventType.FOCUSED : WindowEventType.UNFOCUSED)));
-		GLFW.glfwSetWindowMaximizeCallback(glWindow, (window, maximized) -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.empty(), maximized ? WindowEventType.MAXIMIZED : WindowEventType.MINIMIZED)));
-		GLFW.glfwSetWindowRefreshCallback(glWindow, (window) -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.empty(), WindowEventType.REFRESH)));
-		GLFW.glfwSetDropCallback(glWindow, (window, count, names) -> {
-			String[] fileNames = new String[count];
-			for (int i = 0; i < count; i++) fileNames[i] = GLFWDropCallback.getName(names, i);
-			this.fileDropWindowListeners.forEach((listeners) -> listeners.fileDropEvent(fileNames));
-		});
+		if (GLFWStateManager.isOnGlfwThread()) {
+			GLFW.glfwSetCursorPosCallback(glWindow, (window, xpos, ypos) -> this.courserListeners.forEach((listener) -> listener.courserEvent(new Vec2d(xpos, ypos), false, false)));
+			GLFW.glfwSetCursorEnterCallback(glWindow, (window, entered) -> this.courserListeners.forEach((listener) -> listener.courserEvent(new Vec2d(0, 0), entered, !entered)));
+			GLFW.glfwSetWindowCloseCallback(glWindow, window -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.empty(), WindowEventType.CLOSED)));
+			GLFW.glfwSetWindowSizeCallback (glWindow, (window, width, height) -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.of(new Vec2f(width, height)), WindowEventType.RESIZED)));
+			GLFW.glfwSetWindowFocusCallback(glWindow, (window, focused) -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.empty(), focused ? WindowEventType.FOCUSED : WindowEventType.UNFOCUSED)));
+			GLFW.glfwSetWindowMaximizeCallback(glWindow, (window, maximized) -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.empty(), maximized ? WindowEventType.MAXIMIZED : WindowEventType.MINIMIZED)));
+			GLFW.glfwSetWindowRefreshCallback(glWindow, (window) -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.empty(), WindowEventType.REFRESH)));
+			GLFW.glfwSetWindowContentScaleCallback(glWindow, (window, xscale, yscale) -> this.windowListeners.forEach(listener -> listener.windowEvent(Optional.of(new Vec2f(xscale, yscale)), WindowEventType.DPI_CHANGE)));
+			GLFW.glfwSetDropCallback(glWindow, (window, count, names) -> {
+				String[] fileNames = new String[count];
+				for (int i = 0; i < count; i++) fileNames[i] = GLFWDropCallback.getName(names, i);
+				this.fileDropWindowListeners.forEach((listeners) -> listeners.fileDropEvent(fileNames));
+			});
+		} else {
+			GLFWStateManager.getGlfwExecutor().execute(() -> {
+				GLFW.glfwSetCursorPosCallback(glWindow, (window, xpos, ypos) -> this.courserListeners.forEach((listener) -> listener.courserEvent(new Vec2d(xpos, ypos), false, false)));
+				GLFW.glfwSetCursorEnterCallback(glWindow, (window, entered) -> this.courserListeners.forEach((listener) -> listener.courserEvent(new Vec2d(0, 0), entered, !entered)));
+				GLFW.glfwSetWindowCloseCallback(glWindow, window -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.empty(), WindowEventType.CLOSED)));
+				GLFW.glfwSetWindowSizeCallback (glWindow, (window, width, height) -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.of(new Vec2f(width, height)), WindowEventType.RESIZED)));
+				GLFW.glfwSetWindowFocusCallback(glWindow, (window, focused) -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.empty(), focused ? WindowEventType.FOCUSED : WindowEventType.UNFOCUSED)));
+				GLFW.glfwSetWindowMaximizeCallback(glWindow, (window, maximized) -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.empty(), maximized ? WindowEventType.MAXIMIZED : WindowEventType.MINIMIZED)));
+				GLFW.glfwSetWindowRefreshCallback(glWindow, (window) -> this.windowListeners.forEach((listener) -> listener.windowEvent(Optional.empty(), WindowEventType.REFRESH)));
+				GLFW.glfwSetWindowContentScaleCallback(glWindow, (window, xscale, yscale) -> this.windowListeners.forEach(listener -> listener.windowEvent(Optional.of(new Vec2f(xscale, yscale)), WindowEventType.DPI_CHANGE)));
+				GLFW.glfwSetDropCallback(glWindow, (window, count, names) -> {
+					String[] fileNames = new String[count];
+					for (int i = 0; i < count; i++) fileNames[i] = GLFWDropCallback.getName(names, i);
+					this.fileDropWindowListeners.forEach((listeners) -> listeners.fileDropEvent(fileNames));
+				});
+			});
+		}
 	}
 
 	/**
 	 * Internally removes this class as event receiver to the GLFW window.
 	 */
 	protected void removeCallbacks() {
-		GLFW.glfwSetCursorPosCallback(glWindow, null);
-		GLFW.glfwSetCursorEnterCallback(glWindow, null);
-		GLFW.glfwSetDropCallback(glWindow, null);
-		GLFW.glfwSetWindowCloseCallback(glWindow, null);
-		GLFW.glfwSetWindowContentScaleCallback(glWindow, null);
-		GLFW.glfwSetWindowFocusCallback(glWindow, null);
-		GLFW.glfwSetWindowMaximizeCallback(glWindow, null);
+		if (GLFWStateManager.isOnGlfwThread()) {
+			GLFW.glfwSetCursorPosCallback(glWindow, null);
+			GLFW.glfwSetCursorEnterCallback(glWindow, null);
+			GLFW.glfwSetDropCallback(glWindow, null);
+			GLFW.glfwSetWindowCloseCallback(glWindow, null);
+			GLFW.glfwSetWindowContentScaleCallback(glWindow, null);
+			GLFW.glfwSetWindowFocusCallback(glWindow, null);
+			GLFW.glfwSetWindowMaximizeCallback(glWindow, null);
+		} else {
+			GLFWStateManager.getGlfwExecutor().execute(() -> {
+				GLFW.glfwSetCursorPosCallback(glWindow, null);
+				GLFW.glfwSetCursorEnterCallback(glWindow, null);
+				GLFW.glfwSetDropCallback(glWindow, null);
+				GLFW.glfwSetWindowCloseCallback(glWindow, null);
+				GLFW.glfwSetWindowContentScaleCallback(glWindow, null);
+				GLFW.glfwSetWindowFocusCallback(glWindow, null);
+				GLFW.glfwSetWindowMaximizeCallback(glWindow, null);
+			});
+		}
 	}
 	
 	/**
@@ -91,8 +126,36 @@ public class Window {
 	 * @param title The initial title of the window
 	 */
 	public Window(int width, int height, String title) {
-		this.glWindow = GLFW.glfwCreateWindow(width, height, title, 0, 0);
+		this(width, height, title, true, true, false);
+	}
+	
+	/**
+	 * Creates a new GLFW window.
+	 * 
+	 * @param width The initial with of the window
+	 * @param height The initial height of the window
+	 * @param title The initial title of the window
+	 * @param resizable If the window can be resized
+	 * @param decorated If the window has the platform dependent frame and title bar
+	 * @param transparent If the window allows transparency
+	 */
+	public Window(int width, int height, String title, boolean resizable, boolean decorated, boolean transparent) {
+		if (GLFWStateManager.isOnGlfwThread()) {
+			this.glWindow = createWindow(width, height, title, resizable, decorated, transparent);
+		} else {
+			this.glWindow = CompletableFuture.supplyAsync(() -> {
+				return createWindow(width, height, title, resizable, decorated, transparent);
+			}, GLFWStateManager.getGlfwExecutor()).join();
+		}
 		setCallbacks();
+	}
+	
+	protected long createWindow(int width, int height, String title, boolean resizable, boolean decorated, boolean transparent) {
+		GLFW.glfwDefaultWindowHints();
+		GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, resizable ? GLFW.GLFW_TRUE : GLFW.GLFW_FALSE);
+		GLFW.glfwWindowHint(GLFW.GLFW_DECORATED, decorated ? GLFW.GLFW_TRUE : GLFW.GLFW_FALSE);
+		GLFW.glfwWindowHint(GLFW.GLFW_TRANSPARENT_FRAMEBUFFER, transparent ? GLFW.GLFW_TRUE : GLFW.GLFW_FALSE);
+		return GLFW.glfwCreateWindow(width, height, title, 0, 0);
 	}
 	
 	/**
@@ -108,7 +171,13 @@ public class Window {
 	 * @param title The new title
 	 */
 	public void setTitle(String title) {
-		GLFW.glfwSetWindowTitle(glWindow, title);
+		if (GLFWStateManager.isOnGlfwThread()) {
+			GLFW.glfwSetWindowTitle(glWindow, title);
+		} else {
+			GLFWStateManager.getGlfwExecutor().execute(() -> {
+				GLFW.glfwSetWindowTitle(glWindow, title);
+			});
+		}
 	}
 	
 	/**
@@ -196,19 +265,34 @@ public class Window {
 	 * @param x The x position
 	 * @param y The y position
 	 */
-	public void setPosition(int x, int y) {
-		GLFW.glfwSetWindowPos(this.glWindow, x, y);
+	public void setPosition(Vec2i pos) {
+		if (GLFWStateManager.isOnGlfwThread()) {
+			GLFW.glfwSetWindowPos(this.glWindow, pos.x, pos.y);
+		} else {
+			GLFWStateManager.getGlfwExecutor().execute(() -> {
+				GLFW.glfwSetWindowPos(this.glWindow, pos.x, pos.y);
+			});
+		}
 	}
 	
 	/**
 	 * Returns the position of the upper left corner of the window on the screen.
 	 * @return An integer array of the length 2 containing the x and y positions
 	 */
-	public int[] getPosition() {
-		int[] x = new int[1];
-		int[] y = new int[1];
-		GLFW.glfwGetWindowPos(glWindow, x, y);
-		return new int[] {x[0], y[0]};
+	public Vec2i getPosition() {
+		if (GLFWStateManager.isOnGlfwThread()) {
+			int[] x = new int[1];
+			int[] y = new int[1];
+			GLFW.glfwGetWindowPos(glWindow, x, y);
+			return new Vec2i(x[0], y[0]);
+		} else {
+			return CompletableFuture.supplyAsync(() -> {
+				int[] x = new int[1];
+				int[] y = new int[1];
+				GLFW.glfwGetWindowPos(glWindow, x, y);
+				return new Vec2i(x[0], y[0]);
+			}, GLFWStateManager.getGlfwExecutor()).join();
+		}
 	}
 	
 	/**
@@ -217,7 +301,13 @@ public class Window {
 	 * @param height The height
 	 */
 	public void setSize(int width, int height) {
-		GLFW.glfwSetWindowSize(glWindow, width, height);
+		if (GLFWStateManager.isOnGlfwThread()) {
+			GLFW.glfwSetWindowSize(glWindow, width, height);
+		} else {
+			GLFWStateManager.getGlfwExecutor().execute(() -> {
+				GLFW.glfwSetWindowSize(glWindow, width, height);
+			});
+		}
 	}
 	
 	/**
@@ -237,7 +327,13 @@ public class Window {
 	 * @param heightMax The max height
 	 */
 	public void setSizeLimits(int widthMin, int heightMin, int widthMax, int heightMax) {
-		GLFW.glfwSetWindowSizeLimits(glWindow, widthMin, heightMin, widthMax, heightMax);
+		if (GLFWStateManager.isOnGlfwThread()) {
+			GLFW.glfwSetWindowSizeLimits(glWindow, widthMin, heightMin, widthMax, heightMax);
+		} else {
+			GLFWStateManager.getGlfwExecutor().execute(() -> {
+				GLFW.glfwSetWindowSizeLimits(glWindow, widthMin, heightMin, widthMax, heightMax);
+			});
+		}
 	}
 	
 	/**
@@ -245,10 +341,19 @@ public class Window {
 	 * @return An integer array of the length 2 containing the width and height values
 	 */
 	public int[] getSize() {
-		int[] width = new int[1];
-		int[] height = new int[1];
-		GLFW.glfwGetWindowSize(glWindow, width, height);
-		return new int[] {width[0], height[0]};
+		if (GLFWStateManager.isOnGlfwThread()) {
+			int[] width = new int[1];
+			int[] height = new int[1];
+			GLFW.glfwGetWindowSize(glWindow, width, height);
+			return new int[] {width[0], height[0]};
+		} else {
+			return CompletableFuture.supplyAsync(() -> {
+				int[] width = new int[1];
+				int[] height = new int[1];
+				GLFW.glfwGetWindowSize(glWindow, width, height);
+				return new int[] {width[0], height[0]};
+			}, GLFWStateManager.getGlfwExecutor()).join();
+		}
 	}
 	
 	/**
@@ -256,19 +361,34 @@ public class Window {
 	 * @param x The x position
 	 * @param y The y position
 	 */
-	public void setCourserPos(int x, int y) {
-		GLFW.glfwSetCursorPos(glWindow, x, y);
+	public void setCourserPos(Vec2d pos) {
+		if (GLFWStateManager.isOnGlfwThread()) {
+			GLFW.glfwSetCursorPos(glWindow, pos.x, pos.y);
+		} else {
+			GLFWStateManager.getGlfwExecutor().execute(() -> {
+				GLFW.glfwSetCursorPos(glWindow, pos.x, pos.y);
+			});
+		}
 	}
 	
 	/**
 	 * Returns the position of the cursor on the screen.
 	 * @return An integer array of the length 2 containing the x and y positions
 	 */
-	public double[] getCourserPos() {
-		double[] x = new double[1];
-		double[] y = new double[1];
-		GLFW.glfwGetCursorPos(glWindow, x, y);
-		return new double[] {x[0], y[0]};
+	public Vec2d getCourserPos() {
+		if (GLFWStateManager.isOnGlfwThread()) {
+			double[] x = new double[1];
+			double[] y = new double[1];
+			GLFW.glfwGetCursorPos(glWindow, x, y);
+			return new Vec2d(x[0], y[0]);
+		} else {
+			return CompletableFuture.supplyAsync(() -> {
+				double[] x = new double[1];
+				double[] y = new double[1];
+				GLFW.glfwGetCursorPos(glWindow, x, y);
+				return new Vec2d(x[0], y[0]);
+			}, GLFWStateManager.getGlfwExecutor()).join();
+		}
 	}
 	
 	/**
@@ -276,7 +396,13 @@ public class Window {
 	 * @param opacity The opacity factor of the window.
 	 */
 	public void setOpacity(float opacity) {
-		GLFW.glfwSetWindowOpacity(glWindow, opacity);
+		if (GLFWStateManager.isOnGlfwThread()) {
+			GLFW.glfwSetWindowOpacity(glWindow, opacity);
+		} else {
+			GLFWStateManager.getGlfwExecutor().execute(() -> {
+				GLFW.glfwSetWindowOpacity(glWindow, opacity);
+			});
+		}
 	}
 	
 	/**
@@ -284,7 +410,33 @@ public class Window {
 	 * @return The current opacity factor
 	 */
 	public float getOpacity() {
-		return GLFW.glfwGetWindowOpacity(glWindow);
+		if (GLFWStateManager.isOnGlfwThread()) {
+			return GLFW.glfwGetWindowOpacity(glWindow);
+		} else {
+			return CompletableFuture.supplyAsync(() -> {
+				return GLFW.glfwGetWindowOpacity(glWindow);
+			}, GLFWStateManager.getGlfwExecutor()).join();
+		}
+	}
+	
+	/**
+	 * Returns the content scale of this window
+	 * @return The content scale of this window on the x and y axis
+	 */
+	public Vec2f getContentScale() {
+		if (GLFWStateManager.isOnGlfwThread()) {
+			float[] x = new float[1];
+			float[] y = new float[1];
+			GLFW.glfwGetWindowContentScale(this.windowId(), x, y);
+			return new Vec2f(x[0], y[0]);
+		} else {
+			return CompletableFuture.supplyAsync(() -> {
+				float[] x = new float[1];
+				float[] y = new float[1];
+				GLFW.glfwGetWindowContentScale(this.windowId(), x, y);
+				return new Vec2f(x[0], y[0]);
+			}, GLFWStateManager.getGlfwExecutor()).join();
+		}
 	}
 	
 	/**
@@ -304,14 +456,6 @@ public class Window {
 	}
 	
 	/**
-	 * Polls and processes events from the GLFW window.
-	 * The events of the window will only fire while this method is called.
-	 */
-	public void pollEvents() {
-		GLFW.glfwPollEvents();
-	}
-	
-	/**
 	 * Returns true if the close button of the window was pressed.
 	 * @return true if the window was requested to close
 	 */
@@ -325,7 +469,13 @@ public class Window {
 	 */
 	public void destroy() {
 		removeCallbacks();
-		GLFW.glfwDestroyWindow(glWindow);
+		if (GLFWStateManager.isOnGlfwThread()) {
+			GLFW.glfwDestroyWindow(glWindow);
+		} else {
+			GLFWStateManager.getGlfwExecutor().execute(() -> {
+				GLFW.glfwDestroyWindow(glWindow);
+			});
+		}
 	}
 	
 	/**
@@ -333,10 +483,46 @@ public class Window {
 	 * @param visible True if the window should be visible
 	 */
 	public void setVisible(boolean visible) {
-		if (visible) {
-			GLFW.glfwShowWindow(glWindow);
+		if (GLFWStateManager.isOnGlfwThread()) {
+			if (visible) {
+				GLFW.glfwShowWindow(glWindow);
+			} else {
+				GLFW.glfwHideWindow(glWindow);
+			}
 		} else {
-			GLFW.glfwHideWindow(glWindow);
+			GLFWStateManager.getGlfwExecutor().execute(() -> {
+				if (visible) {
+					GLFW.glfwShowWindow(glWindow);
+				} else {
+					GLFW.glfwHideWindow(glWindow);
+				}
+			});
+		}
+	}
+	
+	/**
+	 * Maximizes the window (sets it to the largest allowed width and height)
+	 */
+	public void maximize() {
+		if (GLFWStateManager.isOnGlfwThread()) {
+			GLFW.glfwMaximizeWindow(glWindow);
+		} else {
+			GLFWStateManager.getGlfwExecutor().execute(() -> {
+				
+			});
+		}
+	}
+	
+	/**
+	 * Minimizes the window (puts it in the task bar)
+	 */
+	public void minimize() {
+		if (GLFWStateManager.isOnGlfwThread()) {
+			GLFW.glfwIconifyWindow(glWindow);
+		} else {
+			GLFWStateManager.getGlfwExecutor().execute(() -> {
+				
+			});
 		}
 	}
 	

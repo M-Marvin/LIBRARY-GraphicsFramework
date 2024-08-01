@@ -3,8 +3,6 @@ package de.m_marvin.gframe;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
 
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL33;
 
@@ -15,28 +13,6 @@ import org.lwjgl.opengl.GL33;
  * @author Marvin Koehler
  */
 public class GLStateManager {
-
-	/**
-	 * Initializes GLFW, must be called before any OpenGL or GLFW related methods can be used.
-	 * This function should be called on the thread used to process user input and game logic!
-	 * 
-	 * @param errorStream Error stream to print GLFW and OpenGL errors.
-	 * @return True if GLFW could be initialized, false if an error occurred
-	 */
-	public static boolean initialize(PrintStream errorStream) {
-		if (!GLFW.glfwInit()) return false;
-		GLFWErrorCallback.createPrint(errorStream).set();
-		return true;
-	}
-	
-	/**
-	 * Calls the GLFW terminate method.
-	 * Should be called to cleanup everything.
-	 * This function must be called on the same thread on which {@link #initialize(PrintStream)} was!
-	 */
-	public static void terminate() {
-		GLFW.glfwTerminate();
-	}
 	
 	/**
 	 * Returns true if the calling thread has a OpenGL context bound to it and can perform rendering operations.

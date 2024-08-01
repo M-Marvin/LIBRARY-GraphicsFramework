@@ -3,13 +3,17 @@ package de.m_marvin.gframe.inputbinding;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 import org.lwjgl.glfw.GLFW;
 
+import de.m_marvin.gframe.GLFWStateManager;
 import de.m_marvin.univec.impl.Vec2d;
 
 /**
@@ -26,17 +30,25 @@ import de.m_marvin.univec.impl.Vec2d;
  */
 public class UserInput {
 	
-	protected Map<String, InputSet> bindings = new HashMap<>();
-	protected Map<String, Boolean> bindingsState = new HashMap<>();
-	protected Map<String, Boolean> bindingsStateLast = new HashMap<>();
-	protected List<Long> attachedWindows = new ArrayList<>();
-	protected List<KeyEventConsumer> keyboardListeners = new ArrayList<>();
-	protected List<MouseEventConsumer> mouseListeners = new ArrayList<>();
-	protected List<TextInputConsumer> textInputListeners = new ArrayList<>();
-	protected List<CursorEventConsumer> cursorListeners = new ArrayList<>();
+	protected Map<String, InputSet> bindings = Collections.synchronizedMap(new HashMap<>());
+	protected Map<String, Boolean> bindingsState = Collections.synchronizedMap(new HashMap<>());
+	protected Map<String, Boolean> bindingsStateLast = Collections.synchronizedMap(new HashMap<>());
+	protected List<Long> attachedWindows = Collections.synchronizedList(new ArrayList<>());
+	protected List<KeyEventConsumer> keyboardListeners = Collections.synchronizedList(new ArrayList<>());
+	protected List<MouseEventConsumer> mouseListeners = Collections.synchronizedList(new ArrayList<>());
+	protected List<TextInputConsumer> textInputListeners = Collections.synchronizedList(new ArrayList<>());
+	protected List<CursorEventConsumer> cursorListeners = Collections.synchronizedList(new ArrayList<>());
 	
 	protected Vec2d cursorOffset = new Vec2d(0, 0);
 	protected Vec2d cursorScale = new Vec2d(1, 1);
+	
+	public static Executor getUserInputExecutor() {
+		return GLFWStateManager.getGlfwExecutor();
+	}
+	
+	public static boolean isOnUserInputThread() {
+		return GLFWStateManager.isOnGlfwThread();
+	}
 	
 	/**
 	 * Creates a new user-input class to store key-bindings and event-listeners.
@@ -230,7 +242,13 @@ public class UserInput {
 	 * @param clipboard The string to copy into the clipboard
 	 */
 	public void setClipboardString(String clipboard) {
-		GLFW.glfwSetClipboardString(0, clipboard);
+		if (!isOnUserInputThread()) {
+			getUserInputExecutor().execute(() -> {
+				GLFW.glfwSetClipboardString(0, clipboard);
+			});
+		} else {
+			GLFW.glfwSetClipboardString(0, clipboard);
+		}
 	}
 	
 	/**
@@ -238,7 +256,13 @@ public class UserInput {
 	 * @return The string currently in the clipboard
 	 */
 	public String getClipboardString() {
-		return GLFW.glfwGetClipboardString(0);
+		if (!isOnUserInputThread()) {
+			return GLFW.glfwGetClipboardString(0);
+		} else {
+			return CompletableFuture.supplyAsync(() -> {
+				return GLFW.glfwGetClipboardString(0);
+			}, getUserInputExecutor()).join();
+		}
 	}
 	
 	/**
@@ -247,12 +271,23 @@ public class UserInput {
 	 */
 	public void detachWindow(long windowId) {
 		this.attachedWindows.remove(windowId);
-		GLFW.glfwSetKeyCallback(windowId, null);
-		GLFW.glfwSetMouseButtonCallback(windowId, null);
-		GLFW.glfwSetCursorPosCallback(windowId, null);
-		GLFW.glfwSetCursorEnterCallback(windowId, null);
-		GLFW.glfwSetScrollCallback(windowId, null);
-		GLFW.glfwSetCharCallback(windowId, null);
+		if (!isOnUserInputThread()) {
+			GLFW.glfwSetKeyCallback(windowId, null);
+			GLFW.glfwSetMouseButtonCallback(windowId, null);
+			GLFW.glfwSetCursorPosCallback(windowId, null);
+			GLFW.glfwSetCursorEnterCallback(windowId, null);
+			GLFW.glfwSetScrollCallback(windowId, null);
+			GLFW.glfwSetCharCallback(windowId, null);
+		} else {
+			getUserInputExecutor().execute(() -> {
+				GLFW.glfwSetKeyCallback(windowId, null);
+				GLFW.glfwSetMouseButtonCallback(windowId, null);
+				GLFW.glfwSetCursorPosCallback(windowId, null);
+				GLFW.glfwSetCursorEnterCallback(windowId, null);
+				GLFW.glfwSetScrollCallback(windowId, null);
+				GLFW.glfwSetCharCallback(windowId, null);
+			});
+		}
 	}
 	
 	/**
@@ -261,12 +296,23 @@ public class UserInput {
 	 */
 	public void attachToWindow(long windowId) {
 		this.attachedWindows.add(windowId);
-		GLFW.glfwSetKeyCallback(windowId, (window, key, scancode, action, mods) -> this.keyboardListeners.forEach((listener) -> listener.keyEvent(key, scancode, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
-		GLFW.glfwSetMouseButtonCallback(windowId, (window, button, action, mods) -> this.mouseListeners.forEach((listener) -> listener.mouseEvent(Optional.empty(), button, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
-		GLFW.glfwSetCursorPosCallback(windowId, (window, xpos, ypos) -> this.cursorListeners.forEach((listener) -> listener.cursorMove(new Vec2d(xpos, ypos).mul(this.cursorScale).add(this.cursorOffset), false, false)));
-		GLFW.glfwSetCursorEnterCallback(windowId, (window, entered) -> this.cursorListeners.forEach((listener) -> listener.cursorMove(getCursorPosition(windowId).mul(this.cursorScale).add(this.cursorOffset), entered, !entered)));
-		GLFW.glfwSetScrollCallback(windowId, (window, xoffset, yoffset) ->  this.mouseListeners.forEach((listener) -> listener.mouseEvent(Optional.of(new Vec2d(xoffset, yoffset).mul(this.cursorScale).add(this.cursorOffset)), 0, false, false)));		
-		GLFW.glfwSetCharCallback(windowId, (window, codepoint) -> this.textInputListeners.forEach((listener) -> listener.input((char) codepoint, Optional.empty())));
+		if (!isOnUserInputThread()) {
+			GLFW.glfwSetKeyCallback(windowId, (window, key, scancode, action, mods) -> this.keyboardListeners.forEach((listener) -> listener.keyEvent(key, scancode, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
+			GLFW.glfwSetMouseButtonCallback(windowId, (window, button, action, mods) -> this.mouseListeners.forEach((listener) -> listener.mouseEvent(Optional.empty(), button, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
+			GLFW.glfwSetCursorPosCallback(windowId, (window, xpos, ypos) -> this.cursorListeners.forEach((listener) -> listener.cursorMove(new Vec2d(xpos, ypos).mul(this.cursorScale).add(this.cursorOffset), false, false)));
+			GLFW.glfwSetCursorEnterCallback(windowId, (window, entered) -> this.cursorListeners.forEach((listener) -> listener.cursorMove(getCursorPosition(windowId).mul(this.cursorScale).add(this.cursorOffset), entered, !entered)));
+			GLFW.glfwSetScrollCallback(windowId, (window, xoffset, yoffset) ->  this.mouseListeners.forEach((listener) -> listener.mouseEvent(Optional.of(new Vec2d(xoffset, yoffset).mul(this.cursorScale).add(this.cursorOffset)), 0, false, false)));		
+			GLFW.glfwSetCharCallback(windowId, (window, codepoint) -> this.textInputListeners.forEach((listener) -> listener.input((char) codepoint, Optional.empty())));
+		} else {
+			getUserInputExecutor().execute(() -> {
+				GLFW.glfwSetKeyCallback(windowId, (window, key, scancode, action, mods) -> this.keyboardListeners.forEach((listener) -> listener.keyEvent(key, scancode, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
+				GLFW.glfwSetMouseButtonCallback(windowId, (window, button, action, mods) -> this.mouseListeners.forEach((listener) -> listener.mouseEvent(Optional.empty(), button, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
+				GLFW.glfwSetCursorPosCallback(windowId, (window, xpos, ypos) -> this.cursorListeners.forEach((listener) -> listener.cursorMove(new Vec2d(xpos, ypos).mul(this.cursorScale).add(this.cursorOffset), false, false)));
+				GLFW.glfwSetCursorEnterCallback(windowId, (window, entered) -> this.cursorListeners.forEach((listener) -> listener.cursorMove(getCursorPosition(windowId).mul(this.cursorScale).add(this.cursorOffset), entered, !entered)));
+				GLFW.glfwSetScrollCallback(windowId, (window, xoffset, yoffset) ->  this.mouseListeners.forEach((listener) -> listener.mouseEvent(Optional.of(new Vec2d(xoffset, yoffset).mul(this.cursorScale).add(this.cursorOffset)), 0, false, false)));		
+				GLFW.glfwSetCharCallback(windowId, (window, codepoint) -> this.textInputListeners.forEach((listener) -> listener.input((char) codepoint, Optional.empty())));
+			});
+		}
 	}
 	
 	/**
@@ -322,10 +368,19 @@ public class UserInput {
 	 * @return true if the key is pressed
 	 */
 	public boolean isKeyPressed(int key) {
-		for (long windowId : this.attachedWindows) {
-			if (GLFW.glfwGetKey(windowId, key) == GLFW.GLFW_PRESS) return true;
+		if (!isOnUserInputThread()) {
+			return CompletableFuture.supplyAsync(() -> {
+				for (long windowId : this.attachedWindows) {
+					if (GLFW.glfwGetKey(windowId, key) == GLFW.GLFW_PRESS) return true;
+				}
+				return false;
+			}, getUserInputExecutor()).join();
+		} else {
+			for (long windowId : this.attachedWindows) {
+				if (GLFW.glfwGetKey(windowId, key) == GLFW.GLFW_PRESS) return true;
+			}
+			return false;
 		}
-		return false;
 	}
 	
 	/**
@@ -335,10 +390,19 @@ public class UserInput {
 	 * @return true if the button is pressed
 	 */
 	public boolean isMouseButtonPressed(int button) {
-		for (long windowId : this.attachedWindows) {
-			if (GLFW.glfwGetMouseButton(windowId, button) == GLFW.GLFW_PRESS) return true;
+		if (!isOnUserInputThread()) {
+			return CompletableFuture.supplyAsync(() ->  {
+				for (long windowId : this.attachedWindows) {
+					if (GLFW.glfwGetMouseButton(windowId, button) == GLFW.GLFW_PRESS) return true;
+				}
+				return false;
+			}, getUserInputExecutor()).join();
+		} else {
+			for (long windowId : this.attachedWindows) {
+				if (GLFW.glfwGetMouseButton(windowId, button) == GLFW.GLFW_PRESS) return true;
+			}
+			return false;
 		}
-		return false;
 	}
 	
 	/**
@@ -362,10 +426,19 @@ public class UserInput {
 	 * @return A Vec2d with the position of the cursor
 	 */
 	public Vec2d getCursorPosition(long windowId) {
-		double[] x = new double[1];
-		double[] y = new double[1];
-		GLFW.glfwGetCursorPos(windowId, x, y);
-		return new Vec2d(x[0], y[0]);
+		if (!isOnUserInputThread()) {
+			return CompletableFuture.supplyAsync(() -> {
+				double[] x = new double[1];
+				double[] y = new double[1];
+				GLFW.glfwGetCursorPos(windowId, x, y);
+				return new Vec2d(x[0], y[0]);
+			}, getUserInputExecutor()).join();
+		} else {
+			double[] x = new double[1];
+			double[] y = new double[1];
+			GLFW.glfwGetCursorPos(windowId, x, y);
+			return new Vec2d(x[0], y[0]);
+		}
 	}
 	
 }

@@ -2,6 +2,7 @@ package de.m_marvin.gframe.inputbinding.bindingsource;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -26,7 +27,13 @@ public class MouseSource {
 		
 		@Override
 		public boolean isPressed(long window) {
-			return GLFW.glfwGetMouseButton(window, this.key) == GLFW.GLFW_PRESS;
+			if (UserInput.isOnUserInputThread()) {
+				return GLFW.glfwGetMouseButton(window, this.key) == GLFW.GLFW_PRESS;
+			} else {
+				return CompletableFuture.supplyAsync(() -> {
+					return GLFW.glfwGetMouseButton(window, this.key) == GLFW.GLFW_PRESS;
+				}, UserInput.getUserInputExecutor()).join();
+			}
 		}
 		
 	}

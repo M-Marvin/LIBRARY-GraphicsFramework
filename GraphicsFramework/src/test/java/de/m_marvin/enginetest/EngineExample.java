@@ -11,6 +11,7 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL33;
 
 import de.m_marvin.enginetest.particles.Particle;
+import de.m_marvin.gframe.GLFWStateManager;
 import de.m_marvin.gframe.GLStateManager;
 import de.m_marvin.gframe.buffers.BufferBuilder;
 import de.m_marvin.gframe.buffers.BufferUsage;
@@ -90,7 +91,7 @@ public class EngineExample {
 		textureLoader = new TextureLoader<ResourceLocation, ResourceFolders>(ResourceFolders.TEXTURES, resourceLoader);
 		
 		// Setup OpenGL and GLFW natives
-		GLStateManager.initialize(System.err);
+		GLFWStateManager.initialize(System.err);
 		
 		// Setup main window
 		mainWindow = new Window(1000, 600, "Engine Test");
@@ -117,7 +118,7 @@ public class EngineExample {
 		mainWindow.destroy();
 		
 		// Terminate OpenGL and GLFW natives
-		GLStateManager.terminate();
+		GLFWStateManager.terminate();
 		
 	}
 	
@@ -142,6 +143,8 @@ public class EngineExample {
 			timeMillis = System.currentTimeMillis();
 			deltaTick += (timeMillis - lastFrameTime) / (float) tickTime;
 			deltaFrame += (timeMillis - lastFrameTime) / (float) frameTime;
+
+			GLFWStateManager.update();
 			
 			if (deltaTick >= 1) {
 				deltaTick--;
@@ -188,7 +191,7 @@ public class EngineExample {
 		textureLoader.buildAtlasMapFromTextures(OBJECT_TEXTURE_LOCATION, OBJECT_TEXTURE_ATLAS_INTERPOLATED, false, true, 10, false);
 
 		windowResized(new Vec2i(this.mainWindow.getSize()[0], this.mainWindow.getSize()[1]));
-		this.mainWindow.registerWindowListener((windowResize, type) -> { if (windowResize.isPresent()) windowResized(windowResize.get()); });
+		this.mainWindow.registerWindowListener((windowResize, type) -> { if (windowResize.isPresent()) windowResized(new Vec2i(windowResize.get())); });
 		
 		// Setup world
 		physicWorld = new Space3D();
@@ -332,7 +335,6 @@ public class EngineExample {
 	
 	private void tick() {
 		
-		mainWindow.pollEvents();
 		this.inputHandler.update();
 		
 		if (inputHandler.isBindingActive("movement.orientate")) {
