@@ -341,18 +341,18 @@ public class Window {
 	 * Returns the width and height of window on the screen.
 	 * @return An integer array of the length 2 containing the width and height values
 	 */
-	public int[] getSize() {
+	public Vec2i getSize() {
 		if (GLFWStateManager.isOnGlfwThread()) {
 			int[] width = new int[1];
 			int[] height = new int[1];
 			GLFW.glfwGetWindowSize(glWindow, width, height);
-			return new int[] {width[0], height[0]};
+			return new Vec2i(width[0], height[0]);
 		} else {
 			return CompletableFuture.supplyAsync(() -> {
 				int[] width = new int[1];
 				int[] height = new int[1];
 				GLFW.glfwGetWindowSize(glWindow, width, height);
-				return new int[] {width[0], height[0]};
+				return new Vec2i(width[0], height[0]);
 			}, GLFWStateManager.getGlfwExecutor()).join();
 		}
 	}
@@ -509,7 +509,7 @@ public class Window {
 			GLFW.glfwMaximizeWindow(glWindow);
 		} else {
 			GLFWStateManager.getGlfwExecutor().execute(() -> {
-				
+				GLFW.glfwMaximizeWindow(glWindow);
 			});
 		}
 	}
@@ -522,7 +522,7 @@ public class Window {
 			GLFW.glfwIconifyWindow(glWindow);
 		} else {
 			GLFWStateManager.getGlfwExecutor().execute(() -> {
-				
+				GLFW.glfwIconifyWindow(glWindow);
 			});
 		}
 	}
