@@ -69,6 +69,8 @@ dependencies {
 	// Physic Engine (Testing)
 	testImplementation "cz.advel.jbullet:jbullet:20101010-1"
 	
+	testImplementation "com.github.quickhull3d:quickhull3d:1.0.0"
+	
 }
 
 java {
