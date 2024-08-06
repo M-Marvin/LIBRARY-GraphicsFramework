@@ -297,6 +297,7 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 			throw new IllegalStateException("Not all elements filled!");
 		} else {
 			this.buildingIndecies = true;
+			ensureCapacity(NumberFormat.UINT.size());
 			putInt(i);
 			this.indexCount++;
 		}
@@ -310,6 +311,7 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 			throw new IllegalStateException("Not all elements filled!");
 		} else {
 			this.buildingIndecies = true;
+			ensureCapacity(NumberFormat.UINT.size() * i.length);
 			putIntArr(i);
 			this.indexCount += i.length;
 		}
