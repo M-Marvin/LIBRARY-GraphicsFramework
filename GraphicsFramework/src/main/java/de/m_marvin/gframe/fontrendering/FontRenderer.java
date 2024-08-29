@@ -81,6 +81,25 @@ public class FontRenderer {
 		return width;
 	}
 	
+	public static String fitText(String string, Font font, int maxWidth) {
+		
+		int nc = 0;
+		int tw = 0;
+//		int[] cw = new int[string.length()];
+		FontMetrics metrics = fontMetricsFactory.apply(font);
+		for (int i = 0; i < string.length(); i++) {
+			int w = metrics.charWidth(string.charAt(i));
+			if (tw + w > maxWidth) break;
+//			cw[i] = w;
+			tw += w;
+			nc++;
+		}
+		
+		if (nc == string.length()) return string;
+		return string.substring(0, nc);
+		
+	}
+	
 	public static int getFontHeight(Font font) {
 		FontMetrics metrics = fontMetricsFactory.apply(font);
 		return metrics.getHeight();

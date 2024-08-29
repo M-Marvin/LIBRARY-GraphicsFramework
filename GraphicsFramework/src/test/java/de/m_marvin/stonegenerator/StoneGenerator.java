@@ -197,6 +197,7 @@ public class StoneGenerator {
 		Color[] colors = { 
 				Color.RED, 
 				Color.green, 
+				
 				Color.black, 
 				Color.blue, 
 				Color.yellow, 

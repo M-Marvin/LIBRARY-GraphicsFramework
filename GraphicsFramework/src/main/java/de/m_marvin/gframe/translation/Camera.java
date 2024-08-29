@@ -29,6 +29,14 @@ public class Camera {
 		this.rotation = rotation;
 	}
 	
+	public void setPosition(Vec3f position) {
+		this.position = position;
+	}
+	
+	public void setRotation(Quaternionf rotation) {
+		this.rotation = rotation;
+	}
+	
 	/**
 	 * Creates a new camera on th given position with the given rotation in euler angles.
 	 * @param position The position of the camera
