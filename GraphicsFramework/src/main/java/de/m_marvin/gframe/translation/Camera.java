@@ -18,6 +18,7 @@ public class Camera {
 	protected Matrix4f viewMatrix = new Matrix4f();
 	protected Vec3f position;
 	protected Quaternionf rotation;
+	protected boolean hasChanged;
 	
 	/**
 	 * Creates a new camera on the given position.
@@ -27,14 +28,17 @@ public class Camera {
 	public Camera(Vec3f position, Quaternionf rotation) {
 		this.position = position;
 		this.rotation = rotation;
+		this.hasChanged = true;
 	}
 	
 	public void setPosition(Vec3f position) {
 		this.position = position;
+		this.hasChanged = true;
 	}
 	
 	public void setRotation(Quaternionf rotation) {
 		this.rotation = rotation;
+		this.hasChanged = true;
 	}
 	
 	/**
@@ -52,12 +56,14 @@ public class Camera {
 	public Camera() {
 		this(new Vec3f(0F, 0F, 0F), new Quaternionf(new Vec3i(0, 0, 0), 0F));
 	}
+	
 	/**
 	 * Moves the camera by the specified xyz coordinates.
 	 * @param linearMotion The xyz offset to move the camera
 	 */
 	public void offset(Vec3f linearMotion) {
 		this.position.addI(linearMotion);
+		this.hasChanged = true;
 	}
 	
 	/**
@@ -76,6 +82,7 @@ public class Camera {
 	 */
 	public void rotate(Vec3i axisVec, float ammount) {
 		this.rotation.mulI(new Quaternionf(axisVec, (float) Math.toRadians(ammount)));
+		this.hasChanged = true;
 	}
 	
 	/**
@@ -85,6 +92,7 @@ public class Camera {
 	 */
 	public void orientate(Vec3i axisVec, float ammount) {
 		this.rotation = new Quaternionf(axisVec, (float) Math.toRadians(ammount)).mul(this.rotation);
+		this.hasChanged = true;
 	}
 	
 	/**
@@ -92,9 +100,11 @@ public class Camera {
 	 * Must be called to let the last translation calls take effect.
 	 */
 	public void upadteViewMatrix() {
+		if (!this.hasChanged) return;
 		this.viewMatrix.identity();
 		this.viewMatrix.mulI(rotation.conj());
 		this.viewMatrix.mulI(Matrix4f.translateMatrix(-this.position.x(), -this.position.y(), -this.position.z()));
+		this.hasChanged = false;
 	}
 	
 	/**
