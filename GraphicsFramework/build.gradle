@@ -55,7 +55,7 @@ dependencies {
 	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
 	
 	// UniVec
-	api 'com.github.M-Marvin:LIBRARY-UnifiedVectors:v1.3'
+	api 'com.github.M-Marvin:LIBRARY-UnifiedVectors:v1.4'
 	
 	// GSON
 	api "com.google.code.gson:gson:2.9.1"

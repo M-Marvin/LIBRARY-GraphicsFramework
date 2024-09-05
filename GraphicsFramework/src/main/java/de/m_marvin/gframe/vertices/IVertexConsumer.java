@@ -6,8 +6,6 @@ import de.m_marvin.gframe.translation.PoseStack;
 import de.m_marvin.unimat.api.IMatrix3f;
 import de.m_marvin.unimat.api.IMatrix4f;
 import de.m_marvin.unimat.api.IQuaternion;
-import de.m_marvin.univec.api.IVector3;
-import de.m_marvin.univec.api.IVector4;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec4f;
 
@@ -33,7 +31,7 @@ public interface IVertexConsumer {
 	 * @return This consumer to apply more draw calls
 	 */
 	public default IVertexConsumer vertex(PoseStack poseStack, float x, float y, float z) {
-		IVector4<Float> vec = poseStack.last().pose().translate(new Vec4f(x, y, z, 1));
+		Vec4f vec = poseStack.last().pose().translate(new Vec4f(x, y, z, 1));
 		return vertex(vec.x(), vec.y(), vec.z());
 	}
 
@@ -45,7 +43,7 @@ public interface IVertexConsumer {
 	 * @return This consumer to apply more draw calls
 	 */
 	public default IVertexConsumer vertex(PoseStack poseStack, float x, float y) {
-		IVector4<Float> vec = poseStack.last().pose().translate(new Vec4f(x, y, 0, 1));
+		Vec4f vec = poseStack.last().pose().translate(new Vec4f(x, y, 0, 1));
 		return vec2f(vec.x(), vec.y());
 	}
 	
@@ -79,7 +77,7 @@ public interface IVertexConsumer {
 	 * @return This consumer to apply more draw calls
 	 */
 	public default IVertexConsumer normal(PoseStack poseStack, float x, float y, float z) {
-		IVector3<Float> vec = poseStack.last().normal().translate(new Vec3f(x, y, z));
+		Vec3f vec = poseStack.last().normal().translate(new Vec3f(x, y, z));
 		return normal(vec.x(), vec.y(), vec.z());
 	}
 	
