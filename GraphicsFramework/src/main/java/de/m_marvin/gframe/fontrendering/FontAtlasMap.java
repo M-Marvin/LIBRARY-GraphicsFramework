@@ -11,7 +11,7 @@ import de.m_marvin.gframe.textures.atlasbuilding.AtlasLayoutBuilder.AtlasLayout;
 import de.m_marvin.gframe.textures.maps.AbstractTextureMap;
 import de.m_marvin.gframe.textures.utility.TextureDataFormat;
 import de.m_marvin.gframe.textures.utility.TextureFormat;
-import de.m_marvin.simplelogging.printing.Logger;
+import de.m_marvin.simplelogging.Log;
 import de.m_marvin.univec.impl.Vec2i;
 import de.m_marvin.univec.impl.Vec4f;
 
@@ -97,7 +97,7 @@ public class FontAtlasMap<R extends IResourceProvider<R>> extends AbstractTextur
 		if (character2uv.containsKey(character)) {
 			activeCharacter = character;
 		} else {
-			Logger.defaultLogger().logWarn("The character-texture for '" + character + "' does not exist in the atlas!");
+			Log.defaultLogger().warn("The character-texture for '%c' does not exist in the atlas!", character);
 			activeCharacter = 0;
 		}
 	}

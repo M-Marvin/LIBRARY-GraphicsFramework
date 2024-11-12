@@ -1,22 +1,13 @@
 package de.m_marvin.stonegenerator;
 
 import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.IntStream;
-
-import javax.imageio.ImageIO;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL33;
 
-import de.m_marvin.enginetest.ParticleType;
 import de.m_marvin.enginetest.ResourceFolders;
-import de.m_marvin.enginetest.Space3D;
-import de.m_marvin.enginetest.particles.Particle;
 import de.m_marvin.gframe.GLFWStateManager;
 import de.m_marvin.gframe.GLStateManager;
 import de.m_marvin.gframe.buffers.BufferBuilder;
@@ -32,20 +23,13 @@ import de.m_marvin.gframe.resources.ResourceLoader;
 import de.m_marvin.gframe.resources.defimpl.ResourceLocation;
 import de.m_marvin.gframe.shaders.ShaderInstance;
 import de.m_marvin.gframe.shaders.ShaderLoader;
-import de.m_marvin.gframe.textures.texture.Texture;
-import de.m_marvin.gframe.textures.utility.TextureDataFormat;
 import de.m_marvin.gframe.translation.Camera;
 import de.m_marvin.gframe.translation.PoseStack;
-import de.m_marvin.gframe.utility.NumberFormat;
-import de.m_marvin.gframe.vertices.RenderPrimitive;
-import de.m_marvin.gframe.vertices.VertexFormat;
 import de.m_marvin.gframe.windows.Window;
-import de.m_marvin.simplelogging.printing.Logger;
 import de.m_marvin.unimat.api.IQuaternionMath.EulerOrder;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.unimat.impl.Quaternionf;
 import de.m_marvin.univec.impl.Vec2i;
-import de.m_marvin.univec.impl.Vec3d;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
 
@@ -82,9 +66,6 @@ public class StoneGenerator {
 	protected List<Stone> stones;
 	
 	public void run() {
-		
-		// Start new logger
-		Logger.setDefaultLogger(new Logger());
 
 		// Redirect run folder (since all resources are located in the test folder)
 		ResourceLoader.redirectRuntimeFolder(StoneGenerator.class.getClassLoader().getResource("").getPath().replace("bin/main/", "run/assets/"));

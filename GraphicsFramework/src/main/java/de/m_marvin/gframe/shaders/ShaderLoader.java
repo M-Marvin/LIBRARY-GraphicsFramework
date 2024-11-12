@@ -21,8 +21,7 @@ import de.m_marvin.gframe.resources.ISourceFolder;
 import de.m_marvin.gframe.resources.ResourceLoader;
 import de.m_marvin.gframe.utility.NumberFormat;
 import de.m_marvin.gframe.vertices.VertexFormat;
-import de.m_marvin.simplelogging.printing.LogType;
-import de.m_marvin.simplelogging.printing.Logger;
+import de.m_marvin.simplelogging.Log;
 
 /**
  * Handles the loading of shaders from files.
@@ -74,8 +73,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 		try {
 			loadShadersIn0(shaderFolderLocation, recusive);
 		} catch (IOException e) {
-			Logger.defaultLogger().logWarn("Failed to load some of the shaders from " + shaderFolderLocation.nameString() + "!");
-			Logger.defaultLogger().printException(LogType.WARN, e);
+			Log.defaultLogger().warn("Failed to load some of the shaders from %s!", shaderFolderLocation.nameString(), e);
 		}
 	}
 	
@@ -123,8 +121,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 			try {
 				shaderCache.put(shaderLocation, load(shaderLocation, format));
 			} catch (IOException e) {
-				Logger.defaultLogger().logWarn("Failed to load shader " + shaderLocation.nameString());
-				Logger.defaultLogger().printException(LogType.WARN, e);
+				Log.defaultLogger().warn("Failed to load shader %s!", shaderLocation.nameString(), e);
 				return null;
 			}
 		}
@@ -152,7 +149,7 @@ public class ShaderLoader<R extends IResourceProvider<R>, FE extends ISourceFold
 	 */
 	public ShaderInstance getShader(R shaderName) {
 		if (!this.shaderCache.containsKey(shaderName)) {
-			Logger.defaultLogger().logWarn("Shader " + shaderName.nameString() + " does not exist!");
+			Log.defaultLogger().warn("Shader %s does not exist!", shaderName.nameString());
 			this.shaderCache.put(shaderName, null);
 		}
 		return this.shaderCache.get(shaderName);

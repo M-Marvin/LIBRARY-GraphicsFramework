@@ -31,7 +31,6 @@ import de.m_marvin.gframe.utility.NumberFormat;
 import de.m_marvin.gframe.vertices.RenderPrimitive;
 import de.m_marvin.gframe.vertices.VertexFormat;
 import de.m_marvin.gframe.windows.Window;
-import de.m_marvin.simplelogging.printing.Logger;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.univec.impl.Vec2i;
 import de.m_marvin.univec.impl.Vec3d;
@@ -79,9 +78,6 @@ public class EngineExample {
 	
 	public void run() {
 		
-		// Start new logger
-		Logger.setDefaultLogger(new Logger());
-
 		// Redirect run folder (since all resources are located in the test folder)
 		ResourceLoader.redirectRuntimeFolder(EngineExample.class.getClassLoader().getResource("").getPath().replace("bin/main/", "run/assets/"));
 		

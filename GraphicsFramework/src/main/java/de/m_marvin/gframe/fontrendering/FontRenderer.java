@@ -17,7 +17,7 @@ import de.m_marvin.gframe.textures.TextureLoader;
 import de.m_marvin.gframe.textures.maps.AbstractTextureMap;
 import de.m_marvin.gframe.translation.PoseStack;
 import de.m_marvin.gframe.utility.Utility;
-import de.m_marvin.simplelogging.printing.Logger;
+import de.m_marvin.simplelogging.Log;
 import de.m_marvin.univec.impl.Vec2i;
 
 public class FontRenderer {
@@ -121,7 +121,7 @@ public class FontRenderer {
 		if (textureMap instanceof FontAtlasMap<R> fontMap) {
 			return fontMap;
 		} else {
-			Logger.defaultLogger().logError("The font atlas for the font '" + fontToString(font) + "' is cached under the wrong format!");
+			Log.defaultLogger().error("The font atlas for the font '%s' is cached under the wrong format!", fontToString(font));
 			return null;
 		}
 		
@@ -151,7 +151,7 @@ public class FontRenderer {
 		// Cache the fonts texture atlas in the texture loader
 		textureLoader.cacheTextureMap(fontAtlasName, fontAtlas);
 		
-		Logger.defaultLogger().logInfo("Loaded and cached font " + fontToString(font) + "!");
+		Log.defaultLogger().info("Loaded and cached font %s!", fontToString(font));
 		
 	}
 	
@@ -164,7 +164,7 @@ public class FontRenderer {
 			int characterWidth = metrics.charWidth((char) i);
 			
 			if (characterWidth <= 0) {
-				Logger.defaultLogger().logError("Character width for char '" + String.valueOf((char) i) + "' in font " + fontToString(font) + " is <= 0!");
+				Log.defaultLogger().error("Character width for char '%s' in font %s is <= 0!", String.valueOf((char) i), fontToString(font));
 				continue;
 			}
 			

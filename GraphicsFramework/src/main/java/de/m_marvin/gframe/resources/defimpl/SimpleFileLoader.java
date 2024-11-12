@@ -10,8 +10,7 @@ import de.m_marvin.gframe.resources.IClearableLoader;
 import de.m_marvin.gframe.resources.IResourceProvider;
 import de.m_marvin.gframe.resources.ISourceFolder;
 import de.m_marvin.gframe.resources.ResourceLoader;
-import de.m_marvin.simplelogging.printing.LogType;
-import de.m_marvin.simplelogging.printing.Logger;
+import de.m_marvin.simplelogging.Log;
 
 /**
  * Handles loading of simple files from resources.
@@ -61,8 +60,7 @@ public abstract class SimpleFileLoader<R extends IResourceProvider<R>, FE extend
 		try {
 			loadFilesIn0(folderLocation, recursive);
 		} catch (IOException e) {
-			Logger.defaultLogger().logWarn("Failed to load some of the " + this.itemName + " files from " + folderLocation.nameString() + "!");
-			Logger.defaultLogger().printException(LogType.WARN, e);
+			Log.defaultLogger().warn("Failed to load some of the %s files from %s!", this.itemName, folderLocation.nameString(), e);
 		}
 	}
 	
@@ -84,7 +82,7 @@ public abstract class SimpleFileLoader<R extends IResourceProvider<R>, FE extend
 			
 			R locationName = folderLocation.locationOfFile(fileName.substring(0, fileName.lastIndexOf('.')));
 			if (loadFile(locationName) == null) {
-				Logger.defaultLogger().logWarn("Failed to load " + this.itemName + " file '" + fileName + "'!");
+				Log.defaultLogger().warn("Failed to load %s file '%s'!", this.itemName, fileName);
 			}
 			
 		}
@@ -105,7 +103,7 @@ public abstract class SimpleFileLoader<R extends IResourceProvider<R>, FE extend
 	 */
 	public T getItem(R location) {
 		if (!this.itemCache.containsKey(location)) {
-			Logger.defaultLogger().logWarn(this.itemName + " " + location.nameString() + " does not exist!");
+			Log.defaultLogger().warn("%s %s does not exist!", this.itemName, location.nameString());
 			this.itemCache.put(location, null);
 		}
 		return this.itemCache.get(location);
@@ -132,8 +130,7 @@ public abstract class SimpleFileLoader<R extends IResourceProvider<R>, FE extend
 				T item = load(location);
 				this.itemCache.put(location, item);
 			} catch (IOException e) {
-				Logger.defaultLogger().logWarn("Failed to load " + this.itemName + " file " + location);
-				Logger.defaultLogger().printException(LogType.WARN, e);
+				Log.defaultLogger().warn("Failed to load %s file %s", this.itemName, location, e);
 			}
 		}
 		return this.itemCache.get(location);

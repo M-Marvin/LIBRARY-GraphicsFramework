@@ -28,16 +28,24 @@ switch (OperatingSystem.current()) {
 		break
 }
 
-group = 'com.github.M-Marvin'
-version = '1.2'
+version = '1.4'
 
 repositories {
 	mavenCentral()
-	maven { url 'https://jitpack.io' }
-}
-
-configurations.all {
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+	maven {
+		url 'https://maven.pkg.github.com/m-marvin/library-simplelogging'
+		credentials {
+            username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+        }
+	}
+	maven {
+		url 'https://maven.pkg.github.com/m-marvin/library-unifiedvectors'
+		credentials {
+            username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+        }
+	}
 }
 
 dependencies {
@@ -55,20 +63,18 @@ dependencies {
 	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
 	
 	// UniVec
-	api 'com.github.M-Marvin:LIBRARY-UnifiedVectors:v1.4'
+	api 'de.m_marvin.univec:univec:1.4.1'
 	
 	// GSON
 	api "com.google.code.gson:gson:2.9.1"
 	
 	// SimpleLogging
-	api 'com.github.M-Marvin:LIBRARY-SimpleLogging:v1.2'
-	
-	// CommandLineParser (Testing)
-	//implementation 'com.github.M-Marvin:LIBRARY-CommandLineParser:main-SNAPSHOT'
+	api 'de.m_marvin.simplelogging:simplelogging:2.1.1'
 	
 	// Physic Engine (Testing)
 	testImplementation "cz.advel.jbullet:jbullet:20101010-1"
 	
+	// Quickhull (Testing)
 	testImplementation "com.github.quickhull3d:quickhull3d:1.0.0"
 	
 }
@@ -80,19 +86,24 @@ java {
 }
 
 publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/m-marvin/library-graphicsframework")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
+                password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
     publications {
         maven(MavenPublication) {
-        	groupId = 'de.m_marvin.gframe'
+            groupId = 'de.m_marvin.gframe'
+        	artifactId = "gframe"
         
 			from components.java
         }
     }
-}
-
-// Specify gradle version to use for jitpack
-wrapper {
-    gradleVersion = "7.4.2"
-    distributionType = Wrapper.DistributionType.ALL
 }
 
 jar {
