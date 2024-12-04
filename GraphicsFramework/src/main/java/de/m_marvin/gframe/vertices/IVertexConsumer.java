@@ -3,8 +3,8 @@ package de.m_marvin.gframe.vertices;
 import de.m_marvin.gframe.buffers.BufferBuilder;
 import de.m_marvin.gframe.textures.maps.IUVModifyer;
 import de.m_marvin.gframe.translation.PoseStack;
-import de.m_marvin.unimat.api.IMatrix3f;
-import de.m_marvin.unimat.api.IMatrix4f;
+import de.m_marvin.unimat.api.IMatrix3;
+import de.m_marvin.unimat.api.IMatrix4;
 import de.m_marvin.unimat.api.IQuaternion;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec4f;
@@ -133,7 +133,7 @@ public interface IVertexConsumer {
 	 * @param m The 4x4 matrix
 	 * @return This consumer to apply more draw calls
 	 */
-	public default IVertexConsumer mat4f(IMatrix4f<?> m) {
+	public default IVertexConsumer mat4f(IMatrix4<Float> m) {
 		vec4f(m.m00(), m.m01(), m.m02(), m.m03());
 		vec4f(m.m10(), m.m11(), m.m12(), m.m13());
 		vec4f(m.m20(), m.m21(), m.m22(), m.m23());
@@ -146,7 +146,7 @@ public interface IVertexConsumer {
 	 * @param m The 3x3 matrix
 	 * @return This consumer to apply more draw calls
 	 */
-	public default IVertexConsumer mat3f(IMatrix3f<?> m) {
+	public default IVertexConsumer mat3f(IMatrix3<Float> m) {
 		vec3f(m.m00(), m.m01(), m.m02());
 		vec3f(m.m10(), m.m11(), m.m12());
 		vec3f(m.m20(), m.m21(), m.m22());
