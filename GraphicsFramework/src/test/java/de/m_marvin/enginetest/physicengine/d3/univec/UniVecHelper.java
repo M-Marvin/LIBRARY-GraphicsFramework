@@ -6,6 +6,7 @@ import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.Transform;
 
+import de.m_marvin.unimat.MatUtil;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.unimat.impl.Quaternionf;
 import de.m_marvin.univec.impl.Vec3f;
@@ -23,11 +24,11 @@ public class UniVecHelper {
 	}
 
 	public static Transform transform(Vec3f translation, Quaternionf rotation) {
-		return transform(Matrix4f.translateMatrix(translation.x, translation.y, translation.z).mul(rotation));
+		return transform(MatUtil.translateMatrixF(translation.x, translation.y, translation.z).mul(rotation));
 	}
 
 	public static Transform transform(Vec3f translation) {
-		return transform(Matrix4f.translateMatrix(translation.x, translation.y, translation.z));
+		return transform(MatUtil.translateMatrixF(translation.x, translation.y, translation.z));
 	}
 	
 	public static Transform transform(Matrix4f matrix) {

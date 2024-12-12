@@ -3,6 +3,7 @@ package de.m_marvin.gframe.translation;
 import de.m_marvin.unimat.api.IQuaternionMath.EulerOrder;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.unimat.impl.Quaternionf;
+import de.m_marvin.unimat.MatUtil;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec3i;
 
@@ -103,7 +104,7 @@ public class Camera {
 		if (!this.hasChanged) return;
 		this.viewMatrix.identity();
 		this.viewMatrix.mulI(rotation.conj());
-		this.viewMatrix.mulI(Matrix4f.translateMatrix(-this.position.x(), -this.position.y(), -this.position.z()));
+		this.viewMatrix.mulI(MatUtil.translateMatrixF(-this.position.x(), -this.position.y(), -this.position.z()));
 		this.hasChanged = false;
 	}
 	
