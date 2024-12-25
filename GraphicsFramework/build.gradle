@@ -28,7 +28,7 @@ switch (OperatingSystem.current()) {
 		break
 }
 
-version = '1.4.2'
+version = '1.4.3'
 
 repositories {
 	mavenCentral()
@@ -64,7 +64,7 @@ dependencies {
 	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
 	
 	// UniVec
-	api 'de.m_marvin.univec:univec:1.6'
+	api 'de.m_marvin.univec:univec:1.6.1'
 	
 	// GSON
 	api "com.google.code.gson:gson:2.9.1"
