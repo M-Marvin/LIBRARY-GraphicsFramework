@@ -3,7 +3,7 @@ import org.gradle.internal.os.OperatingSystem
 apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 
-version = '1.4.3.1'
+version = '1.4.5'
 
 switch (OperatingSystem.current()) {
 	case OperatingSystem.LINUX:
@@ -58,13 +58,13 @@ dependencies {
 	runtimeOnly "org.lwjgl:lwjgl-opengl:3.3.3:$lwjglNatives"
 	
 	// UniVec
-	api 'de.m_marvin.univec:univec:1.6.1'
+	api 'de.m_marvin.univec:univec:1.6.2'
 	
 	// GSON
 	api "com.google.code.gson:gson:2.9.1"
 	
 	// SimpleLogging
-	api 'de.m_marvin.simplelogging:simplelogging:2.1.1'
+	api 'de.m_marvin.simplelogging:simplelogging:2.3.2'
 	
 	// Physic Engine (Testing)
 	testImplementation "cz.advel.jbullet:jbullet:20101010-1"

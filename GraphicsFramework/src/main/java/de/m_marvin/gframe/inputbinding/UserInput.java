@@ -297,20 +297,20 @@ public class UserInput {
 	public void attachToWindow(long windowId) {
 		this.attachedWindows.add(windowId);
 		if (!isOnUserInputThread()) {
-			GLFW.glfwSetKeyCallback(windowId, (window, key, scancode, action, mods) -> this.keyboardListeners.forEach((listener) -> listener.keyEvent(key, scancode, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
-			GLFW.glfwSetMouseButtonCallback(windowId, (window, button, action, mods) -> this.mouseListeners.forEach((listener) -> listener.mouseEvent(Optional.empty(), button, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
-			GLFW.glfwSetCursorPosCallback(windowId, (window, xpos, ypos) -> this.cursorListeners.forEach((listener) -> listener.cursorMove(new Vec2d(xpos, ypos).mul(this.cursorScale).add(this.cursorOffset), false, false)));
-			GLFW.glfwSetCursorEnterCallback(windowId, (window, entered) -> this.cursorListeners.forEach((listener) -> listener.cursorMove(getCursorPosition(windowId).mul(this.cursorScale).add(this.cursorOffset), entered, !entered)));
-			GLFW.glfwSetScrollCallback(windowId, (window, xoffset, yoffset) ->  this.mouseListeners.forEach((listener) -> listener.mouseEvent(Optional.of(new Vec2d(xoffset, yoffset).mul(this.cursorScale).add(this.cursorOffset)), 0, false, false)));		
-			GLFW.glfwSetCharCallback(windowId, (window, codepoint) -> this.textInputListeners.forEach((listener) -> listener.input((char) codepoint, Optional.empty())));
+			GLFW.glfwSetKeyCallback(windowId, (window, key, scancode, action, mods) -> new ArrayList<>(this.keyboardListeners).forEach((listener) -> listener.keyEvent(key, scancode, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
+			GLFW.glfwSetMouseButtonCallback(windowId, (window, button, action, mods) -> new ArrayList<>(this.mouseListeners).forEach((listener) -> listener.mouseEvent(Optional.empty(), button, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
+			GLFW.glfwSetCursorPosCallback(windowId, (window, xpos, ypos) -> new ArrayList<>(this.cursorListeners).forEach((listener) -> listener.cursorMove(new Vec2d(xpos, ypos).mul(this.cursorScale).add(this.cursorOffset), false, false)));
+			GLFW.glfwSetCursorEnterCallback(windowId, (window, entered) -> new ArrayList<>(this.cursorListeners).forEach((listener) -> listener.cursorMove(getCursorPosition(windowId).mul(this.cursorScale).add(this.cursorOffset), entered, !entered)));
+			GLFW.glfwSetScrollCallback(windowId, (window, xoffset, yoffset) ->  new ArrayList<>(this.mouseListeners).forEach((listener) -> listener.mouseEvent(Optional.of(new Vec2d(xoffset, yoffset).mul(this.cursorScale).add(this.cursorOffset)), 0, false, false)));		
+			GLFW.glfwSetCharCallback(windowId, (window, codepoint) -> new ArrayList<>(this.textInputListeners).forEach((listener) -> listener.input((char) codepoint, Optional.empty())));
 		} else {
 			getUserInputExecutor().execute(() -> {
-				GLFW.glfwSetKeyCallback(windowId, (window, key, scancode, action, mods) -> this.keyboardListeners.forEach((listener) -> listener.keyEvent(key, scancode, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
-				GLFW.glfwSetMouseButtonCallback(windowId, (window, button, action, mods) -> this.mouseListeners.forEach((listener) -> listener.mouseEvent(Optional.empty(), button, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
-				GLFW.glfwSetCursorPosCallback(windowId, (window, xpos, ypos) -> this.cursorListeners.forEach((listener) -> listener.cursorMove(new Vec2d(xpos, ypos).mul(this.cursorScale).add(this.cursorOffset), false, false)));
-				GLFW.glfwSetCursorEnterCallback(windowId, (window, entered) -> this.cursorListeners.forEach((listener) -> listener.cursorMove(getCursorPosition(windowId).mul(this.cursorScale).add(this.cursorOffset), entered, !entered)));
-				GLFW.glfwSetScrollCallback(windowId, (window, xoffset, yoffset) ->  this.mouseListeners.forEach((listener) -> listener.mouseEvent(Optional.of(new Vec2d(xoffset, yoffset).mul(this.cursorScale).add(this.cursorOffset)), 0, false, false)));		
-				GLFW.glfwSetCharCallback(windowId, (window, codepoint) -> this.textInputListeners.forEach((listener) -> listener.input((char) codepoint, Optional.empty())));
+				GLFW.glfwSetKeyCallback(windowId, (window, key, scancode, action, mods) -> new ArrayList<>(this.keyboardListeners).forEach((listener) -> listener.keyEvent(key, scancode, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
+				GLFW.glfwSetMouseButtonCallback(windowId, (window, button, action, mods) -> new ArrayList<>(this.mouseListeners).forEach((listener) -> listener.mouseEvent(Optional.empty(), button, action == GLFW.GLFW_PRESS, action == GLFW.GLFW_REPEAT)));		
+				GLFW.glfwSetCursorPosCallback(windowId, (window, xpos, ypos) -> new ArrayList<>(this.cursorListeners).forEach((listener) -> listener.cursorMove(new Vec2d(xpos, ypos).mul(this.cursorScale).add(this.cursorOffset), false, false)));
+				GLFW.glfwSetCursorEnterCallback(windowId, (window, entered) -> new ArrayList<>(this.cursorListeners).forEach((listener) -> listener.cursorMove(getCursorPosition(windowId).mul(this.cursorScale).add(this.cursorOffset), entered, !entered)));
+				GLFW.glfwSetScrollCallback(windowId, (window, xoffset, yoffset) ->  new ArrayList<>(this.mouseListeners).forEach((listener) -> listener.mouseEvent(Optional.of(new Vec2d(xoffset, yoffset).mul(this.cursorScale).add(this.cursorOffset)), 0, false, false)));		
+				GLFW.glfwSetCharCallback(windowId, (window, codepoint) -> new ArrayList<>(this.textInputListeners).forEach((listener) -> listener.input((char) codepoint, Optional.empty())));
 			});
 		}
 	}
