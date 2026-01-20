@@ -7,7 +7,6 @@ import de.m_marvin.enginetest.physicengine.d3.physic.IRigidObject;
 import de.m_marvin.enginetest.physicengine.d3.univec.SimplifiedRigidBody;
 import de.m_marvin.enginetest.physicengine.d3.univec.UniVecHelper;
 import de.m_marvin.gframe.resources.defimpl.ResourceLocation;
-import de.m_marvin.unimat.MatUtil;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.univec.impl.Vec3f;
 
@@ -42,7 +41,7 @@ public abstract class WorldObject implements IRigidObject {
 	}
 
 	public Matrix4f getModelTranslation() {
-		return this.rigidBody.getTranslation().mul(MatUtil.translateMatrixF(getModelOffset().x, getModelOffset().y, getModelOffset().z));
+		return this.rigidBody.getTranslation().mul(Matrix4f.translate(getModelOffset()));
 	}
 	
 }

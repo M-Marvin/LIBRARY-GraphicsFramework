@@ -3,9 +3,9 @@ package de.m_marvin.gframe.vertices;
 import de.m_marvin.gframe.buffers.BufferBuilder;
 import de.m_marvin.gframe.textures.maps.IUVModifyer;
 import de.m_marvin.gframe.translation.PoseStack;
-import de.m_marvin.unimat.api.IMatrix3;
-import de.m_marvin.unimat.api.IMatrix4;
 import de.m_marvin.unimat.api.IQuaternion;
+import de.m_marvin.unimat.impl.Matrix3f;
+import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.univec.impl.Vec3f;
 import de.m_marvin.univec.impl.Vec4f;
 
@@ -31,7 +31,7 @@ public interface IVertexConsumer {
 	 * @return This consumer to apply more draw calls
 	 */
 	public default IVertexConsumer vertex(PoseStack poseStack, float x, float y, float z) {
-		Vec4f vec = poseStack.last().pose().translate(new Vec4f(x, y, z, 1));
+		Vec4f vec = poseStack.last().pose().transformVec4(new Vec4f(x, y, z, 1));
 		return vertex(vec.x(), vec.y(), vec.z());
 	}
 
@@ -43,7 +43,7 @@ public interface IVertexConsumer {
 	 * @return This consumer to apply more draw calls
 	 */
 	public default IVertexConsumer vertex(PoseStack poseStack, float x, float y) {
-		Vec4f vec = poseStack.last().pose().translate(new Vec4f(x, y, 0, 1));
+		Vec4f vec = poseStack.last().pose().transformVec4(new Vec4f(x, y, 0, 1));
 		return vec2f(vec.x(), vec.y());
 	}
 	
@@ -77,7 +77,7 @@ public interface IVertexConsumer {
 	 * @return This consumer to apply more draw calls
 	 */
 	public default IVertexConsumer normal(PoseStack poseStack, float x, float y, float z) {
-		Vec3f vec = poseStack.last().normal().translate(new Vec3f(x, y, z));
+		Vec3f vec = poseStack.last().normal().transformVec3(new Vec3f(x, y, z));
 		return normal(vec.x(), vec.y(), vec.z());
 	}
 	
@@ -133,7 +133,7 @@ public interface IVertexConsumer {
 	 * @param m The 4x4 matrix
 	 * @return This consumer to apply more draw calls
 	 */
-	public default IVertexConsumer mat4f(IMatrix4<Float> m) {
+	public default IVertexConsumer mat4f(Matrix4f m) {
 		vec4f(m.m00(), m.m01(), m.m02(), m.m03());
 		vec4f(m.m10(), m.m11(), m.m12(), m.m13());
 		vec4f(m.m20(), m.m21(), m.m22(), m.m23());
@@ -146,7 +146,7 @@ public interface IVertexConsumer {
 	 * @param m The 3x3 matrix
 	 * @return This consumer to apply more draw calls
 	 */
-	public default IVertexConsumer mat3f(IMatrix3<Float> m) {
+	public default IVertexConsumer mat3f(Matrix3f m) {
 		vec3f(m.m00(), m.m01(), m.m02());
 		vec3f(m.m10(), m.m11(), m.m12());
 		vec3f(m.m20(), m.m21(), m.m22());

@@ -188,7 +188,7 @@ public class ShaderInstance {
 		 * @param value The new value
 		 */
 		public void setMatrix4f(Matrix4f value) {
-			this.type.set(location, value.toFloatArr());
+			this.type.set(location, value.getArray());
 		}
 		
 		/**
@@ -196,7 +196,7 @@ public class ShaderInstance {
 		 * @param value The new value
 		 */
 		public void setMatrix3f(Matrix3f value) {
-			this.type.set(location, value.toFloatArr());
+			this.type.set(location, value.getArray());
 		}
 		
 		/**

@@ -31,7 +31,6 @@ import de.m_marvin.gframe.utility.NumberFormat;
 import de.m_marvin.gframe.vertices.RenderPrimitive;
 import de.m_marvin.gframe.vertices.VertexFormat;
 import de.m_marvin.gframe.windows.Window;
-import de.m_marvin.unimat.MatUtil;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.univec.impl.Vec2i;
 import de.m_marvin.univec.impl.Vec3d;
@@ -65,7 +64,7 @@ public class EngineExample {
 	private UserInput inputHandler;
 	
 	protected Camera mainCamera;
-	protected Matrix4f projectionMatrix = MatUtil.perspectiveF(50, 1000F / 600F, 1F, 1000F);
+	protected Matrix4f projectionMatrix = Matrix4f.perspective(50, 1000F / 600F, 1F, 1000F);
 	
 	protected Space3D physicWorld;
 	protected final VertexFormat objectFormat = new VertexFormat().appand("position", NumberFormat.FLOAT, 3, false).appand("color", NumberFormat.FLOAT, 4, false).appand("size", NumberFormat.FLOAT, 1, false);
@@ -211,7 +210,7 @@ public class EngineExample {
 	
 	public void windowResized(Vec2i screenSize) {
 		GLStateManager.resizeViewport(0, 0, screenSize.x, screenSize.y);
-		this.projectionMatrix = MatUtil.perspectiveF(50, screenSize.x / (float) Math.max(1, screenSize.y), 1F, 100F);
+		this.projectionMatrix = Matrix4f.perspective(50, screenSize.x / (float) Math.max(1, screenSize.y), 1F, 100F);
 	}
 	
 	VertexBuffer particleDrawBuffer = new VertexBuffer();

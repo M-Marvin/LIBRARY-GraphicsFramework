@@ -26,7 +26,6 @@ import de.m_marvin.gframe.shaders.ShaderLoader;
 import de.m_marvin.gframe.translation.Camera;
 import de.m_marvin.gframe.translation.PoseStack;
 import de.m_marvin.gframe.windows.Window;
-import de.m_marvin.unimat.MatUtil;
 import de.m_marvin.unimat.api.IQuaternionMath.EulerOrder;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.unimat.impl.Quaternionf;
@@ -55,7 +54,7 @@ public class StoneGenerator {
 	private UserInput inputHandler;
 	
 	protected Camera mainCamera;
-	protected Matrix4f projectionMatrix = MatUtil.perspectiveF(50, 1000F / 600F, 1F, 1000F);
+	protected Matrix4f projectionMatrix = Matrix4f.perspective(50, 1000F / 600F, 1F, 1000F);
 	
 	private Window mainWindow;
 	private long timeMillis;
@@ -211,7 +210,7 @@ public class StoneGenerator {
 	
 	public void windowResized(Vec2i screenSize) {
 		GLStateManager.resizeViewport(0, 0, screenSize.x, screenSize.y);
-		this.projectionMatrix = MatUtil.perspectiveF(50, screenSize.x / (float) Math.max(1, screenSize.y), 1F, 100F);
+		this.projectionMatrix = Matrix4f.perspective(50, screenSize.x / (float) Math.max(1, screenSize.y), 1F, 100F);
 	}
 	
 	VertexBuffer particleDrawBuffer = new VertexBuffer();

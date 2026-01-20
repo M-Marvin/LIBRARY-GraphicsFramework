@@ -5,7 +5,7 @@ import de.m_marvin.gframe.textures.texture.Texture;
 import de.m_marvin.gframe.textures.utility.TextureDataFormat;
 import de.m_marvin.gframe.textures.utility.TextureFormat;
 import de.m_marvin.unimat.impl.Matrix3f;
-import de.m_marvin.unimat.MatUtil;
+import de.m_marvin.univec.impl.Vec2f;
 
 /**
  * Base class of the different texture maps.
@@ -71,7 +71,9 @@ public abstract class AbstractTextureMap<R extends IResourceProvider<R>> extends
 	 */
 	public void updateMatrix() {
 		this.animationMatrixLast = this.animationMatrix;
-		this.animationMatrix = MatUtil.createScaleMatrixF(1, (float) frameHeight / height).mul(MatUtil.createTranslationMatrixF(0, frames[activeFrame]));
+		float scale = (float) frameHeight / height;
+		float offset = frames[activeFrame];
+		this.animationMatrix = Matrix3f.scale(new Vec2f(1, scale)).mul(Matrix3f.translation(new Vec2f(0, offset)));
 		if (this.animationMatrixLast == null) this.animationMatrixLast = this.animationMatrix;
 	}
 	

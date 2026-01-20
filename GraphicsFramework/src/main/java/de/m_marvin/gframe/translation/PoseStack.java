@@ -8,7 +8,6 @@ import de.m_marvin.unimat.api.IQuaternionMath.EulerOrder;
 import de.m_marvin.unimat.impl.Matrix3f;
 import de.m_marvin.unimat.impl.Matrix4f;
 import de.m_marvin.unimat.impl.Quaternionf;
-import de.m_marvin.unimat.MatUtil;
 import de.m_marvin.univec.api.IVector3;
 import de.m_marvin.univec.impl.Vec3f;
 
@@ -43,27 +42,30 @@ public class PoseStack {
 	}
 	
 	public void translate(IVector3<?> vec) {
-		translate(vec.x().floatValue(), vec.y().floatValue(), vec.z().floatValue());
+		this.last().pose.mulI(Matrix4f.translate(vec));
 	}
 	public void translate(float x, float y, float z) {
-		this.last().pose.mulI(MatUtil.translateMatrixF(x, y, z));
+		translate(new Vec3f(x, y, z));
+	}
+	
+	public void scale(Vec3f scale) {
+		PoseStack.Pose posestack$pose = last();
+		posestack$pose.pose.mulI(Matrix4f.scale(scale));
+		if (scale.x == scale.y && scale.y == scale.z) {
+			if (scale.x > 0.0F)
+				return;
+			posestack$pose.normal.scalarMulI(-1.0F);
+		}
+
+		float f = 1.0F / scale.x;
+		float f1 = 1.0F / scale.y;
+		float f2 = 1.0F / scale.z;
+		float f3 = fastInvCubeRoot(f * f1 * f2);
+		posestack$pose.normal.mulI(Matrix3f.scale(new Vec3f(f3 * f, f3 * f1, f3 * f2)));
 	}
 	
 	public void scale(float sx, float sy, float sz) {
-		PoseStack.Pose posestack$pose = last();
-		posestack$pose.pose.mulI(MatUtil.scaleMatrixF(sx, sy, sz));
-		if (sx == sy && sy == sz) {
-			if (sx > 0.0F) {
-				return;
-			}
-			posestack$pose.normal.scalarI(-1.0F);
-		}
-
-		float f = 1.0F / sx;
-		float f1 = 1.0F / sy;
-		float f2 = 1.0F / sz;
-		float f3 = fastInvCubeRoot(f * f1 * f2);
-		posestack$pose.normal.mulI(MatUtil.createScaleMatrixF(f3 * f, f3 * f1, f3 * f2));
+		scale(new Vec3f(sx, sy, sz));
 	}
 	
 	private static float fastInvCubeRoot(float p_14200_) {
@@ -82,8 +84,8 @@ public class PoseStack {
 	}
 	public void rotate(Quaternionf quat) {
 		Pose pose = last();
-		pose.normal().mulI(quat);
-		pose.pose().mulI(quat);
+		pose.normal().mulI(Matrix3f.rotation(quat));
+		pose.pose().mulI(Matrix4f.rotation(quat));
 	}
 	
 	public boolean cleared() {
