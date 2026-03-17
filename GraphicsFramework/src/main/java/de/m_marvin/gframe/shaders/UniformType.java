@@ -17,10 +17,10 @@ public enum UniformType {
 		GLStateManager.setUniformInt(location, (int) value);
 	}),
 	MATRIX_3x3("matrix3x3", float[].class, (location, value) -> {
-		GLStateManager.setUniformMatrix3(location, false, (float[]) value);
+		GLStateManager.setUniformMatrix3(location, true, (float[]) value);
 	}),
 	MATRIX_4x4("matrix4x4", float[].class, (location, value) -> {
-		GLStateManager.setUniformMatrix4(location, false, (float[]) value);
+		GLStateManager.setUniformMatrix4(location, true, (float[]) value);
 	}),
 	INT("int", int.class, (location, value) -> {
 		GLStateManager.setUniformInt(location, (int) value);

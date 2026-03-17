@@ -355,7 +355,7 @@ public class UserInput {
 	 */
 	public boolean isBindingTyped(String name) {
 		Optional<InputSet> binding = getBinding(name);
-		if (binding.isPresent()) {
+		if (binding.isPresent() && this.bindingsState.containsKey(name)) {
 			if (this.bindingsState.get(name) && !this.bindingsStateLast.get(name)) return true;
 		}
 		return false;

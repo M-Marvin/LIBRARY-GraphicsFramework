@@ -23,7 +23,7 @@ public class PoseStack {
 	public static record Pose(Matrix3f normal, Matrix4f pose) {}
 	
 	public PoseStack() {
-		this.poseStack.add(new Pose(new Matrix3f(), new Matrix4f()));
+		this.poseStack.add(new Pose(new Matrix3f().identityI(), new Matrix4f().identityI()));
 	}
 	
 	public Pose last() {

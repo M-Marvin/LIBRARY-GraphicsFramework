@@ -54,7 +54,7 @@ public class StoneGenerator {
 	private UserInput inputHandler;
 	
 	protected Camera mainCamera;
-	protected Matrix4f projectionMatrix = Matrix4f.perspective(50, 1000F / 600F, 1F, 1000F);
+	protected Matrix4f projectionMatrix = Matrix4f.perspective((float) Math.toRadians(50), 1000F / 600F, 1F, 1000F);
 	
 	private Window mainWindow;
 	private long timeMillis;

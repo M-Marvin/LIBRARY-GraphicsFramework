@@ -15,7 +15,7 @@ import de.m_marvin.univec.impl.Vec3i;
  */
 public class Camera {
 	
-	protected Matrix4f viewMatrix = new Matrix4f();
+	protected Matrix4f viewMatrix = new Matrix4f().identityI();
 	protected Vec3f position;
 	protected Quaternionf rotation;
 	protected boolean hasChanged;
@@ -96,7 +96,7 @@ public class Camera {
 	}
 	
 	/**
-	 * Updates the view matrix storen in the camera instance.
+	 * Updates the view matrix stored in the camera instance.
 	 * Must be called to let the last translation calls take effect.
 	 */
 	public void upadteViewMatrix() {
@@ -108,7 +108,7 @@ public class Camera {
 	}
 	
 	/**
-	 * Returns the view matrix containg all translations of the camera.
+	 * Returns the view matrix containing all translations of the camera.
 	 * @return A matrix that has to be applied to all vertices in the shader
 	 */
 	public Matrix4f getViewMatrix() {

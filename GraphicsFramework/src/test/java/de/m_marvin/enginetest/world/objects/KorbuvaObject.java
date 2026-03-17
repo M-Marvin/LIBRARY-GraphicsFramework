@@ -27,7 +27,7 @@ public class KorbuvaObject extends WorldObject {
 
 	@Override
 	public Vec3f getModelOffset() {
-		return new Vec3f(-1.5F, -0.5F, -0.03125F);
+		return new Vec3f(0, -0.9375F, 0);
 	}
 
 }
