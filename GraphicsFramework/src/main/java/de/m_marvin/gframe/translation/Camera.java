@@ -47,14 +47,14 @@ public class Camera {
 	 * @param eulerRotation The rotation as euler-angles
 	 */
 	public Camera(Vec3f position, Vec3f eulerRotation) {
-		this(position, new Quaternionf(eulerRotation, EulerOrder.XYZ, true));
+		this(position, new Quaternionf().setEulerI(eulerRotation, EulerOrder.XYZ, true));
 	}
 	
 	/**
 	 * Creates a new camera on the default position 0 0 0 with orientation 0 0 0.
 	 */
 	public Camera() {
-		this(new Vec3f(0F, 0F, 0F), new Quaternionf(new Vec3i(0, 0, 0), 0F));
+		this(new Vec3f(0F, 0F, 0F), new Quaternionf().setVectorAngleI(new Vec3i(0, 0, 0), 0F, true));
 	}
 	
 	/**
@@ -71,7 +71,7 @@ public class Camera {
 	 * @param relativeMovement The xyz offset from the view of the camera
 	 */
 	public void move(Vec3f relativeMovement) {
-		Vec3f offsetMovement = relativeMovement.transform(rotation);
+		Vec3f offsetMovement = this.rotation.transform(relativeMovement);
 		offset(offsetMovement);
 	}
 	
@@ -81,7 +81,8 @@ public class Camera {
 	 * @param ammount The angle to rotate in degrees
 	 */
 	public void rotate(Vec3i axisVec, float ammount) {
-		this.rotation.mulI(new Quaternionf(axisVec, (float) Math.toRadians(ammount)));
+		this.rotation.mulI(new Quaternionf().setVectorAngleI(axisVec, ammount, true));
+		System.out.println(this.rotation);
 		this.hasChanged = true;
 	}
 	

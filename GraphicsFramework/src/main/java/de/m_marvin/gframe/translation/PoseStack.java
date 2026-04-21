@@ -77,10 +77,10 @@ public class PoseStack {
 	}
 	
 	public void rotateRadians(float x, float y, float z) {
-		rotate(new Quaternionf(new Vec3f(x, y, z), EulerOrder.XYZ, false));
+		rotate(new Quaternionf().setEulerI(new Vec3f(x, y, z), EulerOrder.XYZ, false));
 	}
 	public void rotateDegrees(float x, float y, float z) {
-		rotate(new Quaternionf(new Vec3f(x, y, z), EulerOrder.XYZ, true));
+		rotate(new Quaternionf().setEulerI(new Vec3f(x, y, z), EulerOrder.XYZ, true));
 	}
 	public void rotate(Quaternionf quat) {
 		Pose pose = last();
