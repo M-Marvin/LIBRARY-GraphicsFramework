@@ -42,6 +42,12 @@ public interface IBufferBuilder {
 	public void end();
 
 	/**
+	 * Checks if an buffer has been started and is currently able to receive vertex data.
+	 * @return true if an buffer has been started
+	 */
+	public boolean isBuilding();
+	
+	/**
 	 * Returns the number of completed ({@link #end()} called) and cached vertex data-buffers are available.
 	 * 
 	 * @return The number of available vertex data-buffers

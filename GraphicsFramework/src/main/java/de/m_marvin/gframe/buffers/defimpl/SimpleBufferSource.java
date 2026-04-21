@@ -6,9 +6,8 @@ import java.util.Set;
 
 import de.m_marvin.gframe.buffers.BufferBuilder;
 import de.m_marvin.gframe.buffers.IBufferSource;
-import de.m_marvin.gframe.resources.IResourceProvider;
 
-public class SimpleBufferSource<R extends IResourceProvider<R>, RM extends IRenderMode> implements IBufferSource<RM> {
+public class SimpleBufferSource<RM extends IRenderMode> implements IBufferSource<RM> {
 	
 	protected final int initialBufferSize;
 	protected Map<RM, BufferBuilder> buffers;
@@ -31,7 +30,8 @@ public class SimpleBufferSource<R extends IResourceProvider<R>, RM extends IRend
 	@Override
 	public BufferBuilder startBuffer(RM renderLayer) {
 		BufferBuilder buffer = getBuffer(renderLayer);
-		buffer.begin(renderLayer.primitive(), renderLayer.vertexFormat());
+		if (!buffer.isBuilding())
+			buffer.begin(renderLayer.primitive(), renderLayer.vertexFormat());
 		return buffer;
 	}
 	

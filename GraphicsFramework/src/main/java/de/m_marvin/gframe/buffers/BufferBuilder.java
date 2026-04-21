@@ -75,7 +75,7 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 	
 	@Override
 	public BufferPair popNext() {
-		if (this.drawStates.isEmpty()) throw new IllegalStateException("Nothing has ben drawn to the buffer!");
+		if (this.drawStates.isEmpty()) throw new IllegalStateException("Nothing has been drawn to the buffer!");
 		DrawState drawState = this.drawStates.poll();
 		this.buffer.position(uploadedBytes);
 		this.uploadedBytes += drawState.format().getSize() * drawState.vertices() + drawState.indecies() * NumberFormat.UINT.size();
@@ -138,6 +138,11 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 			this.writtenBytes = buffer.position();
 		}
 	}
+	
+	@Override
+	public boolean isBuilding() {
+		return this.building;
+	}
 
 	/**
 	 * Returns the vertex-data element that is required next in the order of the format specified in the {@link #begin(RenderPrimitive, VertexFormat)} call.
@@ -151,7 +156,7 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 	public IVertexConsumer nextElement() {
 		if (!this.building) throw new IllegalStateException("Buffer not building!");
 		this.currentElementIndex++;
-		if (this.currentElementIndex == this.format.getElementCount()) throw new IllegalStateException("The current VertexFormat does not have more than " + this.format.getElementCount() + " elements!");
+		if (this.currentElementIndex >= this.format.getElementCount()) throw new IllegalStateException("The current VertexFormat does not have more than " + this.format.getElementCount() + " elements!");
 		this.currentElement = this.format.getElements().get(currentElementIndex);
 		return this;
 	}
@@ -316,6 +321,16 @@ public class BufferBuilder implements IBufferBuilder, IVertexConsumer {
 			this.indexCount += i.length;
 		}
 		return this;
+	}
+	
+	@Override
+	public int vertexCount() {
+		return this.vertexCount;
+	}
+	
+	@Override
+	public int indexCount() {
+		return this.indexCount;
 	}
 	
 }

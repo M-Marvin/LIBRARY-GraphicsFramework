@@ -204,7 +204,7 @@ public class StoneGenerator {
 		}).toList();
 		
 		mainCamera.getPosition().setI(500F, -600F, 500F);
-		mainCamera.getRotation().setI(new Quaternionf(new Vec3f(90, 0, 0), EulerOrder.XYZ, true));
+		mainCamera.getRotation().setI(new Quaternionf().setEulerI(new Vec3f(90, 0, 0), EulerOrder.XYZ, true));
 		
 	}
 	

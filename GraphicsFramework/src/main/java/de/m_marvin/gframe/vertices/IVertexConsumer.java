@@ -331,4 +331,7 @@ public interface IVertexConsumer {
 	 */
 	public void endVertex();
 	
+	public int vertexCount();
+	public int indexCount();
+	
 }
